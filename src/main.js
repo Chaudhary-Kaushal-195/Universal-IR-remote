@@ -2,6 +2,9 @@ import './style.css'
 import mqtt from 'mqtt'
 import { deviceDatabase as localDatabase } from './database.js'
 import { supabase } from './supabaseClient.js'
+import { registerSW } from 'virtual:pwa-register'
+
+registerSW({ immediate: true });
 
 // --- MQTT GLOBALS ---
 const MQTT_BROKER = 'wss://broker.hivemq.com:8884/mqtt';
