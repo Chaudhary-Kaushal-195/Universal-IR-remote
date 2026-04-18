@@ -62,6 +62,16 @@ const loginBtn = document.getElementById('login-btn');
 const signupBtn = document.getElementById('signup-btn');
 const logoutBtn = document.getElementById('logout-btn');
 
+// Hardware Scanner DOM
+const hardwareModal = document.getElementById('hardware-modal');
+const closeHardwareModal = document.getElementById('close-hardware-modal');
+const hwRefreshBtn = document.getElementById('hw-refresh-btn');
+const hwCardUsb = document.getElementById('hw-card-usb');
+const hwStatusUsb = document.getElementById('hw-status-usb');
+const hwCardWifi = document.getElementById('hw-card-wifi');
+const hwStatusWifi = document.getElementById('hw-status-wifi');
+const hwNoDeviceWarning = document.getElementById('hw-no-device-warning');
+
 const templates = {
   tv: `
     <div class="remote-grid">
@@ -204,6 +214,57 @@ function setupMQTT() {
     // But since the current Learning mode polls the local HTTP, we'll keep that working too.
     console.log(`MQTT Received [${topic}]: ${message.toString()}`);
   });
+}
+
+async function scanHardware() {
+  console.log("Running Hardware Diagnostics...");
+  let hasHardware = false;
+
+  // 1. Mobile Native is always hardcoded as FAILED for security (done in HTML)
+
+  // 2. USB Serial
+  if ('serial' in navigator) {
+    try {
+      const ports = await navigator.serial.getPorts();
+      if (ports.length > 0 || state.serialPort) {
+        hwCardUsb.style.borderLeft = '3px solid var(--success)';
+        hwStatusUsb.style.color = 'var(--success)';
+        hwStatusUsb.textContent = 'CONNECTED';
+        hasHardware = true;
+      } else {
+        hwCardUsb.style.borderLeft = '3px solid #64748b';
+        hwStatusUsb.style.color = '#64748b';
+        hwStatusUsb.textContent = 'NO PERMISSIONS';
+      }
+    } catch(e) {
+      hwCardUsb.style.borderLeft = '3px solid var(--danger)';
+      hwStatusUsb.style.color = 'var(--danger)';
+      hwStatusUsb.textContent = 'FAILED';
+    }
+  } else {
+    hwCardUsb.style.borderLeft = '3px solid var(--danger)';
+    hwStatusUsb.style.color = 'var(--danger)';
+    hwStatusUsb.textContent = 'NOT SUPPORTED';
+  }
+
+  // 3. Wi-Fi / MQTT
+  if (mqttClient && mqttClient.connected) {
+    hwCardWifi.style.borderLeft = '3px solid var(--success)';
+    hwStatusWifi.style.color = 'var(--success)';
+    hwStatusWifi.textContent = 'CONNECTED';
+    hasHardware = true;
+  } else {
+    hwCardWifi.style.borderLeft = '3px solid #64748b';
+    hwStatusWifi.style.color = '#64748b';
+    hwStatusWifi.textContent = 'DISCONNECTED';
+  }
+
+  // Warning Resolution
+  if (hasHardware) {
+    hwNoDeviceWarning.style.display = 'none';
+  } else {
+    hwNoDeviceWarning.style.display = 'flex';
+  }
 }
 
 function flashStatus(type) {
@@ -445,6 +506,7 @@ function setupEventListeners() {
       email: emailInput.value, password: passwordInput.value
     });
     if (error) alert(error.message);
+    if (error) alert(error.message);
     else alert("Success! Check your email for confirmation!");
   });
   
@@ -452,8 +514,17 @@ function setupEventListeners() {
     await supabase.auth.signOut();
   });
 
+  // Hardware Scanner Events
+  statusIndicator.addEventListener('click', () => {
+    hardwareModal.classList.add('active');
+    scanHardware();
+  });
+  closeHardwareModal.addEventListener('click', () => hardwareModal.classList.remove('active'));
+  hwRefreshBtn.addEventListener('click', () => scanHardware());
+
   window.addEventListener('click', (e) => {
     if (e.target === configModal) configModal.classList.remove('active');
+    if (e.target === hardwareModal) hardwareModal.classList.remove('active');
   });
   learnBtn.addEventListener('click', async () => {
     if (state.connectionType === 'demo') return alert("Cloning requires a hardware connection.");

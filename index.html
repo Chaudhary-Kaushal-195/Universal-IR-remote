@@ -16,7 +16,9 @@
     <div id="app">
       <header>
         <div class="logo">UNIVERSAL HUB</div>
-        <div id="connection-status" class="status-indicator status-demo">Demo Mode</div>
+        <div id="connection-status" class="status-indicator status-demo" style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+          <i data-lucide="radio" style="width: 14px; height: 14px;"></i> Demo Mode
+        </div>
       </header>
 
       <div class="device-tabs" id="device-tabs">
@@ -88,6 +90,70 @@
             Enter Learning Mode
           </button>
           <p id="learning-status" style="font-size: 0.8rem; color: var(--text-secondary); text-align: center;"></p>
+        </div>
+        </div>
+      </div>
+
+      <!-- Hardware Scanner Modal -->
+      <div class="modal" id="hardware-modal" style="z-index: 2000;">
+        <div class="modal-content glass">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <p style="font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="cpu" style="color: var(--accent-color)"></i> Hardware Diagnostics
+            </p>
+            <i data-lucide="x" id="close-hardware-modal" style="cursor: pointer; color: var(--text-secondary);"></i>
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">
+            Scanning available transmission capabilities...
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            
+            <!-- Check 1: Built-In Mobile -->
+            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border-left: 3px solid var(--danger);">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="font-size: 0.9rem; font-weight: 600;">📱 Built-In Phone IR</span>
+                <span id="hw-status-native" style="font-size: 0.75rem; color: var(--danger); font-weight: bold;">FAILED</span>
+              </div>
+              <p style="font-size: 0.7rem; color: var(--text-secondary);">
+                Browser security explicitly blocks web apps from controlling integrated mobile emitters.
+              </p>
+            </div>
+
+            <!-- Check 2: External USB Serial -->
+            <div id="hw-card-usb" style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border-left: 3px solid #64748b; transition: all 0.3s ease;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="font-size: 0.9rem; font-weight: 600;">🔌 USB Emitter</span>
+                <span id="hw-status-usb" style="font-size: 0.75rem; color: #64748b; font-weight: bold;">NOT CONNECTED</span>
+              </div>
+              <p style="font-size: 0.7rem; color: var(--text-secondary);">
+                Checking local USB tethered hardware nodes.
+              </p>
+            </div>
+
+            <!-- Check 3: Wi-Fi ESP32 Bridge -->
+            <div id="hw-card-wifi" style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border-left: 3px solid #64748b; transition: all 0.3s ease;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="font-size: 0.9rem; font-weight: 600;">🌐 Network Emitter</span>
+                <span id="hw-status-wifi" style="font-size: 0.75rem; color: #64748b; font-weight: bold;">NOT CONNECTED</span>
+              </div>
+              <p style="font-size: 0.7rem; color: var(--text-secondary);">
+                Checking Global Cloud MQTT connectivity.
+              </p>
+            </div>
+
+          </div>
+
+          <div id="hw-no-device-warning" style="margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: 8px; display: flex; flex-direction: column; gap: 5px; text-align: center;">
+            <p style="font-weight: 600; color: var(--danger); font-size: 0.9rem;">⚠️ No Hardware Connected</p>
+            <p style="font-size: 0.8rem; color: var(--text-primary);">You must connect a serial bridge or IoT node in settings to transmit!</p>
+          </div>
+
+          <button class="primary-btn" id="hw-refresh-btn" style="margin-top: 5px; align-self: center; width: 100%; font-size: 0.9rem;">
+            Run Diagnostics Again 
+          </button>
+
         </div>
       </div>
     </div>
