@@ -6,7 +6,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'icons.svg'],
+      includeAssets: ['icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'Universal IR Hub',
         short_name: 'IR Hub',
