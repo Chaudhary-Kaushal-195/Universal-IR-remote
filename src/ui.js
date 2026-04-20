@@ -28,16 +28,21 @@ export const templates = {
   `,
   ac: `
     <div class="remote-grid">
-      <button class="remote-btn power" id="AC_POWER" style="grid-column: span 3; aspect-ratio: auto; padding: 20px;">
-        <i data-lucide="power"></i><span class="btn-label">Power</span>
-      </button>
+      <div style="grid-column: span 3; display: flex; gap: 10px;">
+        <button class="remote-btn power" id="AC_POWER_ON" style="flex: 1; aspect-ratio: auto; padding: 15px; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--success); color: var(--success);">
+          <i data-lucide="power"></i><span class="btn-label" style="font-weight: bold;">ON</span>
+        </button>
+        <button class="remote-btn power" id="AC_POWER_OFF" style="flex: 1; aspect-ratio: auto; padding: 15px; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger);">
+          <i data-lucide="power"></i><span class="btn-label" style="font-weight: bold;">OFF</span>
+        </button>
+      </div>
       
       <div style="grid-column: span 3; display: flex; align-items: center; justify-content: space-between; padding: 30px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px solid var(--glass-border);">
         <button class="remote-btn" id="AC_TEMP_DOWN"><i data-lucide="minus"></i></button>
-        <div style="text-align: center;">
-          <h1 id="ac-temp-display" style="font-size: 3.5rem; font-weight: 300; letter-spacing: -2px;">AC</h1>
+        <button class="remote-btn" id="AC_TEMP_DISPLAY" style="text-align: center; border: none; background: transparent; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <h1 id="ac-temp-display" style="font-size: 3.5rem; font-weight: 300; letter-spacing: -2px; margin: 0;">AC</h1>
           <span style="color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Climate Control</span>
-        </div>
+        </button>
         <button class="remote-btn" id="AC_TEMP_UP"><i data-lucide="plus"></i></button>
       </div>
 
@@ -71,7 +76,12 @@ export function renderRemote() {
   }
 
   document.querySelectorAll('.remote-btn').forEach(btn => {
-    if (state.learnedCodes[btn.id]) {
+    btn.classList.remove('programmed'); // Clear previous states on re-render
+    if (btn.id === 'AC_TEMP_DISPLAY') {
+      if (state.learnedCodes['AC_TEMP_' + state.acTemp]) {
+        btn.classList.add('programmed');
+      }
+    } else if (state.learnedCodes[btn.id]) {
       btn.classList.add('programmed');
     }
   });

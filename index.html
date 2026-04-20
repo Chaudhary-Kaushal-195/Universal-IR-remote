@@ -73,6 +73,19 @@
           <hr style="opacity: 0.1; margin: 10px 0;">
           
           <div style="margin-bottom: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+            <p style="font-size: 0.9rem; margin-bottom: 5px;">Backup & Permanent Storage</p>
+            <div style="display: flex; gap: 8px;">
+              <button class="primary-btn" id="export-codes-btn" style="flex: 1; background: rgba(255,255,255,0.1); font-size: 0.8rem; padding: 8px;">
+                <i data-lucide="download" style="width:14px; height:14px; margin-right:5px"></i> Export JSON
+              </button>
+              <button class="primary-btn" id="import-codes-btn" style="flex: 1; background: rgba(255,255,255,0.1); font-size: 0.8rem; padding: 8px;">
+                <i data-lucide="upload" style="width:14px; height:14px; margin-right:5px"></i> Import JSON
+              </button>
+            </div>
+            <input type="file" id="import-file-input" style="display: none;" accept=".json" />
+          </div>
+
+          <div style="margin-bottom: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
             <p style="font-size: 0.9rem; margin-bottom: 5px;">Import Cloud Database</p>
             <select id="db-select" style="width: 100%; padding: 8px; margin-bottom: 8px; background: var(--panel-bg); color: white; border: 1px solid var(--glass-border); border-radius: 5px;">
               <option value="">-- Select TV Model --</option>
@@ -101,7 +114,7 @@
             <p style="font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
               <i data-lucide="cpu" style="color: var(--accent-color)"></i> Hardware Diagnostics
             </p>
-            <i data-lucide="x" id="close-hardware-modal" style="cursor: pointer; color: var(--text-secondary);"></i>
+            <div id="close-hardware-modal" style="cursor: pointer; color: var(--text-secondary); display: flex;"><i data-lucide="x"></i></div>
           </div>
 
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">

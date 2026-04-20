@@ -39,14 +39,18 @@ const hardwareModal = document.getElementById('hardware-modal');
 const closeHardwareModal = document.getElementById('close-hardware-modal');
 const hwRefreshBtn = document.getElementById('hw-refresh-btn');
 
+const exportCodesBtn = document.getElementById('export-codes-btn');
+const importCodesBtn = document.getElementById('import-codes-btn');
+const importFileInput = document.getElementById('import-file-input');
+
 function init() {
   updateStatusIndicator();
   renderRemote();
   setupEventListeners();
-  
+
   // Core Network Setup Layer
   setupMQTT();
-  
+
   // Auth & Cloud Layer
   initAuth((user) => {
     updateAuthUI(user);
@@ -103,7 +107,7 @@ function setupEventListeners() {
   wifiConnectBtn.addEventListener('click', () => {
     wifiConfig.style.display = wifiConfig.style.display === 'none' ? 'block' : 'none';
   });
-  
+
   saveWifiBtn.addEventListener('click', () => {
     if (ipInput.value) {
       state.espIp = ipInput.value;
@@ -124,7 +128,7 @@ function setupEventListeners() {
     });
     if (error) alert(error.message);
   });
-  
+
   signupBtn.addEventListener('click', async () => {
     const { error } = await supabase.auth.signUp({
       email: emailInput.value, password: passwordInput.value
@@ -132,69 +136,145 @@ function setupEventListeners() {
     if (error) alert(error.message);
     else alert("Success! Check your email for confirmation!");
   });
-  
+
   logoutBtn.addEventListener('click', async () => {
     await supabase.auth.signOut();
+  });
+
+  // Backup & Storage Logic
+  exportCodesBtn.addEventListener('click', () => {
+    try {
+      const dataStr = JSON.stringify(state.learnedCodes, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ir_hub_backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Export failed: " + err.message);
+    }
+  });
+
+  importCodesBtn.addEventListener('click', () => importFileInput.click());
+
+  importFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedData = JSON.parse(event.target.result);
+        
+        // Safety check: merge instead of overwrite to prevent accidental loss
+        state.learnedCodes = { ...state.learnedCodes, ...importedData };
+        localStorage.setItem('learnedCodes', JSON.stringify(state.learnedCodes));
+        
+        syncCloudRemotes();
+        renderRemote();
+        alert("Import Successful! Your codes have been merged.");
+      } catch (err) {
+        alert("Import failed: File is not a valid JSON clone database.");
+      }
+      importFileInput.value = ''; // Reset for next use
+    };
+    reader.readAsText(file);
   });
 
   // Main UI Grid Traversal (Dispatch Loop)
   remoteContent.addEventListener('click', async (e) => {
     const btn = e.target.closest('.remote-btn');
     if (!btn) return;
-    
-    // Custom AC Graphic Handler
+
+    // Custom AC Graphic Handler (Visual Dialing)
     if (btn.id === 'AC_TEMP_UP' || btn.id === 'AC_TEMP_DOWN') {
       const display = document.getElementById('ac-temp-display');
       toggleAC(display, btn.id === 'AC_TEMP_UP' ? 1 : -1);
-      return; 
+      renderRemote(); // Update dot highlight based on new degree
+
+      if (!state.isLearning) {
+        fireSignal('AC_TEMP_' + state.acTemp);
+      }
+      return;
     }
 
     if (state.isLearning) {
-      state.learningTargetId = btn.id;
-      learningStatus.textContent = `Point original remote at Hub and press "${btn.textContent.trim()}"...`;
+      if (btn.id === 'AC_TEMP_DISPLAY') {
+        state.learningTargetId = 'AC_TEMP_' + state.acTemp;
+      } else {
+        state.learningTargetId = btn.id;
+      }
+      learningStatus.textContent = `Point original remote at Hub and press the physical button...`;
       document.querySelectorAll('.remote-btn').forEach(b => b.classList.remove('learning-target'));
       btn.classList.add('learning-target');
+
+      // Trigger Wi-Fi poll if needed (USB serial listens automatically)
+      if (state.connectionType === 'wifi') {
+        try {
+          console.log("%c📡 [SENSE] Initiating WiFi Learn Mode...", "color: #22c55e; font-weight: bold;");
+          const res = await fetch(`http://${state.espIp}/receive`);
+          if (res.status === 408) throw new Error("Timeout - No signal detected within 10 seconds.");
+          if (!res.ok) throw new Error("Network error during learning");
+
+          const data = await res.json();
+          if (data.len && data.values && state.isLearning) {
+            handleCapture(`RAW:${data.len}:${data.values}`, (buttonId) => {
+              state.isLearning = false;
+              state.learningTargetId = null;
+              learnBtn.classList.remove('learning-mode');
+              learnBtn.innerHTML = `<i data-lucide="mic" style="width:16px; height:16px; margin-right:8px"></i> Enter Learning Mode`;
+              if (window.lucide) lucide.createIcons();
+              learningStatus.textContent = `Success! "${buttonId.split('_').join(' ')}" cloned via WiFi.`;
+              renderRemote();
+              setTimeout(() => {
+                learningStatus.textContent = "";
+                configModal.classList.remove('active');
+              }, 2000);
+            });
+          }
+        } catch (err) {
+          console.error("WiFi Learn Error:", err);
+          state.isLearning = false;
+          learnBtn.classList.remove('learning-mode');
+          learnBtn.innerHTML = `<i data-lucide="mic" style="width:16px; height:16px; margin-right:8px"></i> Enter Learning Mode`;
+          if (window.lucide) lucide.createIcons();
+          learningStatus.textContent = `Error: ${err.message}`;
+          setTimeout(() => learningStatus.textContent = "", 3000);
+        }
+      }
+
     } else {
-      fireSignal(btn.id);
+      if (btn.id === 'AC_TEMP_DISPLAY') {
+        fireSignal('AC_TEMP_' + state.acTemp);
+      } else {
+        fireSignal(btn.id);
+      }
     }
   });
 
   // Initiating Reverse-Engineering Module
   learnBtn.addEventListener('click', async () => {
     if (state.connectionType === 'demo') return alert("Cloning requires a hardware connection.");
-    if (!state.learningTargetId) return alert("Please click a button on the remote first to select what to clone.");
-    state.isLearning = true;
-    learnBtn.classList.add('learning-mode');
-    learningStatus.textContent = `Waiting for signal to clone "${state.learningTargetId.split('_').join(' ')}"...`;
-    
-    if (state.connectionType === 'wifi') {
-      try {
-        console.log("%c📡 [SENSE] Initiating WiFi Learn Mode...", "color: #22c55e; font-weight: bold;");
-        const res = await fetch(`http://${state.espIp}/receive`);
-        if (res.status === 408) throw new Error("Timeout - No signal detected within 10 seconds.");
-        if (!res.ok) throw new Error("Network error during learning");
-        
-        const data = await res.json();
-        if (data.len && data.values && state.isLearning) {
-            handleCapture(`RAW:${data.len}:${data.values}`, (buttonId) => {
-                state.isLearning = false;
-                state.learningTargetId = null;
-                learnBtn.classList.remove('learning-mode');
-                learningStatus.textContent = `Success! "${buttonId.split('_').join(' ')}" cloned via WiFi.`;
-                renderRemote();
-                setTimeout(() => {
-                  learningStatus.textContent = "";
-                  configModal.classList.remove('active');
-                }, 2000);
-            });
-        }
-      } catch (err) {
-        console.error("WiFi Learn Error:", err);
-        state.isLearning = false;
-        learnBtn.classList.remove('learning-mode');
-        learningStatus.textContent = `Error: ${err.message}`;
-        setTimeout(() => learningStatus.textContent = "", 3000);
-      }
+
+    if (!state.isLearning) {
+      state.isLearning = true;
+      learnBtn.classList.add('learning-mode');
+      learnBtn.innerHTML = `Cancel Learning`; // Removed icon to avoid flickering, clean text
+      learningStatus.textContent = `Step 1: Click a button on the virtual remote behind this modal to map it.`;
+    } else {
+      // Cancel
+      state.isLearning = false;
+      state.learningTargetId = null;
+      learnBtn.classList.remove('learning-mode');
+      learnBtn.innerHTML = `<i data-lucide="mic" style="width:16px; height:16px; margin-right:8px"></i> Enter Learning Mode`;
+      if (window.lucide) lucide.createIcons();
+      learningStatus.textContent = "";
+      document.querySelectorAll('.remote-btn').forEach(b => b.classList.remove('learning-target'));
     }
   });
 }

@@ -108,7 +108,23 @@ export function handleCapture(line, triggerUIRefresh) {
     state.isLearning = false;
     state.learningTargetId = null;
     const learnBtn = document.getElementById('learn-btn');
-    if (learnBtn) learnBtn.classList.remove('learning-mode');
+    if (learnBtn) {
+        learnBtn.classList.remove('learning-mode');
+        learnBtn.innerHTML = `<i data-lucide="mic" style="width:16px; height:16px; margin-right:8px"></i> Enter Learning Mode`;
+        if (window.lucide) window.lucide.createIcons();
+    }
+    
+    document.querySelectorAll('.remote-btn').forEach(b => b.classList.remove('learning-target'));
+    
+    const learningStatus = document.getElementById('learning-status');
+    if (learningStatus) {
+        learningStatus.textContent = `Success! "${buttonId.split('_').join(' ')}" cloned via USB.`;
+        setTimeout(() => {
+            learningStatus.textContent = "";
+            const configModal = document.getElementById('config-modal');
+            if (configModal) configModal.classList.remove('active');
+        }, 2000);
+    }
     
     renderRemote();
   }
@@ -180,7 +196,14 @@ export async function fireSignal(buttonId) {
   if (state.connectionType === 'serial' && state.serialWriter) {
     flashStatus('fire');
     const encoder = new TextEncoder();
-    await state.serialWriter.write(encoder.encode(payload + "\n"));
+    const fullPayload = "SEND_RAW:" + payload + "\n";
+    
+    // Chunk transmission to prevent Arduino 64-byte RX buffer overrun
+    for (let i = 0; i < fullPayload.length; i += 32) {
+      const chunk = fullPayload.substring(i, i + 32);
+      await state.serialWriter.write(encoder.encode(chunk));
+      await new Promise(res => setTimeout(res, 5)); // 5ms breathing room
+    }
   } else if (state.connectionType === 'wifi') {
     flashStatus('fire');
     if (mqttClient && mqttClient.connected) {
