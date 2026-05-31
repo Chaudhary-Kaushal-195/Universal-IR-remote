@@ -4,6 +4,27 @@ import { flashStatus, updateStatusIndicator, renderRemote } from './ui.js';
 import { syncCloudRemotes } from './api.js';
 
 export let mqttClient = null;
+const MIN_RAW_CAPTURE_PULSES = 10;
+
+function parseRawLine(line) {
+  const parts = line.trim().split(":");
+  if (parts.length < 3 || parts[0] !== "RAW") return null;
+
+  const len = Number.parseInt(parts[1], 10);
+  const values = parts.slice(2).join(":");
+  if (!Number.isFinite(len) || !values) return null;
+
+  return { len, values };
+}
+
+function shouldCaptureRaw(raw) {
+  return Boolean(
+    raw &&
+    state.isLearning &&
+    state.learningTargetId &&
+    raw.len >= MIN_RAW_CAPTURE_PULSES
+  );
+}
 
 export function setupMQTT() {
   if (mqttClient) {
@@ -22,6 +43,11 @@ export function setupMQTT() {
   mqttClient.on('message', (topic, message) => {
     const rawData = message.toString();
     handleStatusMessages(rawData);
+
+    const raw = parseRawLine(rawData);
+    if (shouldCaptureRaw(raw)) {
+      handleCapture(raw);
+    }
   });
 }
 
@@ -59,9 +85,10 @@ async function readSerial() {
       for (const line of lines) {
         const trimmedLine = line.trim();
         if (trimmedLine) handleStatusMessages(trimmedLine);
-        
-        if (trimmedLine.startsWith("RAW:") && state.isLearning && state.learningTargetId) {
-          handleCapture(`RAW:${trimmedLine.split(":")[1]}:${trimmedLine.split(":")[2]}`);
+
+        const raw = parseRawLine(trimmedLine);
+        if (shouldCaptureRaw(raw)) {
+          handleCapture(raw);
         }
       }
     }
@@ -75,8 +102,25 @@ export function handleStatusMessages(line) {
   } else if (line === "STATUS:SENSING_SIGNAL") {
     console.log("%c📡 [SENSE] Incoming IR Signal Detected!", "color: #22c55e; font-weight: bold;");
     flashStatus('sense');
+  } else if (line === "STATUS:ONLINE") {
+    console.log("%c🟢 [HUB] ESP32 is Online!", "color: #22c55e; font-weight: bold;");
+    state.isDeviceOnline = true;
+    updateStatusIndicator();
+  } else if (line === "STATUS:OFFLINE") {
+    console.log("%c🔴 [HUB] ESP32 has gone Offline!", "color: #ef4444; font-weight: bold;");
+    state.isDeviceOnline = false;
+    updateStatusIndicator();
   } else if (line.startsWith("RAW:")) {
-    console.log(`%c📸 [CLONE] Pattern Captured (${line.split(":")[1]} pulses)`, "color: #3b82f6; font-weight: bold;");
+    const raw = parseRawLine(line);
+    if (!raw) return;
+
+    if (raw.len < MIN_RAW_CAPTURE_PULSES) {
+      console.log(`%c⚠️ [SENSE] Ignored short IR noise (${raw.len} pulses)`, "color: #f59e0b; font-weight: bold;");
+    } else if (state.isLearning && state.learningTargetId) {
+      console.log(`%c📸 [CLONE] Pattern Captured (${raw.len} pulses)`, "color: #3b82f6; font-weight: bold;");
+    } else {
+      console.log(`%c📡 [SENSE] Raw IR Signal Seen (${raw.len} pulses)`, "color: #22c55e; font-weight: bold;");
+    }
   } else if (line === "SEND_OK") {
     console.log("%c✅ [OK] Replay Successful", "color: #6366f1;");
   } else if (line === "HUB_READY") {
@@ -86,18 +130,16 @@ export function handleStatusMessages(line) {
   }
 }
 
-export function handleCapture(line, triggerUIRefresh) {
-  const parts = line.trim().split(":");
-  if (parts.length < 3) return;
+export function handleCapture(rawInput, triggerUIRefresh) {
+  const raw = typeof rawInput === 'string' ? parseRawLine(rawInput) : rawInput;
+  if (!shouldCaptureRaw(raw)) return;
 
   const buttonId = state.learningTargetId;
-  const len = parts[1];
-  const values = parts.slice(2).join(":"); // in case values somehow had colons
   
   state.learnedCodes[buttonId] = {
     type: 'raw',
-    len: len,
-    values: values
+    len: String(raw.len),
+    values: raw.values
   };
 
   localStorage.setItem('learnedCodes', JSON.stringify(state.learnedCodes));
@@ -113,12 +155,12 @@ export function handleCapture(line, triggerUIRefresh) {
         learnBtn.innerHTML = `<i data-lucide="mic" style="width:16px; height:16px; margin-right:8px"></i> Enter Learning Mode`;
         if (window.lucide) window.lucide.createIcons();
     }
-    
+
     document.querySelectorAll('.remote-btn').forEach(b => b.classList.remove('learning-target'));
     
     const learningStatus = document.getElementById('learning-status');
     if (learningStatus) {
-        learningStatus.textContent = `Success! "${buttonId.split('_').join(' ')}" cloned via USB.`;
+        learningStatus.textContent = `Success! "${buttonId.split('_').join(' ')}" cloned!`;
         setTimeout(() => {
             learningStatus.textContent = "";
             const configModal = document.getElementById('config-modal');
@@ -206,20 +248,21 @@ export async function fireSignal(buttonId) {
     }
   } else if (state.connectionType === 'wifi') {
     flashStatus('fire');
+
+    // Prepare JSON payload for ESP32
+    const wifiPayload = JSON.stringify({
+      type: 'raw',
+      len: parseInt(signal.len),
+      values: signal.values
+    });
+
     if (mqttClient && mqttClient.connected) {
-      mqttClient.publish(MQTT_TOPIC_TX, payload);
-      console.log("%c🌐 [MQTT TX] Payload Dispatch to ESP32...", "color: #3b82f6;");
+      mqttClient.publish(MQTT_TOPIC_TX, wifiPayload);
+      console.log("%c🌐 [MQTT TX] JSON Payload Dispatch to ESP32...", "color: #3b82f6;");
+      console.log("Payload:", wifiPayload);
     } else {
-      console.warn("MQTT Not Connected. Attempting fallback basic HTTP emit...");
-      try {
-        await fetch(`http://${state.espIp}/emit`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `payload=${encodeURIComponent(payload)}`
-        });
-      } catch(e) {
-        console.error("HTTP emit failed", e);
-      }
+      alert("ESP32 is offline. Please check its power and WiFi connection.");
+      console.warn("MQTT Not Connected. Cannot emit signal over WiFi.");
     }
   } else if (state.connectionType === 'demo') {
     flashStatus('fire');

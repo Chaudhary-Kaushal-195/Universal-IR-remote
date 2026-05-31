@@ -1,6 +1,6 @@
 import './style.css';
 import { registerSW } from 'virtual:pwa-register';
-import { supabase } from './supabaseClient.js';
+import { isSupabaseEnabled, supabase } from './supabaseClient.js';
 import { state } from './state.js';
 import { initAuth, fetchCloudRemotes, syncCloudRemotes, loadGlobalDatabase } from './api.js';
 import { setupMQTT, connectUSB, scanHardware, fireSignal, handleCapture } from './hardware.js';
@@ -123,6 +123,8 @@ function setupEventListeners() {
 
   // Supabase Authentication Handling
   loginBtn.addEventListener('click', async () => {
+    if (!isSupabaseEnabled) return alert("Cloud sync is disabled. Add a valid Supabase config and set VITE_SUPABASE_ENABLED=true to log in.");
+
     const { error } = await supabase.auth.signInWithPassword({
       email: emailInput.value, password: passwordInput.value
     });
@@ -130,6 +132,8 @@ function setupEventListeners() {
   });
 
   signupBtn.addEventListener('click', async () => {
+    if (!isSupabaseEnabled) return alert("Cloud sync is disabled. Add a valid Supabase config and set VITE_SUPABASE_ENABLED=true to sign up.");
+
     const { error } = await supabase.auth.signUp({
       email: emailInput.value, password: passwordInput.value
     });
@@ -138,6 +142,8 @@ function setupEventListeners() {
   });
 
   logoutBtn.addEventListener('click', async () => {
+    if (!isSupabaseEnabled) return;
+
     await supabase.auth.signOut();
   });
 
@@ -215,37 +221,8 @@ function setupEventListeners() {
 
       // Trigger Wi-Fi poll if needed (USB serial listens automatically)
       if (state.connectionType === 'wifi') {
-        try {
-          console.log("%c📡 [SENSE] Initiating WiFi Learn Mode...", "color: #22c55e; font-weight: bold;");
-          const res = await fetch(`http://${state.espIp}/receive`);
-          if (res.status === 408) throw new Error("Timeout - No signal detected within 10 seconds.");
-          if (!res.ok) throw new Error("Network error during learning");
-
-          const data = await res.json();
-          if (data.len && data.values && state.isLearning) {
-            handleCapture(`RAW:${data.len}:${data.values}`, (buttonId) => {
-              state.isLearning = false;
-              state.learningTargetId = null;
-              learnBtn.classList.remove('learning-mode');
-              learnBtn.innerHTML = `<i data-lucide="mic" style="width:16px; height:16px; margin-right:8px"></i> Enter Learning Mode`;
-              if (window.lucide) lucide.createIcons();
-              learningStatus.textContent = `Success! "${buttonId.split('_').join(' ')}" cloned via WiFi.`;
-              renderRemote();
-              setTimeout(() => {
-                learningStatus.textContent = "";
-                configModal.classList.remove('active');
-              }, 2000);
-            });
-          }
-        } catch (err) {
-          console.error("WiFi Learn Error:", err);
-          state.isLearning = false;
-          learnBtn.classList.remove('learning-mode');
-          learnBtn.innerHTML = `<i data-lucide="mic" style="width:16px; height:16px; margin-right:8px"></i> Enter Learning Mode`;
-          if (window.lucide) lucide.createIcons();
-          learningStatus.textContent = `Error: ${err.message}`;
-          setTimeout(() => learningStatus.textContent = "", 3000);
-        }
+        console.log("%c📡 [SENSE] Listening for MQTT Learn Mode payload...", "color: #22c55e; font-weight: bold;");
+        // Capture will be handled asynchronously by mqttClient.on('message') in hardware.js
       }
 
     } else {

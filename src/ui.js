@@ -111,8 +111,13 @@ export function updateStatusIndicator() {
     indicator.innerHTML = '<i data-lucide="usb" style="width:14px; height:14px;"></i> USB Connected';
     indicator.classList.add('status-serial');
   } else if (state.connectionType === 'wifi') {
-    indicator.innerHTML = '<i data-lucide="wifi" style="width:14px; height:14px;"></i> IoT Enabled';
-    indicator.classList.add('status-wifi');
+    if (state.isDeviceOnline) {
+        indicator.innerHTML = '<i data-lucide="wifi" style="width:14px; height:14px;"></i> Hub Online';
+        indicator.classList.add('status-wifi');
+    } else {
+        indicator.innerHTML = '<i data-lucide="cloud-off" style="width:14px; height:14px;"></i> Hub Offline';
+        indicator.classList.add('status-demo'); // Grey color
+    }
   } else {
     indicator.innerHTML = '<i data-lucide="radio" style="width:14px; height:14px;"></i> Demo Mode';
     indicator.classList.add('status-demo');
@@ -128,13 +133,20 @@ export function toggleAC(tempDisplay, delta) {
   tempDisplay.textContent = state.acTemp + "°";
 }
 
-export function updateAuthUI(user) {
+export function updateAuthUI(user, cloudEnabled = true) {
   const authForm = document.getElementById('auth-form');
   const authLoggedIn = document.getElementById('auth-logged-in');
   const userEmailSpan = document.getElementById('user-email');
   const authStatus = document.getElementById('auth-status');
 
   if (!authForm || !authLoggedIn) return;
+
+  if (!cloudEnabled) {
+    authStatus.textContent = "Cloud sync disabled; local backup/export is available";
+    authForm.style.display = 'none';
+    authLoggedIn.style.display = 'none';
+    return;
+  }
 
   if (user) {
     authStatus.textContent = "🔒 Synced securely via Supabase";

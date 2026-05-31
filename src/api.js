@@ -1,19 +1,26 @@
-import { supabase } from './supabaseClient.js';
+import { isSupabaseEnabled, supabase } from './supabaseClient.js';
 import { state } from './state.js';
-import { renderRemote } from './ui.js';
 
 export async function initAuth(updateAuthUICallback) {
+  if (!isSupabaseEnabled) {
+    state.user = null;
+    updateAuthUICallback(null, false);
+    return;
+  }
+
   const { data: { session } } = await supabase.auth.getSession();
   state.user = session?.user || null;
-  updateAuthUICallback(state.user);
+  updateAuthUICallback(state.user, true);
 
   supabase.auth.onAuthStateChange((_event, session) => {
     state.user = session?.user || null;
-    updateAuthUICallback(state.user);
+    updateAuthUICallback(state.user, true);
   });
 }
 
 export async function loadGlobalDatabase() {
+  if (!isSupabaseEnabled) return;
+
   const { data, error } = await supabase.from('global_devices').select('*');
   if (error) {
     console.warn("Could not load global database", error);
@@ -37,7 +44,8 @@ export async function loadGlobalDatabase() {
 }
 
 export async function syncCloudRemotes() {
-  if (!state.user) return;
+  if (!isSupabaseEnabled || !state.user) return;
+
   const { error } = await supabase
     .from('user_remotes')
     .upsert({ 
@@ -52,7 +60,8 @@ export async function syncCloudRemotes() {
 }
 
 export async function fetchCloudRemotes() {
-  if (!state.user) return;
+  if (!isSupabaseEnabled || !state.user) return;
+
   const { data, error } = await supabase
     .from('user_remotes')
     .select('cloned_codes_json')
