@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.UniversalHub" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">#6366f1</item>
+        <item name="colorPrimaryVariant">#4f46e5</item>
+        <item name="colorOnPrimary">#ffffff</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">#050608</item>
+    </style>
+</resources>

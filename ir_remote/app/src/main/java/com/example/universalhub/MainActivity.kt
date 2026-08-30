@@ -338,9 +338,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun getButtonResId(btnId: String): Int {
+        var resId = resources.getIdentifier(btnId, "id", packageName)
+        if (resId == 0) {
+            resId = resources.getIdentifier(btnId.lowercase(), "id", packageName)
+        }
+        return resId
+    }
+
     private fun setupUI() {
         for (btnId in standardButtons) {
-            val resId = resources.getIdentifier(btnId.lowercase(), "id", packageName)
+            val resId = getButtonResId(btnId)
             if (resId != 0) {
                 findViewById<View>(resId).setOnClickListener {
                     handleRemoteClick(btnId)
@@ -399,7 +407,7 @@ class MainActivity : AppCompatActivity() {
     
     private fun updateButtonVisuals() {
         for (btnId in standardButtons) {
-            val resId = resources.getIdentifier(btnId.lowercase(), "id", packageName)
+            val resId = getButtonResId(btnId)
             if (resId != 0) {
                 val btn = findViewById<Button>(resId)
                 if (sharedPref.contains(btnId)) {
