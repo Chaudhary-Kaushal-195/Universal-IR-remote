@@ -37,7 +37,9 @@ const ipInput = document.getElementById('esp-ip');
 
 const hardwareModal = document.getElementById('hardware-modal');
 const closeHardwareModal = document.getElementById('close-hardware-modal');
+const closeConfigModal = document.getElementById('close-config-modal');
 const hwRefreshBtn = document.getElementById('hw-refresh-btn');
+const modalTabs = document.querySelectorAll('.modal-tab');
 
 const exportCodesBtn = document.getElementById('export-codes-btn');
 const importCodesBtn = document.getElementById('import-codes-btn');
@@ -74,8 +76,26 @@ function setupEventListeners() {
     });
   });
 
+  // Modal Sub-Tabs (Configuration)
+  modalTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      modalTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.dataset.tab;
+      ['hardware', 'account', 'database'].forEach(key => {
+        const pane = document.getElementById(`pane-${key}`);
+        if (pane) {
+          pane.style.display = key === target ? 'flex' : 'none';
+        }
+      });
+    });
+  });
+
   // Main UI Modal Interactions
   configBtn.addEventListener('click', () => configModal.classList.add('active'));
+  if (closeConfigModal) {
+    closeConfigModal.addEventListener('click', () => configModal.classList.remove('active'));
+  }
   statusIndicator.addEventListener('click', () => {
     hardwareModal.classList.add('active');
     scanHardware();

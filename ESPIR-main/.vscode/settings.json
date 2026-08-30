@@ -1,0 +1,56 @@
+{
+    "files.associations": {
+        "*.h": "cpp",
+        "*.cpp": "cpp",
+        "*.ino": "cpp",
+        "*.kt": "kotlin",
+        "*.gradle": "groovy",
+        "platformio.ini": "ini",
+        "optional": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "system_error": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "string": "cpp",
+        "string_view": "cpp"
+    },
+    "platformio-ide.useBuiltinPythonInterpreter": true,
+    "platformio-ide.autoRebuildAutocompleteIndex": true,
+    "platformio-ide.autoPreloadEnvLibs": true,
+    "C_Cpp.intelliSenseEngine": "Tag Parser",
+    "C_Cpp.default.configurationProvider": "platformio-ide",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "kotlin.compiler.jvm.target": "1.8",
+    "files.exclude": {
+        "**/.pio": true,
+        "**/build": true,
+        "**/.gradle": true,
+        "**/*.tmp": true,
+        "**/.DS_Store": true
+    },
+    "search.exclude": {
+        "**/.pio": true,
+        "**/build": true,
+        "**/.gradle": true,
+        "**/node_modules": true,
+        "**/*.tmp": true
+    },
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "[cpp]": {
+        "editor.tabSize": 2
+    },
+    "[kotlin]": {
+        "editor.tabSize": 4
+    },
+    "[json]": {
+        "editor.tabSize": 2
+    },
+    "makefile.makefilePath": "Makefile"
+}

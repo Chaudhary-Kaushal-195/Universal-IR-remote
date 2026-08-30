@@ -1,0 +1,128 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "PlatformIO: Build Firmware",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "panel": "new",
+                "showReuseMessage": false
+            },
+            "problemMatcher": [
+                "$platformio"
+            ]
+        },
+        {
+            "label": "PlatformIO: Upload Firmware",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "--target",
+                "upload"
+            ],
+            "group": "build",
+            "presentation": {
+                "panel": "new",
+                "showReuseMessage": false
+            },
+            "dependsOn": "PlatformIO: Build Firmware"
+        },
+        {
+            "label": "PlatformIO: Monitor Serial",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "device",
+                "monitor"
+            ],
+            "group": "test",
+            "presentation": {
+                "panel": "new",
+                "showReuseMessage": false
+            },
+            "isBackground": true
+        },
+        {
+            "label": "Android: Build Debug APK",
+            "type": "shell",
+            "command": "${workspaceFolder}/ESPIR-App/gradlew",
+            "args": [
+                "assembleDebug"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/ESPIR-App"
+            },
+            "group": "build",
+            "presentation": {
+                "panel": "new",
+                "showReuseMessage": false
+            }
+        },
+        {
+            "label": "Android: Install Debug APK",
+            "type": "shell",
+            "command": "${workspaceFolder}/ESPIR-App/gradlew",
+            "args": [
+                "installDebug"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/ESPIR-App"
+            },
+            "group": "build",
+            "presentation": {
+                "panel": "new",
+                "showReuseMessage": false
+            },
+            "dependsOn": "Android: Build Debug APK"
+        },
+        {
+            "label": "Clean All",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "PlatformIO: Clean",
+                "Android: Clean"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "PlatformIO: Clean",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run",
+                "--target",
+                "clean"
+            ],
+            "group": "build",
+            "presentation": {
+                "panel": "new",
+                "showReuseMessage": false
+            }
+        },
+        {
+            "label": "Android: Clean",
+            "type": "shell",
+            "command": "${workspaceFolder}/ESPIR-App/gradlew",
+            "args": [
+                "clean"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/ESPIR-App"
+            },
+            "group": "build",
+            "presentation": {
+                "panel": "new",
+                "showReuseMessage": false
+            }
+        }
+    ]
+}

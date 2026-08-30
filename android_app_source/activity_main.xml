@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#050608"
+    android:padding="20dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="UNIVERSAL HUB"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#818cf8"/>
+
+        <TextView
+            android:id="@+id/connection_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📻 Demo Mode"
+            android:textSize="12sp"
+            android:textColor="#6366f1"
+            android:background="#1a6366f1"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="6dp" />
+    </LinearLayout>
+
+    <!-- Tabs -->
+    <LinearLayout
+        android:id="@+id/tabs_layout"
+        android:layout_below="@id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp">
+
+        <Button
+            android:id="@+id/tab_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#6366f1"
+            android:textColor="#ffffff"
+            android:text="TV Remote"
+            android:textAllCaps="false"
+            android:layout_marginEnd="10dp"/>
+
+        <Button
+            android:id="@+id/tab_ac"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#121217"
+            android:textColor="#94a3b8"
+            android:text="AC Remote"
+            android:textAllCaps="false" />
+    </LinearLayout>
+
+    <!-- Content Area (Scrollable to prevent clipping) -->
+    <ScrollView
+        android:layout_below="@id/tabs_layout"
+        android:layout_above="@id/bottom_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#b3121217"
+            android:padding="16dp">
+
+            <!-- ======================= -->
+            <!-- TV REMOTE LAYOUT        -->
+            <!-- ======================= -->
+            <GridLayout
+                android:id="@+id/layout_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                android:alignmentMode="alignMargins"
+                android:visibility="visible">
+
+                <!-- Row 1: Power, Mute, Input -->
+                <Button android:id="@+id/TV_POWER" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1aef4444" android:textColor="#ef4444" android:text="🔴 Pwr" />
+                <Button android:id="@+id/TV_MUTE" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔇 Mute" />
+                <Button android:id="@+id/TV_INPUT" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔌 Input" />
+
+                <!-- Row 2: D-PAD (Span 3) -->
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_columnSpan="3"
+                    android:columnCount="3"
+                    android:paddingVertical="10dp"
+                    android:layout_margin="4dp">
+                    
+                    <Space android:layout_width="0dp" android:layout_columnWeight="1" />
+                    <Button android:id="@+id/TV_UP" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="⬆️" />
+                    <Space android:layout_width="0dp" android:layout_columnWeight="1" />
+
+                    <Button android:id="@+id/TV_LEFT" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="⬅️" />
+                    <Button android:id="@+id/TV_OK" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#6366f1" android:textColor="#ffffff" android:textStyle="bold" android:text="OK" />
+                    <Button android:id="@+id/TV_RIGHT" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="➡️" />
+
+                    <Space android:layout_width="0dp" android:layout_columnWeight="1" />
+                    <Button android:id="@+id/TV_DOWN" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="⬇️" />
+                    <Space android:layout_width="0dp" android:layout_columnWeight="1" />
+                </GridLayout>
+
+                <!-- Row 3: Vol+, Back, CH+ -->
+                <Button android:id="@+id/TV_VOL_UP" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔊 Vol+" />
+                <Button android:id="@+id/TV_BACK" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="↩️ Back" />
+                <Button android:id="@+id/TV_CH_UP" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="📺 CH+" />
+
+                <!-- Row 4: Vol-, Home, CH- -->
+                <Button android:id="@+id/TV_VOL_DOWN" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔉 Vol-" />
+                <Button android:id="@+id/TV_HOME" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🏠 Home" />
+                <Button android:id="@+id/TV_CH_DOWN" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="📺 CH-" />
+
+            </GridLayout>
+
+
+            <!-- ======================= -->
+            <!-- AC REMOTE LAYOUT        -->
+            <!-- ======================= -->
+            <GridLayout
+                android:id="@+id/layout_ac"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                android:alignmentMode="alignMargins"
+                android:visibility="gone">
+
+                <!-- Row 1: Power ON / OFF (Span 3 split into flex) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_columnSpan="3"
+                    android:orientation="horizontal"
+                    android:layout_margin="4dp">
+                    
+                    <Button android:id="@+id/AC_POWER_ON" android:layout_width="0dp" android:layout_height="70dp" android:layout_weight="1" android:backgroundTint="#1a22c55e" android:textColor="#22c55e" android:text="🟢 ON" android:layout_marginEnd="10dp"/>
+                    <Button android:id="@+id/AC_POWER_OFF" android:layout_width="0dp" android:layout_height="70dp" android:layout_weight="1" android:backgroundTint="#1aef4444" android:textColor="#ef4444" android:text="🔴 OFF" />
+                </LinearLayout>
+
+                <!-- Row 2: Temp Control Area -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp"
+                    android:layout_columnSpan="3"
+                    android:orientation="horizontal"
+                    android:background="#05ffffff"
+                    android:gravity="center"
+                    android:layout_margin="4dp">
+                    
+                    <Button android:id="@+id/AC_TEMP_DOWN" android:layout_width="60dp" android:layout_height="60dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="➖" />
+                    
+                    <LinearLayout
+                        android:id="@+id/AC_TEMP_DISPLAY_CONTAINER"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true">
+                        
+                        <TextView android:id="@+id/ac_temp_display" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="24°" android:textSize="50sp" android:textColor="#ffffff" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CLIMATE CONTROL" android:textSize="10sp" android:textColor="#94a3b8" />
+                    </LinearLayout>
+                    
+                    <Button android:id="@+id/AC_TEMP_UP" android:layout_width="60dp" android:layout_height="60dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="➕" />
+                </LinearLayout>
+
+                <!-- Row 3: Mode, Fan, Swing -->
+                <Button android:id="@+id/AC_MODE" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="💨 Mode" />
+                <Button android:id="@+id/AC_FAN" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🌀 Fan" />
+                <Button android:id="@+id/AC_SWING" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔄 Swing" />
+
+                <!-- Row 4: Timer, Sleep, Light -->
+                <Button android:id="@+id/AC_TIMER" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="⏱️ Timer" />
+                <Button android:id="@+id/AC_SLEEP" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🌙 Sleep" />
+                <Button android:id="@+id/AC_LIGHT" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="☀️ Light" />
+
+            </GridLayout>
+        </FrameLayout>
+    </ScrollView>
+
+    <!-- Settings Floating Button -->
+    <Button
+        android:id="@+id/settings_btn"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_above="@id/bottom_container"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="#6366f1"
+        android:textColor="#ffffff"
+        android:textSize="24sp"
+        android:text="⚙️"
+        android:elevation="8dp"
+        android:stateListAnimator="@null" />
+
+    <!-- Bottom Learn Modal Area -->
+    <LinearLayout
+        android:id="@+id/bottom_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingTop="10dp">
+        
+        <TextView
+            android:id="@+id/learning_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="#94a3b8"
+            android:textSize="12sp"
+            android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:id="@+id/learn_btn"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:backgroundTint="#6366f1"
+            android:textColor="#ffffff"
+            android:text="🎤 Enter Learning Mode"
+            android:textAllCaps="false"/>
+    </LinearLayout>
+
+</RelativeLayout>

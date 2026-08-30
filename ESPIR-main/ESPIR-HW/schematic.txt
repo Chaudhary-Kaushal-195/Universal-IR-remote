@@ -1,0 +1,115 @@
+# ESPIR Hardware Schematic
+
+```
+                                 ESPIR IR Blaster Circuit
+                                      Version 1.0
+
+                                    +3.3V Supply
+                                         |
+                    +--------------------+--------------------+
+                    |                                         |
+                    |                                    +----+----+
+                    |                                    |         |
+                    |               ESP32-WROOM-32       |   C1    |
+                    |                                    | 100nF   |
+                    |          +------------------+      |         |
+                    |          |                  |      +----+----+
+                    |      +---|  3.3V       GND  |---+       |
+                    |      |   |                  |   |      GND
+                    |      |   |  GPIO4      GPIO5|---+
+                    |      |   |                  |   |
+                    |      |   |  GPIO2           |   |      IR Receiver Module
+                    |      |   |                  |   |      (TSOP4838)
+                    |      |   |                  |   |      +-------------+
+                    |      |   |  EN         RST  |   |      |      +3.3V  |
+                    |      |   |                  |   |      |             |
+                    |      |   |                  |   |      |       OUT   |
+                    |      |   +------------------+   +------+             |
+                    |      |                                 |       GND   |
+                    |      |                                 +------+------+
+                    |      |                                        |
+                    +------+                                       GND
+                           |
+                          GND
+
+IR Transmitter Circuit Detail:
+
+                           +3.3V
+                             |
+                        +----+----+
+                        |   R1    |  10kΩ (Pull-up)
+                        | 10kΩ    |
+                        +----+----+
+                             |
+    GPIO4 ----+----[R2]-----+
+              |     1kΩ      |
+              |              |
+              |              G (Gate)
+              |         +----+----+
+              |         |  2N7000 |  N-Channel MOSFET
+              +---------|         |  (Logic Level)
+                        |   D S   |
+                        +----+----+
+                             |
+                             S (Source)
+                             |
+                        +----+----+
+                        |   R3    |  Current Limiting
+                        |  100Ω   |  Resistor
+                        +----+----+
+                             |
+                             |
+                    +--------+--------+
+                    |                 |
+                    |    IR LED       |  TSAL6200
+                    |   (940nm)       |  or equivalent
+                    |                 |
+                    +--------+--------+
+                             |
+                             |
+                            GND
+
+Status LED (Built-in ESP32):
+
+    GPIO2 ----[330Ω]----+|LED|+---- +3.3V
+                         Built-in
+
+Power Supply Filtering:
+
+    +5V USB ----[AMS1117-3.3]---- +3.3V ----[C2]---- GND
+                     |                        100µF
+                    GND
+
+Pin Connections Summary:
+========================
+ESP32 GPIO2  -> Status LED (built-in)
+ESP32 GPIO4  -> MOSFET Gate (through 1kΩ resistor)
+ESP32 GPIO5  -> IR Receiver Output
+ESP32 3.3V   -> IR Receiver VCC, Pull-up resistors
+ESP32 GND    -> Common Ground
+
+Component Values:
+================
+R1: 10kΩ (MOSFET pull-up)
+R2: 1kΩ (Gate limiting resistor)  
+R3: 100Ω (IR LED current limiting)
+C1: 100nF (IR receiver decoupling)
+C2: 100µF (Power supply filtering)
+
+Notes:
+======
+1. IR LED forward voltage: ~1.4V @ 20mA
+2. IR LED maximum current: 100mA (pulsed)
+3. MOSFET should be logic-level compatible
+4. IR receiver operates at 38kHz carrier frequency
+5. Ensure IR receiver is shielded from direct IR LED output
+6. Use wide traces for high-current IR LED path
+7. Add heat sinking if continuous IR operation required
+
+Safety:
+=======
+- IR LED power levels are below eye safety limits
+- Use proper current limiting for IR LED
+- Ensure MOSFET can handle switching current
+- Add fusing for external power sources
+```

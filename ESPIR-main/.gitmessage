@@ -1,0 +1,33 @@
+# Commit Message Template for ESPIR Project
+
+# Type(scope): Brief description (50 chars max)
+# |<----  Using a Maximum Of 50 Characters  ---->|
+
+# Body: Explain what and why (wrap at 72 chars)
+# |<----   Try To Limit Each Line to a Maximum Of 72 Characters   ---->|
+
+# Footer: Issues/PRs references
+# |<----   Try To Limit Each Line to a Maximum Of 72 Characters   ---->|
+
+# --- COMMIT END ---
+# Type can be:
+#    feat     (new feature)
+#    fix      (bug fix)
+#    refactor (refactoring production code)
+#    style    (formatting, missing semi colons, etc; no code change)
+#    docs     (changes to documentation)
+#    test     (adding or refactoring tests; no production code change)
+#    chore    (updating grunt tasks etc; no production code change)
+#    build    (changes to build system or external dependencies)
+#    ci       (changes to CI configuration files and scripts)
+#    perf     (performance improvements)
+#    hw       (hardware changes)
+#    android  (Android app specific changes)
+#    firmware (ESP32 firmware specific changes)
+# --------------------
+# Remember to:
+#   - Use imperative mood in subject line
+#   - Do not end subject line with period
+#   - Capitalize subject line and each paragraph
+#   - Use body to explain what and why
+#   - Separate subject from body with blank line

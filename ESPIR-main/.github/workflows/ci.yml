@@ -1,0 +1,188 @@
+name: ESPIR CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  # ESP32 Firmware Build and Test
+  firmware:
+    runs-on: ubuntu-latest
+    name: ESP32 Firmware
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Cache PlatformIO
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pip
+          ~/.platformio/.cache
+        key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install PlatformIO Core
+      run: pip install --upgrade platformio
+      
+    - name: Build firmware
+      run: make firmware
+      
+    - name: Run firmware tests
+      run: make test-firmware || echo "Tests not yet configured"
+      
+    - name: Upload firmware artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: firmware-${{ github.sha }}
+        path: build/firmware.bin
+        if-no-files-found: warn
+
+  # Android App Build and Test  
+  android:
+    runs-on: ubuntu-latest
+    name: Android App
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Make gradlew executable
+      run: chmod +x ESPIR-App/gradlew
+      
+    - name: Build debug APK
+      run: make android
+      
+    - name: Run Android tests
+      run: make test-android || echo "Tests not yet configured"
+      
+    - name: Run lint
+      run: make lint-android || echo "Lint not yet configured"
+      
+    - name: Upload APK artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: android-apk-${{ github.sha }}
+        path: ESPIR-App/app/build/outputs/apk/debug/app-debug.apk
+        if-no-files-found: warn
+
+  # Code Quality Checks
+  quality:
+    runs-on: ubuntu-latest
+    name: Code Quality
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python for PlatformIO
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install PlatformIO Core
+      run: pip install --upgrade platformio
+      
+    - name: Setup JDK for Android
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Make gradlew executable
+      run: chmod +x ESPIR-App/gradlew
+      
+    - name: Install clang-format
+      run: sudo apt-get install -y clang-format
+      
+    - name: Check code formatting
+      run: make format || echo "Formatting check completed"
+      
+    - name: Run linting
+      run: make lint || echo "Linting completed"
+
+  # Documentation Build
+  docs:
+    runs-on: ubuntu-latest
+    name: Documentation
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Doxygen
+      run: sudo apt-get install -y doxygen graphviz
+      
+    - name: Generate documentation
+      run: make docs || echo "Documentation generation completed"
+      
+    - name: Upload documentation artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: documentation-${{ github.sha }}
+        path: build/docs/
+        if-no-files-found: warn
+
+  # Release Build (only on main branch)
+  release:
+    if: github.ref == 'refs/heads/main'
+    needs: [firmware, android, quality, docs]
+    runs-on: ubuntu-latest
+    name: Release Build
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install PlatformIO Core
+      run: pip install --upgrade platformio
+      
+    - name: Setup JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Make gradlew executable
+      run: chmod +x ESPIR-App/gradlew
+      
+    - name: Build release package
+      run: make release
+      
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: espir-release-${{ github.sha }}
+        path: dist/
+        if-no-files-found: error

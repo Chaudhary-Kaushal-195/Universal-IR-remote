@@ -38,133 +38,156 @@
       <!-- Settings Modal -->
       <div class="modal" id="config-modal">
         <div class="modal-content glass">
-          <!-- Auth Section -->
-          <div id="auth-section" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-            <p style="font-size: 0.9rem; margin-bottom: 10px;" id="auth-status">🔒 Not Logged In</p>
-            <div id="auth-form" style="display: flex; flex-direction: column; gap: 8px;">
-              <input type="email" id="auth-email" placeholder="Email" style="padding: 8px; font-size: 0.9rem;" />
-              <input type="password" id="auth-password" placeholder="Password" style="padding: 8px; font-size: 0.9rem;" />
-              <div style="display: flex; gap: 8px; margin-top: 5px;">
-                <button class="primary-btn" id="login-btn" style="flex: 1; padding: 8px; font-size: 0.9rem;">Log In</button>
-                <button class="primary-btn" id="signup-btn" style="flex: 1; padding: 8px; font-size: 0.9rem; background: transparent; border: 1px solid var(--accent-color);">Sign Up</button>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <p style="font-weight: 600; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="settings" style="color: var(--accent-color); width: 18px; height: 18px;"></i> Configuration
+            </p>
+            <div id="close-config-modal" style="cursor: pointer; color: var(--text-secondary); display: flex;"><i data-lucide="x" style="width: 18px; height: 18px;"></i></div>
+          </div>
+
+          <!-- Settings Sub-Tabs -->
+          <div class="modal-tabs" id="config-tabs" style="display: flex; gap: 6px; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 10px;">
+            <button type="button" class="modal-tab active" data-tab="hardware" style="flex: 1; padding: 6px 4px; border: none; border-radius: 8px; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Hardware</button>
+            <button type="button" class="modal-tab" data-tab="account" style="flex: 1; padding: 6px 4px; border: none; border-radius: 8px; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Cloud & Sync</button>
+            <button type="button" class="modal-tab" data-tab="database" style="flex: 1; padding: 6px 4px; border: none; border-radius: 8px; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Database</button>
+          </div>
+
+          <!-- Tab Pane 1: Hardware & Connection -->
+          <div class="modal-pane" id="pane-hardware" style="display: flex; flex-direction: column; gap: 10px;">
+            <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: -2px;">Select transmission bridge:</p>
+            <div style="display: flex; gap: 8px;">
+              <button class="primary-btn" id="usb-connect" style="flex: 1; padding: 10px 6px; font-size: 0.8rem;">
+                <i data-lucide="usb" style="width: 15px; height: 15px;"></i> USB Serial
+              </button>
+              <button class="primary-btn" id="wifi-connect" style="flex: 1; padding: 10px 6px; font-size: 0.8rem; background: var(--panel-bg); border: 1px solid var(--glass-border);">
+                <i data-lucide="wifi" style="width: 15px; height: 15px;"></i> Wi-Fi ESP32
+              </button>
+            </div>
+
+            <div id="wifi-config" style="display: none; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.25); padding: 8px 10px; border-radius: 8px;">
+              <input type="text" id="esp-ip" placeholder="ESP32 IP (e.g. 192.168.1.50)" style="padding: 6px 10px; font-size: 0.8rem;" />
+              <button class="primary-btn" id="save-config" style="padding: 7px; font-size: 0.8rem;">Save & Connect</button>
+            </div>
+
+            <div style="margin-top: 4px;">
+              <button class="primary-btn" id="learn-btn" style="background: var(--success); width: 100%; padding: 10px; font-size: 0.85rem;">
+                <i data-lucide="mic" style="width:15px; height:15px; margin-right:6px"></i>
+                Enter Learning Mode
+              </button>
+              <p id="learning-status" style="font-size: 0.72rem; color: var(--text-secondary); text-align: center; margin-top: 4px; min-height: 14px;"></p>
+            </div>
+          </div>
+
+          <!-- Tab Pane 2: Cloud Sync & Backup -->
+          <div class="modal-pane" id="pane-account" style="display: none; flex-direction: column; gap: 10px;">
+            <!-- Auth Section -->
+            <div id="auth-section" style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
+              <p style="font-size: 0.78rem; margin-bottom: 6px;" id="auth-status">🔒 Login to backup your clones to cloud</p>
+              <div id="auth-form" style="display: flex; flex-direction: column; gap: 6px;">
+                <input type="email" id="auth-email" placeholder="Email" style="padding: 6px 10px; font-size: 0.8rem;" />
+                <input type="password" id="auth-password" placeholder="Password" style="padding: 6px 10px; font-size: 0.8rem;" />
+                <div style="display: flex; gap: 6px; margin-top: 2px;">
+                  <button class="primary-btn" id="login-btn" style="flex: 1; padding: 6px; font-size: 0.8rem;">Log In</button>
+                  <button class="primary-btn" id="signup-btn" style="flex: 1; padding: 6px; font-size: 0.8rem; background: transparent; border: 1px solid var(--accent-color);">Sign Up</button>
+                </div>
+              </div>
+              <div id="auth-logged-in" style="display: none; align-items: center; justify-content: space-between;">
+                <span id="user-email" style="font-size: 0.75rem; color: var(--accent-color); font-weight: bold;"></span>
+                <button class="primary-btn" id="logout-btn" style="padding: 4px 10px; font-size: 0.75rem; background: var(--danger);">Log Out</button>
               </div>
             </div>
-            <div id="auth-logged-in" style="display: none; align-items: center; justify-content: space-between;">
-              <span id="user-email" style="font-size: 0.8rem; color: var(--accent-color); font-weight: bold;"></span>
-              <button class="primary-btn" id="logout-btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--danger);">Log Out</button>
+
+            <!-- Offline Backup Section -->
+            <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
+              <p style="font-size: 0.75rem; margin-bottom: 6px; color: var(--text-secondary);">Offline JSON File Backup</p>
+              <div style="display: flex; gap: 6px;">
+                <button class="primary-btn" id="export-codes-btn" style="flex: 1; background: rgba(255,255,255,0.08); font-size: 0.75rem; padding: 7px;">
+                  <i data-lucide="download" style="width:13px; height:13px; margin-right:4px"></i> Export JSON
+                </button>
+                <button class="primary-btn" id="import-codes-btn" style="flex: 1; background: rgba(255,255,255,0.08); font-size: 0.75rem; padding: 7px;">
+                  <i data-lucide="upload" style="width:13px; height:13px; margin-right:4px"></i> Import JSON
+                </button>
+              </div>
+              <input type="file" id="import-file-input" style="display: none;" accept=".json" />
             </div>
           </div>
 
-          <p>Choose Connection Type</p>
-          
-          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <button class="primary-btn" id="usb-connect" style="flex: 1;">
-              <i data-lucide="usb"></i> USB (Arduino)
-            </button>
-            <button class="primary-btn" id="wifi-connect" style="flex: 1; background: var(--panel-bg); border: 1px solid var(--glass-border);">
-              <i data-lucide="wifi"></i> WiFi (ESP32)
-            </button>
-          </div>
-
-          <div id="wifi-config" style="display: none; flex-direction: column; gap: 10px;">
-            <input type="text" id="esp-ip" placeholder="192.168.1.XX" />
-            <button class="primary-btn" id="save-config">Save & Connect</button>
-          </div>
-          
-          <hr style="opacity: 0.1; margin: 10px 0;">
-          
-          <div style="margin-bottom: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
-            <p style="font-size: 0.9rem; margin-bottom: 5px;">Backup & Permanent Storage</p>
-            <div style="display: flex; gap: 8px;">
-              <button class="primary-btn" id="export-codes-btn" style="flex: 1; background: rgba(255,255,255,0.1); font-size: 0.8rem; padding: 8px;">
-                <i data-lucide="download" style="width:14px; height:14px; margin-right:5px"></i> Export JSON
-              </button>
-              <button class="primary-btn" id="import-codes-btn" style="flex: 1; background: rgba(255,255,255,0.1); font-size: 0.8rem; padding: 8px;">
-                <i data-lucide="upload" style="width:14px; height:14px; margin-right:5px"></i> Import JSON
+          <!-- Tab Pane 3: Database -->
+          <div class="modal-pane" id="pane-database" style="display: none; flex-direction: column; gap: 10px;">
+            <div style="background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px;">
+              <p style="font-size: 0.78rem; margin-bottom: 8px;">Preset TV Brand Profiles</p>
+              <select id="db-select" style="width: 100%; padding: 8px 10px; margin-bottom: 10px; background: var(--panel-bg); color: white; border: 1px solid var(--glass-border); border-radius: 6px; font-size: 0.82rem;">
+                <option value="">-- Select TV Model --</option>
+                <option value="Samsung TV">Samsung TV</option>
+                <option value="LG TV">LG TV</option>
+                <option value="Sony TV">Sony TV</option>
+              </select>
+              <button class="primary-btn" id="db-import-btn" style="background: var(--accent-color); font-size: 0.82rem; padding: 9px; width: 100%;">
+                <i data-lucide="download" style="width:14px; height:14px; margin-right:5px"></i> Apply Profile
               </button>
             </div>
-            <input type="file" id="import-file-input" style="display: none;" accept=".json" />
           </div>
 
-          <div style="margin-bottom: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
-            <p style="font-size: 0.9rem; margin-bottom: 5px;">Import Cloud Database</p>
-            <select id="db-select" style="width: 100%; padding: 8px; margin-bottom: 8px; background: var(--panel-bg); color: white; border: 1px solid var(--glass-border); border-radius: 5px;">
-              <option value="">-- Select TV Model --</option>
-              <option value="Samsung TV">Samsung TV</option>
-              <option value="LG TV">LG TV</option>
-              <option value="Sony TV">Sony TV</option>
-            </select>
-            <button class="primary-btn" id="db-import-btn" style="background: var(--accent-color); font-size: 0.9rem; padding: 8px;">
-              <i data-lucide="download" style="width:14px; height:14px; margin-right:5px"></i> Apply Profile
-            </button>
-          </div>
-          
-          <button class="primary-btn" id="learn-btn" style="background: var(--success)">
-            <i data-lucide="mic" style="width:16px; height:16px; margin-right:8px"></i>
-            Enter Learning Mode
-          </button>
-          <p id="learning-status" style="font-size: 0.8rem; color: var(--text-secondary); text-align: center;"></p>
-        </div>
         </div>
       </div>
 
       <!-- Hardware Scanner Modal -->
       <div class="modal" id="hardware-modal" style="z-index: 2000;">
         <div class="modal-content glass">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <p style="font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-              <i data-lucide="cpu" style="color: var(--accent-color)"></i> Hardware Diagnostics
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <p style="font-weight: 600; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="cpu" style="color: var(--accent-color); width: 18px; height: 18px;"></i> Hardware Diagnostics
             </p>
-            <div id="close-hardware-modal" style="cursor: pointer; color: var(--text-secondary); display: flex;"><i data-lucide="x"></i></div>
+            <div id="close-hardware-modal" style="cursor: pointer; color: var(--text-secondary); display: flex;"><i data-lucide="x" style="width: 18px; height: 18px;"></i></div>
           </div>
 
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;">
             Scanning available transmission capabilities...
           </p>
 
-          <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
             
             <!-- Check 1: Built-In Mobile -->
-            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border-left: 3px solid var(--danger);">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span style="font-size: 0.9rem; font-weight: 600;">📱 Built-In Phone IR</span>
-                <span id="hw-status-native" style="font-size: 0.75rem; color: var(--danger); font-weight: bold;">FAILED</span>
+            <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 8px; border-left: 3px solid var(--danger);">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                <span style="font-size: 0.82rem; font-weight: 600;">📱 Built-In Phone IR</span>
+                <span id="hw-status-native" style="font-size: 0.72rem; color: var(--danger); font-weight: bold;">FAILED</span>
               </div>
-              <p style="font-size: 0.7rem; color: var(--text-secondary);">
-                Browser security explicitly blocks web apps from controlling integrated mobile emitters.
+              <p style="font-size: 0.68rem; color: var(--text-secondary); line-height: 1.2;">
+                Browser security explicitly blocks web apps from controlling phone emitters.
               </p>
             </div>
 
             <!-- Check 2: External USB Serial -->
-            <div id="hw-card-usb" style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border-left: 3px solid #64748b; transition: all 0.3s ease;">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span style="font-size: 0.9rem; font-weight: 600;">🔌 USB Emitter</span>
-                <span id="hw-status-usb" style="font-size: 0.75rem; color: #64748b; font-weight: bold;">NOT CONNECTED</span>
+            <div id="hw-card-usb" style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 8px; border-left: 3px solid #64748b; transition: all 0.3s ease;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                <span style="font-size: 0.82rem; font-weight: 600;">🔌 USB Emitter</span>
+                <span id="hw-status-usb" style="font-size: 0.72rem; color: #64748b; font-weight: bold;">NOT CONNECTED</span>
               </div>
-              <p style="font-size: 0.7rem; color: var(--text-secondary);">
+              <p style="font-size: 0.68rem; color: var(--text-secondary); line-height: 1.2;">
                 Checking local USB tethered hardware nodes.
               </p>
             </div>
 
             <!-- Check 3: Wi-Fi ESP32 Bridge -->
-            <div id="hw-card-wifi" style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border-left: 3px solid #64748b; transition: all 0.3s ease;">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span style="font-size: 0.9rem; font-weight: 600;">🌐 Network Emitter</span>
-                <span id="hw-status-wifi" style="font-size: 0.75rem; color: #64748b; font-weight: bold;">NOT CONNECTED</span>
+            <div id="hw-card-wifi" style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 8px; border-left: 3px solid #64748b; transition: all 0.3s ease;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                <span style="font-size: 0.82rem; font-weight: 600;">🌐 Network Emitter</span>
+                <span id="hw-status-wifi" style="font-size: 0.72rem; color: #64748b; font-weight: bold;">NOT CONNECTED</span>
               </div>
-              <p style="font-size: 0.7rem; color: var(--text-secondary);">
+              <p style="font-size: 0.68rem; color: var(--text-secondary); line-height: 1.2;">
                 Checking Global Cloud MQTT connectivity.
               </p>
             </div>
 
           </div>
 
-          <div id="hw-no-device-warning" style="margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: 8px; display: flex; flex-direction: column; gap: 5px; text-align: center;">
-            <p style="font-weight: 600; color: var(--danger); font-size: 0.9rem;">⚠️ No Hardware Connected</p>
-            <p style="font-size: 0.8rem; color: var(--text-primary);">You must connect a serial bridge or IoT node in settings to transmit!</p>
+          <div id="hw-no-device-warning" style="margin-top: 6px; padding: 8px 10px; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); border-radius: 8px; display: flex; flex-direction: column; gap: 2px; text-align: center;">
+            <p style="font-weight: 600; color: var(--danger); font-size: 0.82rem;">⚠️ No Hardware Connected</p>
+            <p style="font-size: 0.72rem; color: var(--text-primary);">Connect a USB bridge or Wi-Fi node in settings to transmit!</p>
           </div>
 
-          <button class="primary-btn" id="hw-refresh-btn" style="margin-top: 5px; align-self: center; width: 100%; font-size: 0.9rem;">
+          <button class="primary-btn" id="hw-refresh-btn" style="margin-top: 4px; align-self: center; width: 100%; font-size: 0.82rem; padding: 8px;">
             Run Diagnostics Again 
           </button>
 

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/control_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Device Control"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/control_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: Ready"
+        android:textSize="14sp"
+        android:layout_marginBottom="32dp"/>
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:rowCount="3"
+        android:useDefaultMargins="true"
+        android:alignmentMode="alignBounds"
+        android:layout_gravity="center">
+
+        <Button
+            android:id="@+id/btn_power"
+            android:layout_width="290dp"
+            android:layout_height="80dp"
+            android:text="Power"
+            android:backgroundTint="#D32F2F"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_columnSpan="2"
+            android:layout_gravity="fill_horizontal" />
+
+        <Button
+            android:id="@+id/btn_volume_up"
+            android:layout_width="140dp"
+            android:layout_height="80dp"
+            android:textSize="15sp"
+            android:text="Vol +" />
+
+        <Button
+            android:id="@+id/btn_channel_up"
+            android:layout_width="140dp"
+            android:layout_height="80dp"
+            android:textSize="15sp"
+            android:text="Ch +" />
+
+        <Button
+            android:id="@+id/btn_volume_down"
+            android:layout_width="140dp"
+            android:layout_height="80dp"
+            android:textSize="15sp"
+            android:text="Vol -" />
+
+        <Button
+            android:id="@+id/btn_channel_down"
+            android:layout_width="140dp"
+            android:layout_height="80dp"
+            android:textSize="15sp"
+            android:text="Ch -" />
+
+        <Button
+            android:id="@+id/btn_mute"
+            android:layout_width="290dp"
+            android:layout_height="80dp"
+            android:textSize="15sp"
+            android:text="Mute"
+            android:layout_columnSpan="2"
+            android:layout_gravity="fill_horizontal" />
+
+    </GridLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <Button
+        android:id="@+id/btn_learn"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Program / Learn Button"
+        android:textSize="16sp" />
+
+</LinearLayout>

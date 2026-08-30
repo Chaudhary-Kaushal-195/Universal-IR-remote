@@ -1,3 +1,20 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production / Build output
+dist/
+dist-ssr/
+build/
+**/build/
+*.local
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+
 # Logs
 logs
 *.log
@@ -7,18 +24,48 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Embedded, Arduino & PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+.clangd/
+compile_commands.json
+*.hex
+*.bin
+*.elf
 
-# Editor directories and files
+# Bundled JDK & Toolchains
+.jdk/
+**/.jdk/
+
+# Android & Gradle
+.gradle/
+**/.gradle/
+local.properties
+*.apk
+*.aab
+.cxx/
+captures/
+*.hprof
+
+# IDE & Editor Files
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+!.vscode/settings.json
+.idea/
+*.iml
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini

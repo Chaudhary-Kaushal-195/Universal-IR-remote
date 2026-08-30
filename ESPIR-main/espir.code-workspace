@@ -1,0 +1,147 @@
+{
+    "folders": [
+        {
+            "name": "ESPIR-FW (ESP32 Firmware)",
+            "path": "."
+        },
+        {
+            "name": "ESPIR-App (Android)",
+            "path": "./ESPIR-App"
+        },
+        {
+            "name": "ESPIR-HW (Hardware)",
+            "path": "./ESPIR-HW"
+        },
+        {
+            "name": "Documentation",
+            "path": "./docs"
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "*.h": "cpp",
+            "*.cpp": "cpp",
+            "*.ino": "cpp",
+            "*.kt": "kotlin",
+            "*.gradle": "groovy"
+        },
+        "platformio-ide.useBuiltinPythonInterpreter": true,
+        "platformio-ide.autoRebuildAutocompleteIndex": true,
+        "C_Cpp.intelliSenseEngine": "Tag Parser",
+        "C_Cpp.default.configurationProvider": "platformio-ide",
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "kotlin.compiler.jvm.target": "1.8",
+        "files.exclude": {
+            "**/.pio": true,
+            "**/build": true,
+            "**/.gradle": true
+        },
+        "search.exclude": {
+            "**/.pio": true,
+            "**/build": true,
+            "**/.gradle": true,
+            "**/node_modules": true
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "platformio.platformio-ide",
+            "ms-vscode.cpptools",
+            "redhat.java",
+            "mathiasfrohlich.kotlin",
+            "ms-vscode.cmake-tools",
+            "twxs.cmake"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "PlatformIO: Build",
+                "type": "shell",
+                "command": "pio",
+                "args": [
+                    "run"
+                ],
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                },
+                "presentation": {
+                    "panel": "new"
+                },
+                "problemMatcher": [
+                    "$platformio"
+                ]
+            },
+            {
+                "label": "PlatformIO: Upload",
+                "type": "shell",
+                "command": "pio",
+                "args": [
+                    "run",
+                    "--target",
+                    "upload"
+                ],
+                "group": "build",
+                "presentation": {
+                    "panel": "new"
+                }
+            },
+            {
+                "label": "PlatformIO: Clean",
+                "type": "shell",
+                "command": "pio",
+                "args": [
+                    "run",
+                    "--target",
+                    "clean"
+                ],
+                "group": "build",
+                "presentation": {
+                    "panel": "new"
+                }
+            },
+            {
+                "label": "Android: Build Debug",
+                "type": "shell",
+                "command": "./gradlew",
+                "args": [
+                    "assembleDebug"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder}/ESPIR-App"
+                },
+                "group": "build",
+                "presentation": {
+                    "panel": "new"
+                }
+            },
+            {
+                "label": "Android: Install Debug",
+                "type": "shell",
+                "command": "./gradlew",
+                "args": [
+                    "installDebug"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder}/ESPIR-App"
+                },
+                "group": "build",
+                "presentation": {
+                    "panel": "new"
+                }
+            }
+        ]
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "PlatformIO Debugger",
+                "type": "platformio-debug",
+                "request": "launch"
+            }
+        ]
+    }
+}

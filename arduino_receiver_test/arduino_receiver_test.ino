@@ -23,17 +23,24 @@ void loop() {
     
     uint16_t len = IrReceiver.irparams.rawlen;
     
-    // Print the raw microsecond durations as a C++ array
+    // 1. Print the Web App "RAW:" format so it can be manually pasted or cloned
+    Serial.print(F("RAW:"));
+    Serial.print(len);
+    Serial.print(F(":"));
+    for (uint16_t i = 1; i < len; i++) {
+        Serial.print(IrReceiver.irparams.rawbuf[i] * 50);
+        if (i < len - 1) Serial.print(F(","));
+    }
+    Serial.println();
+    
+    // 2. Print the C++ Array format for hardcoding into Arduino sketches
     Serial.print(F("uint16_t rawData["));
     Serial.print(len - 1);
     Serial.print(F("] = {"));
-    
     for (uint16_t i = 1; i < len; i++) {
-        // IRremote stores ticks. Multiply by 50 to get real microseconds.
         Serial.print(IrReceiver.irparams.rawbuf[i] * 50);
         if (i < len - 1) Serial.print(F(", "));
     }
-    
     Serial.println(F("};"));
     Serial.println(F("---------------------------\n"));
     

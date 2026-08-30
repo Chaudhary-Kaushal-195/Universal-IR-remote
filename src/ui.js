@@ -7,7 +7,7 @@ export const templates = {
       <button class="remote-btn" id="TV_MUTE"><i data-lucide="volume-x"></i><span class="btn-label">Mute</span></button>
       <button class="remote-btn" id="TV_INPUT"><i data-lucide="log-in"></i><span class="btn-label">Input</span></button>
       
-      <div style="grid-column: span 3; padding: 20px 0;">
+      <div style="grid-column: span 3; display: flex; align-items: center; justify-content: center; padding: 2px 0;">
         <div class="dpad">
           <div></div><button class="remote-btn" id="TV_UP"><i data-lucide="chevron-up"></i></button><div></div>
           <button class="remote-btn" id="TV_LEFT"><i data-lucide="chevron-left"></i></button>
@@ -27,23 +27,23 @@ export const templates = {
     </div>
   `,
   ac: `
-    <div class="remote-grid">
+    <div class="remote-grid ac-grid">
       <div style="grid-column: span 3; display: flex; gap: 10px;">
-        <button class="remote-btn power" id="AC_POWER_ON" style="flex: 1; aspect-ratio: auto; padding: 15px; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--success); color: var(--success);">
-          <i data-lucide="power"></i><span class="btn-label" style="font-weight: bold;">ON</span>
+        <button class="remote-btn power" id="AC_POWER_ON" style="flex: 1; aspect-ratio: auto; padding: 10px; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--success); color: var(--success);">
+          <i data-lucide="power"></i><span class="btn-label" style="font-weight: bold; color: var(--success);">ON</span>
         </button>
-        <button class="remote-btn power" id="AC_POWER_OFF" style="flex: 1; aspect-ratio: auto; padding: 15px; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger);">
-          <i data-lucide="power"></i><span class="btn-label" style="font-weight: bold;">OFF</span>
+        <button class="remote-btn power" id="AC_POWER_OFF" style="flex: 1; aspect-ratio: auto; padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger);">
+          <i data-lucide="power"></i><span class="btn-label" style="font-weight: bold; color: var(--danger);">OFF</span>
         </button>
       </div>
       
-      <div style="grid-column: span 3; display: flex; align-items: center; justify-content: space-between; padding: 30px; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px solid var(--glass-border);">
-        <button class="remote-btn" id="AC_TEMP_DOWN"><i data-lucide="minus"></i></button>
-        <button class="remote-btn" id="AC_TEMP_DISPLAY" style="text-align: center; border: none; background: transparent; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <h1 id="ac-temp-display" style="font-size: 3.5rem; font-weight: 300; letter-spacing: -2px; margin: 0;">AC</h1>
-          <span style="color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Climate Control</span>
+      <div style="grid-column: span 3; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255,255,255,0.02); border-radius: 18px; border: 1px solid var(--glass-border);">
+        <button class="remote-btn" id="AC_TEMP_DOWN" style="width: 42px; height: 42px; border-radius: 50%; aspect-ratio: 1;"><i data-lucide="minus"></i></button>
+        <button class="remote-btn" id="AC_TEMP_DISPLAY" style="text-align: center; border: none; background: transparent; padding: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: auto;">
+          <h1 id="ac-temp-display" style="font-size: 2.6rem; font-weight: 300; letter-spacing: -1px; margin: 0; line-height: 1;">AC</h1>
+          <span style="color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">Climate Control</span>
         </button>
-        <button class="remote-btn" id="AC_TEMP_UP"><i data-lucide="plus"></i></button>
+        <button class="remote-btn" id="AC_TEMP_UP" style="width: 42px; height: 42px; border-radius: 50%; aspect-ratio: 1;"><i data-lucide="plus"></i></button>
       </div>
 
       <button class="remote-btn" id="AC_MODE"><i data-lucide="wind"></i><span class="btn-label">Mode</span></button>
