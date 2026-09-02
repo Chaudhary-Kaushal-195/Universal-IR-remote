@@ -1,13 +1,13 @@
 /*
   SUPER-BUFFER CLONER - ARDUINO UNO (Fixed Linker Error)
-  - Increased Buffer to 450 pulses (Shared RAM optimization)
+  - Increased Buffer to 750 pulses (Shared RAM optimization)
   - Better timing for long AC strings
 */
 
 #include <Arduino.h>
 
 // --- CRITICAL: High-Capacity Buffer ---
-#define RAW_BUFFER_LENGTH 450 
+#define RAW_BUFFER_LENGTH 750 
 #define IR_SEND_PIN 3
 #define IR_RECEIVE_PIN 7 
 
@@ -24,7 +24,7 @@ void setup() {
   IrSender.begin(ENABLE_LED_FEEDBACK); 
 
   Serial.println(F("HUB_READY"));
-  Serial.println(F("DEBUG: Super-Buffer Active (450 pulses)"));
+  Serial.println(F("DEBUG: Super-Buffer Active (750 pulses)"));
 }
 
 void loop() {
@@ -53,8 +53,15 @@ void loop() {
 }
 
 void handleStreamingRawSend() {
+  // CRITICAL FIX: Stop receiver to prevent timer interrupts from 
+  // corrupting the shared buffer or dropping Serial bytes during download!
+  IrReceiver.stop(); 
+
   int len = Serial.parseInt();
-  if (Serial.read() != ':') return;
+  if (Serial.read() != ':') {
+    IrReceiver.start();
+    return;
+  }
 
   // Use the shared buffer to save RAM
   uint16_t* sharedBuffer = (uint16_t*)IrReceiver.irparams.rawbuf;
@@ -62,12 +69,16 @@ void handleStreamingRawSend() {
 
   while (count < len - 1 && count < RAW_BUFFER_LENGTH) {
     sharedBuffer[count++] = (uint16_t)Serial.parseInt();
-    char next = Serial.peek();
-    if (next == ',' || next == '\r' || next == '\n') Serial.read();
-    if (next == '\n') break;
   }
 
   Serial.println(F("STATUS:REPLAYING_RAW_SIGNAL"));
+  
+  // Data Integrity Check:
+  Serial.print(F("DEBUG_FIRST_TWO:"));
+  Serial.print(sharedBuffer[0]);
+  Serial.print(F(","));
+  Serial.println(sharedBuffer[1]);
+
   digitalWrite(LED_BUILTIN, HIGH);
   
   IrSender.sendRaw(sharedBuffer, count, 38);
@@ -75,5 +86,5 @@ void handleStreamingRawSend() {
   digitalWrite(LED_BUILTIN, LOW);
   Serial.println(F("SEND_OK"));
   
-  IrReceiver.resume(); 
+  IrReceiver.start(); // Restart the timer interrupt
 }
