@@ -1,253 +1,401 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#050608"
-    android:padding="20dp">
+    android:background="#E0E0E0">
 
-    <!-- Header -->
-    <LinearLayout
-        android:id="@+id/header_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="20dp">
-
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/app_logo"
-            android:contentDescription="App Logo"
-            android:layout_marginEnd="10dp" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="UNIVERSAL HUB"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#818cf8"/>
-
-        <TextView
-            android:id="@+id/connection_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="📻 Demo Mode"
-            android:textSize="12sp"
-            android:textColor="#6366f1"
-            android:background="#1a6366f1"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="6dp" />
-    </LinearLayout>
-
-    <!-- Tabs -->
-    <LinearLayout
-        android:id="@+id/tabs_layout"
-        android:layout_below="@id/header_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="20dp">
-
-        <Button
-            android:id="@+id/tab_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="#6366f1"
-            android:textColor="#ffffff"
-            android:text="TV Remote"
-            android:textAllCaps="false"
-            android:layout_marginEnd="10dp"/>
-
-        <Button
-            android:id="@+id/tab_ac"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="#121217"
-            android:textColor="#94a3b8"
-            android:text="AC Remote"
-            android:textAllCaps="false" />
-    </LinearLayout>
-
-    <!-- Content Area (Scrollable to prevent clipping) -->
     <ScrollView
-        android:layout_below="@id/tabs_layout"
-        android:layout_above="@id/bottom_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
 
-        <FrameLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#b3121217"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <!-- ======================= -->
-            <!-- TV REMOTE LAYOUT        -->
-            <!-- ======================= -->
-            <GridLayout
-                android:id="@+id/layout_tv"
+            <!-- ============================================ -->
+            <!-- 1. APP BAR: Menu Icon & Account Icon         -->
+            <!-- ============================================ -->
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:columnCount="3"
-                android:alignmentMode="alignMargins"
-                android:visibility="visible">
+                android:paddingHorizontal="36dp"
+                android:paddingTop="25dp"
+                android:paddingBottom="16dp">
 
-                <!-- Row 1: Power, Mute, Input -->
-                <Button android:id="@+id/TV_POWER" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1aef4444" android:textColor="#ef4444" android:text="🔴 Pwr" />
-                <Button android:id="@+id/TV_MUTE" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔇 Mute" />
-                <Button android:id="@+id/TV_INPUT" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔌 Input" />
+                <!-- Menu Icon -->
+                <ImageView
+                    android:id="@+id/btn_menu"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_menu"
+                    android:tint="#424242"
+                    android:contentDescription="Menu"
+                    android:clickable="true"
+                    android:focusable="true" />
 
-                <!-- Row 2: D-PAD (Span 3) -->
-                <GridLayout
-                    android:layout_width="match_parent"
+                <!-- Person / Account Icon -->
+                <ImageView
+                    android:id="@+id/btn_person"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_person"
+                    android:tint="#424242"
+                    android:contentDescription="Account"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </RelativeLayout>
+
+            <!-- ============================================ -->
+            <!-- 2. WELCOME HOME BANNER                       -->
+            <!-- ============================================ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="36dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:id="@+id/text_welcome"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_columnSpan="3"
-                    android:columnCount="3"
-                    android:paddingVertical="10dp"
-                    android:layout_margin="4dp">
-                    
-                    <Space android:layout_width="0dp" android:layout_columnWeight="1" />
-                    <Button android:id="@+id/TV_UP" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="⬆️" />
-                    <Space android:layout_width="0dp" android:layout_columnWeight="1" />
+                    android:text="Welcome Home,"
+                    android:textSize="20sp"
+                    android:textColor="#424242"
+                    android:fontFamily="sans-serif" />
 
-                    <Button android:id="@+id/TV_LEFT" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="⬅️" />
-                    <Button android:id="@+id/TV_OK" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#6366f1" android:textColor="#ffffff" android:textStyle="bold" android:text="OK" />
-                    <Button android:id="@+id/TV_RIGHT" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="➡️" />
+                <TextView
+                    android:id="@+id/text_user_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kaushal"
+                    android:textSize="64sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:fontFamily="sans-serif-condensed"
+                    android:letterSpacing="0.02"
+                    android:lineSpacingMultiplier="0.9" />
+            </LinearLayout>
 
-                    <Space android:layout_width="0dp" android:layout_columnWeight="1" />
-                    <Button android:id="@+id/TV_DOWN" android:layout_width="0dp" android:layout_height="60dp" android:layout_columnWeight="1" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="⬇️" />
-                    <Space android:layout_width="0dp" android:layout_columnWeight="1" />
-                </GridLayout>
+            <!-- ============================================ -->
+            <!-- 3. DIVIDER                                   -->
+            <!-- ============================================ -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="36dp"
+                android:background="#CCCCCC"
+                android:layout_marginBottom="25dp" />
 
-                <!-- Row 3: Vol+, Back, CH+ -->
-                <Button android:id="@+id/TV_VOL_UP" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔊 Vol+" />
-                <Button android:id="@+id/TV_BACK" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="↩️ Back" />
-                <Button android:id="@+id/TV_CH_UP" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="📺 CH+" />
+            <!-- ============================================ -->
+            <!-- 4. SMART DEVICES HEADER                      -->
+            <!-- ============================================ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Smart Devices"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#424242"
+                android:fontFamily="sans-serif"
+                android:layout_marginHorizontal="36dp"
+                android:layout_marginBottom="16dp" />
 
-                <!-- Row 4: Vol-, Home, CH- -->
-                <Button android:id="@+id/TV_VOL_DOWN" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔉 Vol-" />
-                <Button android:id="@+id/TV_HOME" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🏠 Home" />
-                <Button android:id="@+id/TV_CH_DOWN" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="📺 CH-" />
-
-            </GridLayout>
-
-
-            <!-- ======================= -->
-            <!-- AC REMOTE LAYOUT        -->
-            <!-- ======================= -->
-            <GridLayout
-                android:id="@+id/layout_ac"
+            <!-- ============================================ -->
+            <!-- 5. 2x2 SMART DEVICES GRID                    -->
+            <!-- ============================================ -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:columnCount="3"
-                android:alignmentMode="alignMargins"
-                android:visibility="gone">
+                android:orientation="vertical"
+                android:paddingHorizontal="22dp"
+                android:paddingBottom="30dp">
 
-                <!-- Row 1: Power ON / OFF (Span 3 split into flex) -->
+                <!-- ROW 1: Smart Light & Smart AC -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_columnSpan="3"
                     android:orientation="horizontal"
-                    android:layout_margin="4dp">
-                    
-                    <Button android:id="@+id/AC_POWER_ON" android:layout_width="0dp" android:layout_height="70dp" android:layout_weight="1" android:backgroundTint="#1a22c55e" android:textColor="#22c55e" android:text="🟢 ON" android:layout_marginEnd="10dp"/>
-                    <Button android:id="@+id/AC_POWER_OFF" android:layout_width="0dp" android:layout_height="70dp" android:layout_weight="1" android:backgroundTint="#1aef4444" android:textColor="#ef4444" android:text="🔴 OFF" />
-                </LinearLayout>
+                    android:layout_marginBottom="14dp">
 
-                <!-- Row 2: Temp Control Area -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="140dp"
-                    android:layout_columnSpan="3"
-                    android:orientation="horizontal"
-                    android:background="#05ffffff"
-                    android:gravity="center"
-                    android:layout_margin="4dp">
-                    
-                    <Button android:id="@+id/AC_TEMP_DOWN" android:layout_width="60dp" android:layout_height="60dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="➖" />
-                    
-                    <LinearLayout
-                        android:id="@+id/AC_TEMP_DISPLAY_CONTAINER"
+                    <!-- 1. SMART LIGHT -->
+                    <RelativeLayout
+                        android:id="@+id/card_light"
                         android:layout_width="0dp"
-                        android:layout_height="match_parent"
+                        android:layout_height="190dp"
                         android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center"
+                        android:layout_marginHorizontal="10dp"
+                        android:background="@drawable/bg_device_card_on"
+                        android:paddingTop="25dp"
+                        android:paddingBottom="20dp"
+                        android:paddingHorizontal="16dp"
                         android:clickable="true"
                         android:focusable="true">
-                        
-                        <TextView android:id="@+id/ac_temp_display" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="24°" android:textSize="50sp" android:textColor="#ffffff" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CLIMATE CONTROL" android:textSize="10sp" android:textColor="#94a3b8" />
-                    </LinearLayout>
-                    
-                    <Button android:id="@+id/AC_TEMP_UP" android:layout_width="60dp" android:layout_height="60dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="➕" />
+
+                        <ImageView
+                            android:id="@+id/icon_light"
+                            android:layout_width="65dp"
+                            android:layout_height="65dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/ic_device_light"
+                            android:tint="#FFFFFF"
+                            android:contentDescription="Smart Light" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:id="@+id/text_light"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Smart\nLight"
+                                android:textSize="19sp"
+                                android:textStyle="bold"
+                                android:textColor="#FFFFFF"
+                                android:fontFamily="sans-serif-medium"
+                                android:lineSpacingExtra="2dp"
+                                android:paddingStart="4dp" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switch_light"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:rotation="270"
+                                android:checked="true" />
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <!-- 2. SMART AC -->
+                    <RelativeLayout
+                        android:id="@+id/card_ac"
+                        android:layout_width="0dp"
+                        android:layout_height="190dp"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="10dp"
+                        android:background="@drawable/bg_device_card_off"
+                        android:paddingTop="25dp"
+                        android:paddingBottom="20dp"
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:id="@+id/icon_ac"
+                            android:layout_width="65dp"
+                            android:layout_height="65dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/ic_device_ac"
+                            android:tint="#616161"
+                            android:contentDescription="Smart AC" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:id="@+id/text_ac"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Smart\nAC"
+                                android:textSize="19sp"
+                                android:textStyle="bold"
+                                android:textColor="#000000"
+                                android:fontFamily="sans-serif-medium"
+                                android:lineSpacingExtra="2dp"
+                                android:paddingStart="4dp" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switch_ac"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:rotation="270"
+                                android:checked="false" />
+                        </LinearLayout>
+                    </RelativeLayout>
                 </LinearLayout>
 
-                <!-- Row 3: Mode, Fan, Swing -->
-                <Button android:id="@+id/AC_MODE" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="💨 Mode" />
-                <Button android:id="@+id/AC_FAN" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🌀 Fan" />
-                <Button android:id="@+id/AC_SWING" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🔄 Swing" />
+                <!-- ROW 2: Smart TV & Smart Fan -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-                <!-- Row 4: Timer, Sleep, Light -->
-                <Button android:id="@+id/AC_TIMER" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="⏱️ Timer" />
-                <Button android:id="@+id/AC_SLEEP" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="🌙 Sleep" />
-                <Button android:id="@+id/AC_LIGHT" android:layout_width="0dp" android:layout_height="80dp" android:layout_columnWeight="1" android:layout_margin="4dp" android:backgroundTint="#1affffff" android:textColor="#ffffff" android:text="☀️ Light" />
+                    <!-- 3. SMART TV -->
+                    <RelativeLayout
+                        android:id="@+id/card_tv"
+                        android:layout_width="0dp"
+                        android:layout_height="190dp"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="10dp"
+                        android:background="@drawable/bg_device_card_off"
+                        android:paddingTop="25dp"
+                        android:paddingBottom="20dp"
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true">
 
-            </GridLayout>
-        </FrameLayout>
+                        <ImageView
+                            android:id="@+id/icon_tv"
+                            android:layout_width="65dp"
+                            android:layout_height="65dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/ic_device_tv"
+                            android:tint="#616161"
+                            android:contentDescription="Smart TV" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:id="@+id/text_tv"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Smart\nTV"
+                                android:textSize="19sp"
+                                android:textStyle="bold"
+                                android:textColor="#000000"
+                                android:fontFamily="sans-serif-medium"
+                                android:lineSpacingExtra="2dp"
+                                android:paddingStart="4dp" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switch_tv"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:rotation="270"
+                                android:checked="false" />
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <!-- 4. SMART FAN -->
+                    <RelativeLayout
+                        android:id="@+id/card_fan"
+                        android:layout_width="0dp"
+                        android:layout_height="190dp"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="10dp"
+                        android:background="@drawable/bg_device_card_off"
+                        android:paddingTop="25dp"
+                        android:paddingBottom="20dp"
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:id="@+id/icon_fan"
+                            android:layout_width="65dp"
+                            android:layout_height="65dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/ic_device_fan"
+                            android:tint="#616161"
+                            android:contentDescription="Smart Fan" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:id="@+id/text_fan"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Smart\nFan"
+                                android:textSize="19sp"
+                                android:textStyle="bold"
+                                android:textColor="#000000"
+                                android:fontFamily="sans-serif-medium"
+                                android:lineSpacingExtra="2dp"
+                                android:paddingStart="4dp" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switch_fan"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:rotation="270"
+                                android:checked="false" />
+                        </LinearLayout>
+                    </RelativeLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
     </ScrollView>
 
-    <!-- Settings Floating Button -->
-    <Button
-        android:id="@+id/settings_btn"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_above="@id/bottom_container"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:backgroundTint="#6366f1"
-        android:textColor="#ffffff"
-        android:textSize="24sp"
-        android:text="⚙️"
-        android:elevation="8dp"
-        android:stateListAnimator="@null" />
-
-    <!-- Bottom Learn Modal Area -->
+    <!-- ============================================ -->
+    <!-- FLOATING IN-APP POPUP NOTIFICATION BANNER    -->
+    <!-- ============================================ -->
     <LinearLayout
-        android:id="@+id/bottom_container"
-        android:layout_width="match_parent"
+        android:id="@+id/toast_banner"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:paddingTop="10dp">
-        
-        <TextView
-            android:id="@+id/learning_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="#94a3b8"
-            android:textSize="12sp"
-            android:layout_marginBottom="10dp"/>
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_toast_banner"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="11dp"
+        android:paddingBottom="11dp"
+        android:elevation="40dp"
+        android:translationZ="40dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
 
-        <Button
-            android:id="@+id/learn_btn"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:backgroundTint="#6366f1"
-            android:textColor="#ffffff"
-            android:text="🎤 Enter Learning Mode"
-            android:textAllCaps="false"/>
+        <TextView
+            android:id="@+id/toast_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📡"
+            android:textSize="15sp"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/toast_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Transmitting Signal..."
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="2"
+            android:ellipsize="end" />
     </LinearLayout>
 
-</RelativeLayout>
+</FrameLayout>

@@ -1,11 +1,41 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Theme.UniversalHub" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">#6366f1</item>
-        <item name="colorPrimaryVariant">#4f46e5</item>
-        <item name="colorOnPrimary">#ffffff</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">#050608</item>
+        <!-- Neutral Theme Colors -->
+        <item name="colorPrimary">#212121</item>
+        <item name="colorPrimaryVariant">#000000</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#424242</item>
+        
+        <!-- Status & Navigation bars -->
+        <item name="android:statusBarColor">#E0E0E0</item>
+        <item name="android:navigationBarColor">#E0E0E0</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">#E0E0E0</item>
+        
+        <!-- Default Typography -->
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="fontFamily">sans-serif</item>
+        
+        <!-- Disable automatic button tinting from MaterialComponents -->
+        <item name="backgroundTint">@null</item>
+        <item name="colorButtonNormal">@android:color/transparent</item>
+
+        <!-- Fully Transparent BottomSheet Container for Clean Rounded Corners -->
+        <item name="bottomSheetDialogTheme">@style/CustomBottomSheetDialogTheme</item>
+    </style>
+
+    <style name="CustomBottomSheetDialogTheme" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.55</item>
+    </style>
+
+    <style name="CustomBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="shapeAppearance">@null</item>
     </style>
 </resources>

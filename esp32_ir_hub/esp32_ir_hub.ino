@@ -79,6 +79,35 @@ void sendACRaw(uint16_t* rawArray, uint16_t rawLen) {
 
 
 
+bool parseAndScheduleRaw(uint16_t rawLen, const String& valuesStr) {
+  if (rawLen == 0 || valuesStr.length() == 0) return false;
+
+  if (globalRawArray != nullptr) {
+    delete[] globalRawArray;
+    globalRawArray = nullptr;
+  }
+
+  globalRawArray = new uint16_t[rawLen];
+  int count = 0;
+  int pos = 0;
+  int nextComma = 0;
+
+  while (nextComma >= 0 && count < rawLen) {
+    nextComma = valuesStr.indexOf(',', pos);
+    if (nextComma > 0) {
+      globalRawArray[count++] = valuesStr.substring(pos, nextComma).toInt();
+      pos = nextComma + 1;
+    } else {
+      globalRawArray[count++] = valuesStr.substring(pos).toInt();
+    }
+    if (count % 20 == 0) yield();
+  }
+
+  globalRawLen = count;
+  pendingTransmission = true;
+  return true;
+}
+
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
   Serial.println("\n--- NEW SIGNAL RECEIVED FROM CLOUD ---");
   
@@ -96,32 +125,9 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     uint16_t rawLen = doc["len"] | 0;
     String valuesStr = doc["values"] | "";
     
-    if (rawLen == 0 || valuesStr.length() == 0) return;
-
-    Serial.printf("Storing RAW signal (Length: %d)...\n", rawLen);
-
-    if (globalRawArray != nullptr) delete[] globalRawArray;
-    globalRawArray = new uint16_t[rawLen];
-    
-    int i = 0;
-    int pos = 0;
-    int nextComma = 0;
-
-    while (nextComma >= 0 && i < rawLen) {
-      nextComma = valuesStr.indexOf(',', pos);
-      if (nextComma > 0) {
-        globalRawArray[i++] = valuesStr.substring(pos, nextComma).toInt();
-        pos = nextComma + 1;
-      } else {
-        globalRawArray[i++] = valuesStr.substring(pos).toInt();
-      }
-      if (i % 20 == 0) yield(); 
+    if (parseAndScheduleRaw(rawLen, valuesStr)) {
+      Serial.printf("MQTT: RAW signal scheduled (%d pulses).\n", globalRawLen);
     }
-
-    globalRawLen = i;
-    pendingTransmission = true;
-    Serial.println("Signal stored and scheduled for transmission.");
-
   } else {
     // Handle standard NEC/Samsung/TV signals
     String protocolStr = doc["protocol"] | "NEC";
@@ -137,20 +143,18 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 }
 
 void reconnectMQTT() {
-  while (!client.connected()) {
-    if (WiFi.status() != WL_CONNECTED) {
-      Serial.print("Connecting to WiFi.");
-      WiFi.disconnect();
-      WiFi.begin(ssid, password);
-      while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-      }
-      Serial.println(" Connected!");
-      Serial.print("IP Address (Copy to Web): ");
-      Serial.println(WiFi.localIP());
-    }
+  static unsigned long lastAttempt = 0;
+  if (millis() - lastAttempt < 6000) return;
+  lastAttempt = millis();
 
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Connecting to WiFi in background...");
+    WiFi.disconnect();
+    WiFi.begin(ssid, password);
+    return;
+  }
+
+  if (!client.connected()) {
     Serial.print("Connecting to MQTT Broker...");
     String clientId = "ESP32Hub-" + String(random(0xffff), HEX);
     
@@ -160,10 +164,7 @@ void reconnectMQTT() {
       client.publish(mqtt_topic_tx, "STATUS:ONLINE", true);
       client.subscribe(mqtt_topic_rx);
     } else {
-      Serial.print(" FAILED, rc=");
-      Serial.print(client.state());
-      Serial.println(". Retrying in 5s...");
-      delay(5000);
+      Serial.printf(" FAILED (rc=%d), will retry.\n", client.state());
     }
   }
 }
@@ -182,13 +183,33 @@ void setup() {
   client.setServer(mqtt_server, 1883);
   client.setCallback(mqttCallback);
   client.setBufferSize(8192); // Required for receiving huge AC strings
+  
+  Serial.println(F("HUB_READY: USB Serial & MQTT Active (115200 baud)"));
 }
 
 void loop() {
-  if (!client.connected()) {
+  if (WiFi.status() == WL_CONNECTED && client.connected()) {
+    client.loop();
+  } else {
     reconnectMQTT();
   }
-  client.loop();
+
+  // --- USB SERIAL STREAMING TRANSMIT (ARDUINO / ESP32 UNIFIED PROTOCOL) ---
+  if (Serial.available() > 0) {
+    String serialLine = Serial.readStringUntil('\n');
+    serialLine.trim();
+    if (serialLine.startsWith("SEND_RAW:")) {
+      int firstColon = serialLine.indexOf(':');
+      int secondColon = serialLine.indexOf(':', firstColon + 1);
+      if (firstColon > 0 && secondColon > firstColon) {
+        int rawLen = serialLine.substring(firstColon + 1, secondColon).toInt();
+        String valuesStr = serialLine.substring(secondColon + 1);
+        if (parseAndScheduleRaw(rawLen, valuesStr)) {
+          Serial.println(F("STATUS:REPLAYING_RAW_SIGNAL"));
+        }
+      }
+    }
+  }
 
   // --- SAFE TRANSMISSION EXECUTION ---
   if (pendingTransmission) {
@@ -196,14 +217,9 @@ void loop() {
     
     Serial.println("\n--- EMITTING IR SIGNAL ---");
     Serial.printf("Buffer Size: %d pulses\n", globalRawLen);
-    for (int i = 0; i < globalRawLen; i++) {
-      Serial.print(globalRawArray[i]);
-      if (i < globalRawLen - 1) Serial.print(",");
-    }
-    Serial.println("\n--------------------------");
-
     sendACRaw(globalRawArray, globalRawLen);
     Serial.println("Emission Complete!");
+    Serial.println(F("SEND_OK"));
     
     delete[] globalRawArray;
     globalRawArray = nullptr;
@@ -218,43 +234,37 @@ void loop() {
     if (results.rawlen > 15) {
       Serial.println("\n--- IR SIGNAL CAPTURED ---");
     
-    // Print basic info (Protocol, Bits, Hex Code)
-    serialPrintUint64(results.value, HEX);
-    Serial.print(" (Protocol: ");
-    Serial.print(typeToString(results.decode_type));
-    Serial.print(", Bits: ");
-    Serial.print(results.bits);
-    Serial.println(")");
+      // Print basic info (Protocol, Bits, Hex Code)
+      serialPrintUint64(results.value, HEX);
+      Serial.print(" (Protocol: ");
+      Serial.print(typeToString(results.decode_type));
+      Serial.print(", Bits: ");
+      Serial.print(results.bits);
+      Serial.println(")");
 
-    // Print Raw Data (Microseconds) and build MQTT payload
-    Serial.print("Raw Data (");
-    Serial.print(results.rawlen);
-    Serial.print("): ");
+      String payload;
+      payload.reserve(results.rawlen * 6 + 30);
+      payload = "RAW:";
+      payload += results.rawlen;
+      payload += ":";
 
-    String payload;
-    // Pre-allocate memory to prevent heap fragmentation
-    payload.reserve(results.rawlen * 6 + 30);
-    payload = "RAW:";
-    payload += results.rawlen;
-    payload += ":";
-
-    for (uint16_t i = 1; i < results.rawlen; i++) {
-      uint32_t usecs = results.rawbuf[i] * kRawTick;
-      Serial.print(usecs);
-      payload += usecs;
-      if (i < results.rawlen - 1) {
-        Serial.print(",");
-        payload += ",";
+      for (uint16_t i = 1; i < results.rawlen; i++) {
+        uint32_t usecs = results.rawbuf[i] * kRawTick;
+        payload += usecs;
+        if (i < results.rawlen - 1) {
+          payload += ",";
+        }
       }
-    }
-    Serial.println("\n--------------------------");
-    
-    // Publish to the cloud so the web app can learn it over WiFi!
-    if (client.publish(mqtt_topic_tx, payload.c_str())) {
-      Serial.println("Published captured RAW signal to MQTT.");
-    } else {
-      Serial.println("Failed to publish to MQTT. Payload too large?");
-    }
+      
+      // Output clean single-line payload for USB Serial capture
+      Serial.println(payload);
+      
+      // Also publish to MQTT if connected
+      if (client.connected()) {
+        if (client.publish(mqtt_topic_tx, payload.c_str())) {
+          Serial.println("Published captured RAW signal to MQTT.");
+        }
+      }
     }
 
     irrecv.resume(); // Receive the next value

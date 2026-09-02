@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="28dp">
+
+        <!-- Drag Handle -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_drag_handle" />
+
+        <!-- Sheet Header -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Smart TV Controller"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#1E293B"
+                    android:fontFamily="sans-serif-medium" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Living Room • Universal IR"
+                    android:textSize="12sp"
+                    android:textColor="#64748B"
+                    android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/sheet_btn_close_tv"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:text="✕"
+                android:textColor="#64748B"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_sheet_btn"
+                android:stateListAnimator="@null" />
+        </RelativeLayout>
+
+        <!-- Device Profile Selector (Up to 5 IR Code Profiles) -->
+        <include layout="@layout/view_profile_selector" />
+
+        <!-- Top Action Row: Power, Mute, Input -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="18dp">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/TV_POWER"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="POWER"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#B91C1C"
+                android:background="@drawable/bg_sheet_btn_red"
+                android:stateListAnimator="@null" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/TV_MUTE"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="4dp"
+                android:text="Mute"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#1E293B"
+                android:background="@drawable/bg_sheet_btn"
+                android:textAllCaps="false"
+                android:stateListAnimator="@null" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/TV_INPUT"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="Source"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#1E293B"
+                android:background="@drawable/bg_sheet_btn"
+                android:textAllCaps="false"
+                android:stateListAnimator="@null" />
+        </LinearLayout>
+
+        <!-- D-Pad Navigation & OK Center -->
+        <FrameLayout
+            android:layout_width="210dp"
+            android:layout_height="210dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bg_temp_card"
+            android:layout_marginBottom="18dp">
+
+            <!-- UP -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/TV_UP"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="top|center_horizontal"
+                android:layout_marginTop="10dp"
+                android:text="▲"
+                android:textColor="#1E293B"
+                android:textSize="14sp"
+                android:background="@drawable/bg_circle_step_btn"
+                android:stateListAnimator="@null" />
+
+            <!-- DOWN -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/TV_DOWN"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:text="▼"
+                android:textColor="#1E293B"
+                android:textSize="14sp"
+                android:background="@drawable/bg_circle_step_btn"
+                android:stateListAnimator="@null" />
+
+            <!-- LEFT -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/TV_LEFT"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="10dp"
+                android:text="◀"
+                android:textColor="#1E293B"
+                android:textSize="14sp"
+                android:background="@drawable/bg_circle_step_btn"
+                android:stateListAnimator="@null" />
+
+            <!-- RIGHT -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/TV_RIGHT"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="10dp"
+                android:text="▶"
+                android:textColor="#1E293B"
+                android:textSize="14sp"
+                android:background="@drawable/bg_circle_step_btn"
+                android:stateListAnimator="@null" />
+
+            <!-- CENTER OK -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/TV_OK"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:text="OK"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:background="@drawable/bg_sheet_btn_active"
+                android:stateListAnimator="@null" />
+        </FrameLayout>
+
+        <!-- Volume & Channel Rockers + Navigation Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <!-- Volume Rocker Pill -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="115dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
+                android:background="@drawable/bg_temp_card"
+                android:gravity="center">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/TV_VOL_UP"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="+"
+                    android:textColor="#1E293B"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:background="@android:color/transparent"
+                    android:stateListAnimator="@null" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="VOL"
+                    android:textColor="#64748B"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/TV_VOL_DOWN"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="—"
+                    android:textColor="#1E293B"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:background="@android:color/transparent"
+                    android:stateListAnimator="@null" />
+            </LinearLayout>
+
+            <!-- Center Actions: Back & Home -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="115dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginEnd="8dp">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/TV_BACK"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="6dp"
+                    android:text="Back"
+                    android:textColor="#1E293B"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_sheet_btn"
+                    android:textAllCaps="false"
+                    android:stateListAnimator="@null" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/TV_HOME"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="Home"
+                    android:textColor="#1E293B"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_sheet_btn"
+                    android:textAllCaps="false"
+                    android:stateListAnimator="@null" />
+            </LinearLayout>
+
+            <!-- Channel Rocker Pill -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="115dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/bg_temp_card"
+                android:gravity="center">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/TV_CH_UP"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="▲"
+                    android:textColor="#1E293B"
+                    android:textSize="14sp"
+                    android:background="@android:color/transparent"
+                    android:stateListAnimator="@null" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CH"
+                    android:textColor="#64748B"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/TV_CH_DOWN"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="▼"
+                    android:textColor="#1E293B"
+                    android:textSize="14sp"
+                    android:background="@android:color/transparent"
+                    android:stateListAnimator="@null" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

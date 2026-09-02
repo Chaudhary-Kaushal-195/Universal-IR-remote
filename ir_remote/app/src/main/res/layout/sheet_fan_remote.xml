@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="28dp">
+
+        <!-- Drag Handle -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_drag_handle" />
+
+        <!-- Sheet Header -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Smart Fan Controller"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#1E293B"
+                    android:fontFamily="sans-serif-medium" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ceiling BLDC • Universal IR"
+                    android:textSize="12sp"
+                    android:textColor="#64748B"
+                    android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/sheet_btn_close_fan"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:text="✕"
+                android:textColor="#64748B"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_sheet_btn"
+                android:stateListAnimator="@null" />
+        </RelativeLayout>
+
+        <!-- Device Profile Selector (Up to 5 IR Code Profiles) -->
+        <include layout="@layout/view_profile_selector" />
+
+        <!-- Fan Power Toggle -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/FAN_POWER"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="TOGGLE FAN POWER"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_sheet_btn_active"
+            android:layout_marginBottom="16dp"
+            android:stateListAnimator="@null" />
+
+        <!-- Speeds: 1, 2, 3, Turbo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SPEED PRESETS"
+            android:textColor="#64748B"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="14dp">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/FAN_SPEED_1"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="1"
+                android:textColor="#1E293B"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_sheet_btn"
+                android:stateListAnimator="@null" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/FAN_SPEED_2"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="2"
+                android:textColor="#1E293B"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_sheet_btn"
+                android:stateListAnimator="@null" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/FAN_SPEED_3"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="3"
+                android:textColor="#1E293B"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_sheet_btn"
+                android:stateListAnimator="@null" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/FAN_SPEED_4"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="Turbo"
+                android:textColor="#1E293B"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_sheet_btn"
+                android:stateListAnimator="@null" />
+        </LinearLayout>
+
+        <!-- Swing & Timer -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/FAN_SWING"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="Oscillation"
+                android:textColor="#1E293B"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_sheet_btn"
+                android:textAllCaps="false"
+                android:stateListAnimator="@null" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/FAN_TIMER"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="Timer"
+                android:textColor="#1E293B"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_sheet_btn"
+                android:textAllCaps="false"
+                android:stateListAnimator="@null" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_sheet"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="28dp">
+
+    <!-- Top Drag Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_drag_handle"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Header Row: Title + Close Button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hub Settings"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#1E293B"
+                android:fontFamily="sans-serif-medium" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MQTT Hub &amp; IR Data Configuration"
+                android:textSize="12sp"
+                android:textColor="#64748B"
+                android:fontFamily="sans-serif" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_close_settings"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="✕"
+            android:textColor="#64748B"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_sheet_btn"
+            android:stateListAnimator="@null" />
+    </RelativeLayout>
+
+    <!-- IR Programming Mode Toggle Card -->
+    <LinearLayout
+        android:id="@+id/card_learn_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_temp_card"
+        android:padding="16dp"
+        android:layout_marginBottom="18dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="IR Programming Mode"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#1E293B"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tap any remote button to capture signal"
+                android:textSize="12sp"
+                android:textColor="#64748B"
+                android:fontFamily="sans-serif"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_learn_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Phone Internal IR Blaster Card -->
+    <LinearLayout
+        android:id="@+id/card_phone_ir"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_temp_card"
+        android:padding="16dp"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phone Built-in IR Blaster"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#1E293B"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/text_phone_ir_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Checking..."
+                android:textSize="12sp"
+                android:textColor="#64748B"
+                android:fontFamily="sans-serif"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/badge_phone_ir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:background="@drawable/bg_sheet_btn"
+            android:text="Not Detected"
+            android:textColor="#64748B"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- USB Hardware (Arduino Uno / ESP32) Card -->
+    <LinearLayout
+        android:id="@+id/card_usb_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_temp_card"
+        android:padding="16dp"
+        android:layout_marginBottom="18dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="USB Hardware Link"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#1E293B"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/text_usb_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Arduino Uno / ESP32 (Disconnected)"
+                android:textSize="12sp"
+                android:textColor="#64748B"
+                android:fontFamily="sans-serif"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_connect_usb"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:paddingHorizontal="14dp"
+            android:background="@drawable/bg_sheet_btn"
+            android:text="Connect"
+            android:textAllCaps="false"
+            android:textColor="#1E293B"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+    <!-- 1. Hub Topic ID Field -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MQTT HUB TOPIC ID"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="#64748B"
+        android:letterSpacing="0.06"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/input_hub_id"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_sheet_btn"
+        android:textColor="#1E293B"
+        android:textColorHint="#94A3B8"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:hint="e.g. kaushal-ir-hub-97"
+        android:paddingHorizontal="16dp"
+        android:singleLine="true"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 2. ESP32 Local IP Field -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ESP32 LOCAL IP (OPTIONAL)"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="#64748B"
+        android:letterSpacing="0.06"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/input_esp32_ip"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_sheet_btn"
+        android:textColor="#1E293B"
+        android:textColorHint="#94A3B8"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:hint="e.g. 192.168.1.100"
+        android:paddingHorizontal="16dp"
+        android:singleLine="true"
+        android:layout_marginBottom="20dp" />
+
+    <!-- 3. Save Configuration Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_save_config"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="@drawable/bg_sheet_btn_active"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:text="Save Configuration"
+        android:textAllCaps="false"
+        android:fontFamily="sans-serif-medium"
+        android:stateListAnimator="@null"
+        android:layout_marginBottom="12dp" />
+
+    <!-- 4. Backup & Restore Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_export_json"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_sheet_btn"
+            android:textColor="#1E293B"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:text="Export Backup"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginEnd="6dp"
+            android:stateListAnimator="@null" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_import_json"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_sheet_btn"
+            android:textColor="#1E293B"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:text="Import Backup"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginStart="6dp"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity.ktx)
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    implementation("com.github.mik3y:usb-serial-for-android:3.8.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
