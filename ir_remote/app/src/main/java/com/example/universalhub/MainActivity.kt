@@ -740,6 +740,52 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Network Hub (ESP32 via Wi-Fi) Link
+        val textNetworkStatus = view.findViewById<TextView>(R.id.text_network_status)
+        val btnConnectNetwork = view.findViewById<Button>(R.id.btn_connect_network)
+
+        fun updateNetworkUi() {
+            if (isEsp32MqttOnline) {
+                textNetworkStatus?.text = "ESP32 Hub Online via Wi-Fi (HiveMQ)"
+                btnConnectNetwork?.text = "Disconnect"
+            } else if (mqttClient != null && mqttClient!!.isConnected) {
+                textNetworkStatus?.text = "Cloud Broker Ready (Waiting for ESP32)"
+                btnConnectNetwork?.text = "Reconnect"
+            } else {
+                textNetworkStatus?.text = "ESP32 Wi-Fi (Disconnected)"
+                btnConnectNetwork?.text = "Connect"
+            }
+        }
+        updateNetworkUi()
+
+        btnConnectNetwork?.setOnClickListener {
+            triggerVibration()
+            if (mqttClient != null && mqttClient!!.isConnected) {
+                bgExecutor.execute {
+                    try { mqttClient?.disconnect() } catch (e: Exception) {}
+                    isEsp32MqttOnline = false
+                    runOnUiThread {
+                        updateNetworkUi()
+                        updateHardwareStatusUI()
+                        showModernPopup("Network Disconnected", "ℹ️")
+                    }
+                }
+            } else {
+                showModernPopup("Connecting to ESP32 via Network...", "🌐")
+                setupMQTT { success ->
+                    runOnUiThread {
+                        updateNetworkUi()
+                        updateHardwareStatusUI()
+                        if (success) {
+                            showModernPopup("Connected to Network Broker! 🌐", "✅")
+                        } else {
+                            showModernPopup("Network Connection Failed", "❌")
+                        }
+                    }
+                }
+            }
+        }
+
         // IR Programming Mode Toggle
         switchLearnMode.isChecked = isLearning
         switchLearnMode.setOnCheckedChangeListener { _, isChecked ->
@@ -855,7 +901,7 @@ class MainActivity : AppCompatActivity() {
     // ========================================================
     // MQTT & TRANSMISSION & CAPTURE
     // ========================================================
-    private fun setupMQTT() {
+    private fun setupMQTT(onComplete: ((Boolean) -> Unit)? = null) {
         bgExecutor.execute {
             try {
                 if (mqttClient != null && mqttClient!!.isConnected) {
@@ -900,8 +946,10 @@ class MainActivity : AppCompatActivity() {
                 })
 
                 client.connect(connOpts)
+                onComplete?.invoke(true)
             } catch (e: Exception) {
                 Log.e("MQTT", "Error connecting", e)
+                onComplete?.invoke(false)
             }
         }
     }
@@ -1299,6 +1347,19 @@ class MainActivity : AppCompatActivity() {
             .setTitle("📡 Hardware Status & Diagnostics")
             .setMessage(msg)
             .setPositiveButton("OK", null)
+            .setNegativeButton(if (mqttClient?.isConnected == true) "Reconnect Network" else "Connect via Network") { _, _ ->
+                showModernPopup("Connecting to ESP32 via Network...", "🌐")
+                setupMQTT { success ->
+                    runOnUiThread {
+                        updateHardwareStatusUI()
+                        if (success) {
+                            showModernPopup("Connected to Network Broker! 🌐", "✅")
+                        } else {
+                            showModernPopup("Network Connection Failed", "❌")
+                        }
+                    }
+                }
+            }
             .setNeutralButton("Re-Scan USB") { _, _ ->
                 usbSerialManager.connect(userInitiated = true)
                 updateHardwareStatusUI()
