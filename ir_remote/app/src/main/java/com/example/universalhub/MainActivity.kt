@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     private var broker = "tcp://broker.hivemq.com:1883"
     private val clientId = "AndroidAppClient_" + System.currentTimeMillis()
     private var hubId = "kaushal-ir-hub-97"
+    private var hubPassword = "TestKaushalSecure2026"
     private var topicTx = "universalo-hub/$hubId/rx"
     private var topicRx = "universalo-hub/$hubId/tx"
 
@@ -133,6 +134,7 @@ class MainActivity : AppCompatActivity() {
 
         // Load configuration and states
         hubId = sharedPref.getString("hubId", "kaushal-ir-hub-97") ?: "kaushal-ir-hub-97"
+        hubPassword = sharedPref.getString("hub_password", "TestKaushalSecure2026") ?: "TestKaushalSecure2026"
         isLightOn = sharedPref.getBoolean("state_light", true)
         isAcOn = sharedPref.getBoolean("state_ac", false)
         isTvOn = sharedPref.getBoolean("state_tv", false)
@@ -196,10 +198,10 @@ class MainActivity : AppCompatActivity() {
             showHardwareStatusDialog()
         }
 
-        // Person -> Settings
+        // Person -> User Account Security & Login
         btnPerson.setOnClickListener {
             triggerVibration()
-            showSettingsDialog()
+            showUserAccountSecurityDialog()
         }
 
         // 1. SMART LIGHT
@@ -700,6 +702,7 @@ class MainActivity : AppCompatActivity() {
         val textUsbStatus = view.findViewById<TextView>(R.id.text_usb_status)
         val btnConnectUsb = view.findViewById<Button>(R.id.btn_connect_usb)
         val hubIdInput = view.findViewById<EditText>(R.id.input_hub_id)
+        val hubPassInput = view.findViewById<EditText>(R.id.input_hub_password)
         val ipInput = view.findViewById<EditText>(R.id.input_esp32_ip)
         val btnClose = view.findViewById<View>(R.id.btn_close_settings)
         val btnSave = view.findViewById<Button>(R.id.btn_save_config)
@@ -707,6 +710,7 @@ class MainActivity : AppCompatActivity() {
         val btnImport = view.findViewById<Button>(R.id.btn_import_json)
 
         hubIdInput.setText(hubId)
+        hubPassInput?.setText(hubPassword)
         ipInput.setText(sharedPref.getString("esp32Ip", ""))
 
         val textPhoneIrStatus = view.findViewById<TextView>(R.id.text_phone_ir_status)
@@ -817,8 +821,13 @@ class MainActivity : AppCompatActivity() {
                 topicRx = "universalo-hub/$hubId/tx"
                 sharedPref.edit().putString("hubId", hubId).apply()
             }
+            val newPass = hubPassInput?.text?.toString()?.trim() ?: ""
+            if (newPass.isNotEmpty()) {
+                hubPassword = newPass
+                sharedPref.edit().putString("hub_password", hubPassword).apply()
+            }
             sharedPref.edit().putString("esp32Ip", ipInput.text.toString().trim()).apply()
-            showModernPopup("Settings Saved", "💾")
+            showModernPopup("Settings Saved & Security Updated", "💾")
             setupMQTT()
             bottomSheet.dismiss()
         }
@@ -1033,6 +1042,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleRemoteClick(buttonId: String) {
+        val isLoggedIn = sharedPref.getBoolean("is_logged_in", true)
+        val hasOwner = sharedPref.getString("owner_username", null) != null
+        if (hasOwner && !isLoggedIn) {
+            triggerVibration()
+            showModernPopup("🔒 Remote is Locked! Tap Account icon to log in", "⛔")
+            showUserAccountSecurityDialog()
+            return
+        }
+
         triggerVibration()
         val readableName = buttonId.replace("_", " ")
         val category = profileManager.getCategoryFromButtonId(buttonId)
@@ -1093,9 +1111,12 @@ class MainActivity : AppCompatActivity() {
         if (mqttClient != null && mqttClient!!.isConnected) {
             bgExecutor.execute {
                 try {
-                    val message = MqttMessage(savedSignal.toByteArray())
+                    val jsonObj = JSONObject(savedSignal).apply {
+                        put("auth", hubPassword)
+                    }
+                    val message = MqttMessage(jsonObj.toString().toByteArray())
                     mqttClient?.publish(topicTx, message)
-                    Log.d("MQTT", "Dispatched: $savedSignal")
+                    Log.d("MQTT", "Dispatched (Authorized): ${jsonObj.toString()}")
                 } catch (e: Exception) {
                     Log.e("MQTT", "Failed to send MQTT message", e)
                 }
@@ -1413,6 +1434,98 @@ class MainActivity : AppCompatActivity() {
                 updateHardwareStatusUI()
             }
             .show()
+    }
+
+    private fun showUserAccountSecurityDialog() {
+        val ownerName = sharedPref.getString("owner_username", null)
+        val isLoggedIn = sharedPref.getBoolean("is_logged_in", true)
+
+        if (ownerName == null) {
+            // 1. SIGN UP (Create Owner Account)
+            val layout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(60, 30, 60, 10)
+            }
+            val userInput = EditText(this).apply {
+                hint = "Owner Username (e.g. Kaushal)"
+                setText("Kaushal")
+            }
+            val passInput = EditText(this).apply {
+                hint = "Set Account Password"
+                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            }
+            val hubKeyInput = EditText(this).apply {
+                hint = "Set Secret Hub Password (ESP32 Key)"
+                setText(hubPassword)
+                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            }
+            layout.addView(userInput)
+            layout.addView(passInput)
+            layout.addView(hubKeyInput)
+
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("👤 Create Owner Security Account")
+                .setMessage("Lock your device and cloned codes so unauthorized users cannot control your appliances.")
+                .setView(layout)
+                .setPositiveButton("Sign Up & Protect") { _, _ ->
+                    val user = userInput.text.toString().trim()
+                    val pass = passInput.text.toString().trim()
+                    val hubKey = hubKeyInput.text.toString().trim()
+                    if (user.isNotEmpty() && pass.isNotEmpty()) {
+                        sharedPref.edit()
+                            .putString("owner_username", user)
+                            .putString("owner_password", pass)
+                            .putString("hub_password", if (hubKey.isNotEmpty()) hubKey else hubPassword)
+                            .putBoolean("is_logged_in", true)
+                            .apply()
+                        if (hubKey.isNotEmpty()) hubPassword = hubKey
+                        showModernPopup("Owner Account Created! Protected 🔒", "✅")
+                    } else {
+                        showModernPopup("Please enter both username and password", "⚠️")
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        } else if (!isLoggedIn) {
+            // 2. LOGIN (Unlock Remote)
+            val layout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(60, 30, 60, 10)
+            }
+            val passInput = EditText(this).apply {
+                hint = "Enter Password to Unlock"
+                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            }
+            layout.addView(passInput)
+
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("🔒 Remote Locked: $ownerName")
+                .setMessage("Enter your password to unlock the IR remote and control appliances.")
+                .setView(layout)
+                .setPositiveButton("Log In / Unlock") { _, _ ->
+                    val enteredPass = passInput.text.toString().trim()
+                    val savedPass = sharedPref.getString("owner_password", "")
+                    if (enteredPass == savedPass) {
+                        sharedPref.edit().putBoolean("is_logged_in", true).apply()
+                        showModernPopup("Welcome back, $ownerName! Unlocked 🔓", "✅")
+                    } else {
+                        showModernPopup("Incorrect password! Access denied ⛔", "❌")
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        } else {
+            // 3. LOGGED IN STATUS & LOGOUT / LOCK
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("👤 Owner Account: $ownerName")
+                .setMessage("🟢 Status: Logged In & Authorized\n🔑 Hub Password: Active ($hubPassword)\n📦 Cloned Codes: Secured on this Device")
+                .setPositiveButton("OK", null)
+                .setNegativeButton("Lock / Log Out") { _, _ ->
+                    sharedPref.edit().putBoolean("is_logged_in", false).apply()
+                    showModernPopup("Remote Locked! Login required to control", "🔒")
+                }
+                .show()
+        }
     }
 
     private fun setupUsbSerial() {

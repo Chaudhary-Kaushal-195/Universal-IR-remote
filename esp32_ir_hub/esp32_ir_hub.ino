@@ -23,6 +23,7 @@ unsigned long wifiConnectStartTime = 0;
 const char* ssid = "Galaxy M35 5G A733";
 const char* password = "TestKaushal";
 const char* mqtt_server = "broker.hivemq.com";
+const char* hub_password = "TestKaushalSecure2026"; // Secret Hub Security Key
 const char* mqtt_topic_rx = "universalo-hub/kaushal-ir-hub-97/rx"; // ESP32 Listens here
 const char* mqtt_topic_tx = "universalo-hub/kaushal-ir-hub-97/tx"; // ESP32 Publishes status here
 
@@ -123,12 +124,24 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     return;
   }
 
+  String authPass = doc["auth"] | "";
   String cmdStr = doc["cmd"] | "";
+
   if (cmdStr == "PING") {
     Serial.println("STATUS:PING_RECEIVED -> Replying ONLINE");
     client.publish(mqtt_topic_tx, "STATUS:ONLINE", true);
     return;
-  } else if (cmdStr == "LEARN_START") {
+  }
+
+  // --- HARDWARE SECURITY GATEWAY ---
+  // Reject any action or transmission unless the client provides the correct secret hub password
+  if (authPass != hub_password) {
+    Serial.printf("⛔ [SECURITY ALERT] Unauthorized command rejected! Invalid auth: '%s'\n", authPass.c_str());
+    client.publish(mqtt_topic_tx, "STATUS:SECURITY_UNAUTHORIZED_BLOCKED");
+    return;
+  }
+
+  if (cmdStr == "LEARN_START") {
     isLearningMode = true;
     irrecv.resume();
     Serial.println("STATUS:LEARNING_ACTIVE");

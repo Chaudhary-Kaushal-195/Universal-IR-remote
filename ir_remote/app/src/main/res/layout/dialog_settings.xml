@@ -280,6 +280,33 @@
         android:singleLine="true"
         android:layout_marginBottom="16dp" />
 
+    <!-- 2. Hub Security Password Field -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HUB SECURITY PASSWORD"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="#64748B"
+        android:letterSpacing="0.06"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/input_hub_password"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_sheet_btn"
+        android:textColor="#1E293B"
+        android:textColorHint="#94A3B8"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:hint="Secret Hardware Password"
+        android:inputType="textPassword"
+        android:paddingHorizontal="16dp"
+        android:singleLine="true"
+        android:layout_marginBottom="16dp" />
+
     <!-- 2. ESP32 Local IP Field -->
     <TextView
         android:layout_width="wrap_content"

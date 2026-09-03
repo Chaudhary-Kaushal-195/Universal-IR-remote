@@ -276,6 +276,9 @@ export function handleStatusMessages(line) {
     state.isDeviceOnline = false;
     updateHubWifiBadge('OFF');
     updateStatusIndicator();
+  } else if (line === "STATUS:SECURITY_UNAUTHORIZED_BLOCKED") {
+    console.error("%c⛔ [SECURITY ALERT] Command Rejected by ESP32: Incorrect Hub Password!", "color: #ef4444; font-weight: bold;");
+    alert("⛔ Security Alert: ESP32 rejected this command! Hub Password is incorrect.");
   } else if (line.startsWith("STATUS:WIFI_ENABLED")) {
     console.log("%c🌐 [HUB] WiFi Radio Activated on ESP32", "color: #3b82f6; font-weight: bold;");
     updateHubWifiBadge('CONNECTING');
@@ -540,13 +543,14 @@ export async function fireSignal(buttonId) {
   if (mqttClient && mqttClient.connected) {
     flashStatus('fire');
     const wifiPayload = JSON.stringify({
+      auth: state.hubPassword || localStorage.getItem('hubPassword') || 'TestKaushalSecure2026',
       type: 'raw',
       len: parseInt(signal.len),
       values: signal.values
     });
     mqttClient.publish(MQTT_TOPIC_TX, wifiPayload);
     transmitted = true;
-    console.log("%c🌐 [MQTT TX] Dispatched via Wi-Fi", "color: #3b82f6; font-weight: bold;");
+    console.log("%c🌐 [MQTT TX] Dispatched via Wi-Fi (Authorized)", "color: #3b82f6; font-weight: bold;");
   }
 
   // 3. Fallback Demo flash if neither physical bridge is connected

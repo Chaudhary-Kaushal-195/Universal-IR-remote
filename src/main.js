@@ -214,6 +214,22 @@ function setupEventListeners() {
     }
   });
 
+  // Hub Security Password Configuration
+  const inputHubPassword = document.getElementById('input-hub-password');
+  const btnSaveHubPassword = document.getElementById('btn-save-hub-password');
+  if (inputHubPassword) {
+    inputHubPassword.value = state.hubPassword || localStorage.getItem('hubPassword') || 'TestKaushalSecure2026';
+  }
+  if (btnSaveHubPassword) {
+    btnSaveHubPassword.addEventListener('click', () => {
+      const val = inputHubPassword ? inputHubPassword.value.trim() : '';
+      if (!val) return alert("Please enter a valid password.");
+      state.hubPassword = val;
+      localStorage.setItem('hubPassword', val);
+      alert("✅ Hub Security Password Saved! All commands are now signed with this key.");
+    });
+  }
+
   // Supabase Authentication Handling
   loginBtn.addEventListener('click', async () => {
     if (!isSupabaseEnabled) return alert("Cloud sync is disabled. Add a valid Supabase config and set VITE_SUPABASE_ENABLED=true to log in.");

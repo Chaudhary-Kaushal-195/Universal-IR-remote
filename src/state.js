@@ -17,7 +17,8 @@ export const state = {
   lastCapturedSignal: null,
   lastTransmittedSignal: null,
   lastTelemetry: null,
-  connectedBoardName: 'None'
+  connectedBoardName: 'None',
+  hubPassword: localStorage.getItem('hubPassword') || 'TestKaushalSecure2026'
 };
 
 // Global Config
