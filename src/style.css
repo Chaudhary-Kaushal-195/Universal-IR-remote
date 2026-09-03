@@ -683,7 +683,16 @@ button.remote-btn.mi-wheel-dir:focus,
 }
 .mi-ac-power-btn.power-btn-off svg { color: var(--card-red-border); }
 
-/* Row 2 & Row 4: 3-Column Tile Rows */
+/* Row 2: 4-Column Tile Row (Speed, Swing, Light ON, Light OFF) */
+.mi-ac-four-col-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  height: clamp(38px, 5.5vh, 44px);
+  flex-shrink: 0;
+}
+
+/* Row 4: 3-Column Tile Row (Timer, Sleep, Eco) */
 .mi-ac-three-col-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -732,13 +741,27 @@ button.remote-btn.mi-wheel-dir:focus,
 }
 .mi-ac-tile-btn.swing-btn svg { color: var(--card-teal-border); }
 
-.mi-ac-tile-btn.light-btn {
+.mi-ac-tile-btn.light-btn,
+.mi-ac-tile-btn.light-on-btn {
   background: var(--card-amber-bg) !important;
   border-color: var(--card-amber-border) !important;
   box-shadow: 2px 2.5px 0px var(--card-amber-border) !important;
   color: var(--card-amber-text) !important;
+  font-size: 0.68rem;
+  padding: 0 2px;
 }
-.mi-ac-tile-btn.light-btn svg { color: var(--card-amber-border); }
+.mi-ac-tile-btn.light-btn svg,
+.mi-ac-tile-btn.light-on-btn svg { color: var(--card-amber-border); width: 14px; height: 14px; }
+
+.mi-ac-tile-btn.light-off-btn {
+  background: #f1f5f9 !important;
+  border-color: #64748b !important;
+  box-shadow: 2px 2.5px 0px #64748b !important;
+  color: #334155 !important;
+  font-size: 0.68rem;
+  padding: 0 2px;
+}
+.mi-ac-tile-btn.light-off-btn svg { color: #64748b; width: 14px; height: 14px; }
 
 .mi-ac-tile-btn.timer-btn {
   background: var(--card-amber-bg) !important;

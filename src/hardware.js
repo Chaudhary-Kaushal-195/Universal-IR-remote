@@ -454,7 +454,10 @@ export async function scanHardware() {
 }
 
 export async function fireSignal(buttonId) {
-  const signal = state.learnedCodes[buttonId];
+  let signal = state.learnedCodes[buttonId];
+  if (!signal && (buttonId === 'AC_LIGHT_ON' || buttonId === 'AC_LIGHT_OFF')) {
+    signal = state.learnedCodes['AC_LIGHT'];
+  }
   if (!signal) {
     alert("This button hasn't been programmed yet!");
     return;

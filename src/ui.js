@@ -100,8 +100,8 @@ export const templates = {
         </button>
       </div>
 
-      <!-- Row 2: Speed | Swing | Light -->
-      <div class="mi-ac-three-col-row">
+      <!-- Row 2: Speed | Swing | Light ON | Light OFF -->
+      <div class="mi-ac-four-col-row">
         <button class="remote-btn mi-ac-tile-btn fan-btn" id="AC_FAN">
           <i data-lucide="fan"></i>
           <span>Speed</span>
@@ -110,9 +110,13 @@ export const templates = {
           <i data-lucide="refresh-cw"></i>
           <span>Swing</span>
         </button>
-        <button class="remote-btn mi-ac-tile-btn light-btn" id="AC_LIGHT">
+        <button class="remote-btn mi-ac-tile-btn light-on-btn" id="AC_LIGHT_ON" title="Display Light ON">
           <i data-lucide="sun"></i>
-          <span>Light</span>
+          <span>Light ON</span>
+        </button>
+        <button class="remote-btn mi-ac-tile-btn light-off-btn" id="AC_LIGHT_OFF" title="Display Light OFF">
+          <i data-lucide="sun-dim"></i>
+          <span>Light OFF</span>
         </button>
       </div>
 
@@ -139,7 +143,7 @@ export const templates = {
           <i data-lucide="moon"></i>
           <span>Sleep</span>
         </button>
-        <button class="remote-btn mi-ac-tile-btn eco-btn" id="AC_LIGHT" title="Eco Mode">
+        <button class="remote-btn mi-ac-tile-btn eco-btn" id="AC_ECO" title="Eco Mode">
           <i data-lucide="sparkles"></i>
           <span>Eco</span>
         </button>
