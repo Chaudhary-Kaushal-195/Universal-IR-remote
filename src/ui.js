@@ -2,57 +2,148 @@ import { state } from './state.js';
 
 export const templates = {
   tv: `
-    <div class="remote-grid">
-      <button class="remote-btn power" id="TV_POWER"><i data-lucide="power"></i><span class="btn-label">Power</span></button>
-      <button class="remote-btn" id="TV_MUTE"><i data-lucide="volume-x"></i><span class="btn-label">Mute</span></button>
-      <button class="remote-btn" id="TV_INPUT"><i data-lucide="log-in"></i><span class="btn-label">Input</span></button>
-      
-      <div style="grid-column: span 3; display: flex; align-items: center; justify-content: center; padding: 2px 0;">
-        <div class="dpad">
-          <div></div><button class="remote-btn" id="TV_UP"><i data-lucide="chevron-up"></i></button><div></div>
-          <button class="remote-btn" id="TV_LEFT"><i data-lucide="chevron-left"></i></button>
-          <button class="remote-btn" style="background: var(--accent-color); color: white;" id="TV_OK">OK</button>
-          <button class="remote-btn" id="TV_RIGHT"><i data-lucide="chevron-right"></i></button>
-          <div></div><button class="remote-btn" id="TV_DOWN"><i data-lucide="chevron-down"></i></button><div></div>
+    <div class="tv-handheld-wrapper">
+      <div class="tv-handheld-chassis">
+        <!-- Top Row: 3 Circular Buttons (Screen 2: Power, Home, Menu) -->
+        <div class="mi-top-row">
+          <button class="remote-btn mi-circle-btn power-btn" id="TV_POWER" title="Power">
+            <i data-lucide="power"></i>
+          </button>
+          <button class="remote-btn mi-circle-btn home-btn" id="TV_HOME" title="Home">
+            <i data-lucide="home"></i>
+          </button>
+          <button class="remote-btn mi-circle-btn input-btn" id="TV_INPUT" title="Input / Menu">
+            <i data-lucide="menu"></i>
+          </button>
         </div>
-      </div>
 
-      <button class="remote-btn" id="TV_VOL_UP"><i data-lucide="plus"></i><span class="btn-label">Vol +</span></button>
-      <button class="remote-btn" id="TV_BACK"><i data-lucide="rotate-ccw"></i><span class="btn-label">Back</span></button>
-      <button class="remote-btn" id="TV_CH_UP"><i data-lucide="chevron-up"></i><span class="btn-label">CH +</span></button>
-      
-      <button class="remote-btn" id="TV_VOL_DOWN"><i data-lucide="minus"></i><span class="btn-label">Vol -</span></button>
-      <button class="remote-btn" id="TV_HOME"><i data-lucide="home"></i><span class="btn-label">Home</span></button>
-      <button class="remote-btn" id="TV_CH_DOWN"><i data-lucide="chevron-down"></i><span class="btn-label">CH -</span></button>
+        <!-- Center: Seamless Navigation Wheel (Screen 2) -->
+        <div class="mi-dpad-wheel">
+          <button class="remote-btn mi-wheel-dir up" id="TV_UP" title="Up">
+            <i data-lucide="chevron-up"></i>
+          </button>
+          <button class="remote-btn mi-wheel-dir left" id="TV_LEFT" title="Left">
+            <i data-lucide="chevron-left"></i>
+          </button>
+          <button class="remote-btn mi-wheel-ok" id="TV_OK" title="Select / OK">
+            OK
+          </button>
+          <button class="remote-btn mi-wheel-dir right" id="TV_RIGHT" title="Right">
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button class="remote-btn mi-wheel-dir down" id="TV_DOWN" title="Down">
+            <i data-lucide="chevron-down"></i>
+          </button>
+        </div>
+
+        <!-- Bottom Capsule Bar 1: Volume & Mute (Screen 2) -->
+        <div class="mi-capsule-bar vol-bar">
+          <button class="remote-btn mi-capsule-btn" id="TV_VOL_DOWN" title="Volume Down">
+            <i data-lucide="volume-1"></i>
+          </button>
+          <button class="remote-btn mi-capsule-btn mute-btn" id="TV_MUTE" title="Mute">
+            <i data-lucide="volume-x"></i>
+          </button>
+          <button class="remote-btn mi-capsule-btn" id="TV_VOL_UP" title="Volume Up">
+            <i data-lucide="volume-2"></i>
+          </button>
+        </div>
+
+        <!-- Bottom Capsule Bar 2: Wide Return / Back (Screen 2) -->
+        <button class="remote-btn mi-wide-back-btn" id="TV_BACK" title="Back / Return">
+          <i data-lucide="undo-2"></i>
+        </button>
+      </div>
     </div>
   `,
   ac: `
-    <div class="remote-grid ac-grid">
-      <div style="grid-column: span 3; display: flex; gap: 10px;">
-        <button class="remote-btn power" id="AC_POWER_ON" style="flex: 1; aspect-ratio: auto; padding: 10px; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--success); color: var(--success);">
-          <i data-lucide="power"></i><span class="btn-label" style="font-weight: bold; color: var(--success);">ON</span>
-        </button>
-        <button class="remote-btn power" id="AC_POWER_OFF" style="flex: 1; aspect-ratio: auto; padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger);">
-          <i data-lucide="power"></i><span class="btn-label" style="font-weight: bold; color: var(--danger);">OFF</span>
-        </button>
-      </div>
-      
-      <div style="grid-column: span 3; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255,255,255,0.02); border-radius: 18px; border: 1px solid var(--glass-border);">
-        <button class="remote-btn" id="AC_TEMP_DOWN" style="width: 42px; height: 42px; border-radius: 50%; aspect-ratio: 1;"><i data-lucide="minus"></i></button>
-        <button class="remote-btn" id="AC_TEMP_DISPLAY" style="text-align: center; border: none; background: transparent; padding: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: auto;">
-          <h1 id="ac-temp-display" style="font-size: 2.6rem; font-weight: 500; letter-spacing: -1px; margin: 0; line-height: 1; color: #ffffff;">AC</h1>
-          <span style="color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">Climate Control</span>
-        </button>
-        <button class="remote-btn" id="AC_TEMP_UP" style="width: 42px; height: 42px; border-radius: 50%; aspect-ratio: 1;"><i data-lucide="plus"></i></button>
+    <div class="ac-layout mi-layout">
+      <!-- Top Ambient & Temperature Display Card (Screen 3) -->
+      <div class="mi-ac-display-card">
+        <div class="mi-ac-meta-row">
+          <span>Outside 26°C</span>
+          <span>Humidity 48%</span>
+          <span>Eco Pure</span>
+        </div>
+
+        <div class="mi-ac-hero-temp">
+          <div class="mi-ac-big-digits">
+            <span id="ac-temp-display">26</span>
+            <span class="mi-ac-deg">°C</span>
+          </div>
+          <div class="mi-ac-mode-badge">
+            <i data-lucide="snowflake" style="width: 16px; height: 16px;"></i>
+            <span>Cooling</span>
+          </div>
+        </div>
+
+        <div class="mi-ac-sub-status">
+          <span><i data-lucide="fan" style="width: 12px; height: 12px;"></i> Speed Auto</span>
+          <span><i data-lucide="move" style="width: 12px; height: 12px;"></i> Direction Mid</span>
+          <span><i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i> Swing On</span>
+        </div>
       </div>
 
-      <button class="remote-btn" id="AC_MODE"><i data-lucide="wind"></i><span class="btn-label">Mode</span></button>
-      <button class="remote-btn" id="AC_FAN"><i data-lucide="fan"></i><span class="btn-label">Fan</span></button>
-      <button class="remote-btn" id="AC_SWING"><i data-lucide="refresh-cw"></i><span class="btn-label">Swing</span></button>
-      
-      <button class="remote-btn" id="AC_TIMER"><i data-lucide="clock"></i><span class="btn-label">Timer</span></button>
-      <button class="remote-btn" id="AC_SLEEP"><i data-lucide="moon"></i><span class="btn-label">Sleep</span></button>
-      <button class="remote-btn" id="AC_LIGHT"><i data-lucide="sun"></i><span class="btn-label">Light</span></button>
+      <!-- Row 1: Power ON / OFF & Mode -->
+      <div class="mi-ac-power-mode-row">
+        <button class="remote-btn mi-ac-power-btn power-btn-on" id="AC_POWER_ON" title="AC Power ON">
+          <i data-lucide="power"></i>
+          <span>ON</span>
+        </button>
+        <button class="remote-btn mi-ac-power-btn power-btn-off" id="AC_POWER_OFF" title="AC Power OFF">
+          <i data-lucide="power"></i>
+          <span>OFF</span>
+        </button>
+        <button class="remote-btn mi-ac-tile-btn mode-btn" id="AC_MODE">
+          <i data-lucide="wind"></i>
+          <span>Mode</span>
+        </button>
+      </div>
+
+      <!-- Row 2: Speed | Swing | Light -->
+      <div class="mi-ac-three-col-row">
+        <button class="remote-btn mi-ac-tile-btn fan-btn" id="AC_FAN">
+          <i data-lucide="fan"></i>
+          <span>Speed</span>
+        </button>
+        <button class="remote-btn mi-ac-tile-btn swing-btn" id="AC_SWING">
+          <i data-lucide="refresh-cw"></i>
+          <span>Swing</span>
+        </button>
+        <button class="remote-btn mi-ac-tile-btn light-btn" id="AC_LIGHT">
+          <i data-lucide="sun"></i>
+          <span>Light</span>
+        </button>
+      </div>
+
+      <!-- Row 3: Horizontal Temperature Slider: [ - ]  Temp  [ + ] -->
+      <div class="mi-ac-temp-bar">
+        <button class="remote-btn mi-temp-pill-btn minus" id="AC_TEMP_DOWN" title="Decrease Temp">
+          <i data-lucide="minus"></i>
+        </button>
+        <button class="remote-btn mi-temp-center-btn" id="AC_TEMP_DISPLAY" title="Send Temperature">
+          <span class="temp-bar-label">Temp</span>
+        </button>
+        <button class="remote-btn mi-temp-pill-btn plus" id="AC_TEMP_UP" title="Increase Temp">
+          <i data-lucide="plus"></i>
+        </button>
+      </div>
+
+      <!-- Row 4: Timer | Sleep | Eco -->
+      <div class="mi-ac-three-col-row">
+        <button class="remote-btn mi-ac-tile-btn timer-btn" id="AC_TIMER">
+          <i data-lucide="clock"></i>
+          <span>Timer</span>
+        </button>
+        <button class="remote-btn mi-ac-tile-btn sleep-btn" id="AC_SLEEP">
+          <i data-lucide="moon"></i>
+          <span>Sleep</span>
+        </button>
+        <button class="remote-btn mi-ac-tile-btn eco-btn" id="AC_LIGHT" title="Eco Mode">
+          <i data-lucide="sparkles"></i>
+          <span>Eco</span>
+        </button>
+      </div>
     </div>
   `
 };
