@@ -489,18 +489,27 @@ export async function fireSignal(buttonId) {
 
   // 1. Send via USB Serial if connected
   if (state.serialWriter) {
-    flashStatus('fire');
-    const encoder = new TextEncoder();
-    const fullPayload = "SEND_RAW:" + payload + "\n";
-    
-    // Chunk in 32 bytes with 8ms delay to prevent Arduino AVR 64-byte serial buffer overflow
-    for (let i = 0; i < fullPayload.length; i += 32) {
-      const chunk = fullPayload.substring(i, i + 32);
-      await state.serialWriter.write(encoder.encode(chunk));
-      await new Promise(res => setTimeout(res, 8));
+    try {
+      flashStatus('fire');
+      const encoder = new TextEncoder();
+      const fullPayload = "SEND_RAW:" + payload + "\n";
+      
+      // Chunk in 32 bytes with 8ms delay to prevent Arduino AVR 64-byte serial buffer overflow
+      for (let i = 0; i < fullPayload.length; i += 32) {
+        const chunk = fullPayload.substring(i, i + 32);
+        await state.serialWriter.write(encoder.encode(chunk));
+        await new Promise(res => setTimeout(res, 8));
+      }
+      transmitted = true;
+      console.log("%c🔌 [USB TX] Dispatched via Serial to Uno", "color: #10b981; font-weight: bold;");
+    } catch (serialErr) {
+      console.warn("⚠️ [USB TX NOTICE] Serial write interrupted:", serialErr.message);
+      try {
+        await state.serialWriter.releaseLock();
+      } catch (e) {}
+      state.serialWriter = null;
+      updateStatusIndicator();
     }
-    transmitted = true;
-    console.log("%c🔌 [USB TX] Dispatched via Serial to Uno", "color: #10b981; font-weight: bold;");
   }
 
   // 2. Send via Wi-Fi MQTT if connected
