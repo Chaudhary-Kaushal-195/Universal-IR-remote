@@ -69,3 +69,9 @@ captures/
 ehthumbs.db
 Thumbs.db
 desktop.ini
+
+# User private codes & backups
+src/defaultCodes.js
+*.backup.json
+ir_hub_backup_*.json
+learned_codes*.json

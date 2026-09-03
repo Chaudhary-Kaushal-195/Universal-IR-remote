@@ -1,8 +1,4 @@
-import { defaultACRemoteCodes } from './defaultCodes.js';
-
 const storedCodes = JSON.parse(localStorage.getItem('learnedCodes') || '{}');
-// Merge default AC codes with any locally learned codes
-const initialLearnedCodes = { ...defaultACRemoteCodes, ...storedCodes };
 
 export const state = {
   activeLayout: 'tv',
@@ -13,7 +9,7 @@ export const state = {
   serialPort: null,
   serialWriter: null,
   user: null,
-  learnedCodes: initialLearnedCodes,
+  learnedCodes: storedCodes,
   globalDeviceDatabase: {},
   acTemp: 24,
   isDeviceOnline: false,
