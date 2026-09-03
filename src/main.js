@@ -4,6 +4,7 @@ import { isSupabaseEnabled, supabase } from './supabaseClient.js';
 import { state } from './state.js';
 import { setupMQTT, connectUSB, performUSBConnect, scanHardware, fireSignal, handleCapture, enableHubWifi, disableHubWifi, startLearning, stopLearning } from './hardware.js';
 import { renderRemote, updateStatusIndicator, toggleAC, updateAuthUI, renderSignalDebugger } from './ui.js';
+import { initAuth, fetchCloudRemotes, loadGlobalDatabase, syncCloudRemotes } from './api.js';
 
 // Initialize PWA Service Worker aggressively
 registerSW({ immediate: true });
