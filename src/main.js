@@ -3,7 +3,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { isSupabaseEnabled, supabase } from './supabaseClient.js';
 import { state } from './state.js';
 import { setupMQTT, connectUSB, performUSBConnect, scanHardware, fireSignal, handleCapture, enableHubWifi, disableHubWifi, startLearning, stopLearning } from './hardware.js';
-import { renderRemote, updateStatusIndicator, toggleAC, updateAuthUI } from './ui.js';
+import { renderRemote, updateStatusIndicator, toggleAC, updateAuthUI, renderSignalDebugger } from './ui.js';
 
 // Initialize PWA Service Worker aggressively
 registerSW({ immediate: true });
@@ -84,14 +84,33 @@ function setupEventListeners() {
       modalTabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       const target = tab.dataset.tab;
-      ['hardware', 'account', 'database'].forEach(key => {
+      ['hardware', 'account', 'database', 'debugger'].forEach(key => {
         const pane = document.getElementById(`pane-${key}`);
         if (pane) {
           pane.style.display = key === target ? 'flex' : 'none';
         }
       });
+      if (target === 'debugger') {
+        renderSignalDebugger();
+      }
     });
   });
+
+  const btnCopyDebugLog = document.getElementById('btn-copy-debug-log');
+  if (btnCopyDebugLog) {
+    btnCopyDebugLog.addEventListener('click', () => {
+      const logData = {
+        captured_from_remote: state.lastCapturedSignal,
+        transmitted_to_ac: state.lastTransmittedSignal,
+        arduino_hardware_telemetry: state.lastTelemetry,
+        all_learned_buttons: Object.keys(state.learnedCodes),
+        timestamp: new Date().toISOString()
+      };
+      navigator.clipboard.writeText(JSON.stringify(logData, null, 2))
+        .then(() => alert("📋 Diagnostic log copied to clipboard! You can paste it here to analyze."))
+        .catch(() => alert("Failed to copy log. Open F12 console to view."));
+    });
+  }
 
   // Main UI Modal Interactions
   configBtn.addEventListener('click', () => configModal.classList.add('active'));

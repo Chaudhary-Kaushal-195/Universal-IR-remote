@@ -252,3 +252,55 @@ export function updateAuthUI(user, cloudEnabled = true) {
     authLoggedIn.style.display = 'none';
   }
 }
+
+export function renderSignalDebugger() {
+  const captureBadge = document.getElementById('debug-capture-badge');
+  const captureDetails = document.getElementById('debug-capture-details');
+  const transmitBadge = document.getElementById('debug-transmit-badge');
+  const transmitDetails = document.getElementById('debug-transmit-details');
+  const matchBadge = document.getElementById('debug-match-badge');
+  const echoDetails = document.getElementById('debug-echo-details');
+
+  if (state.lastCapturedSignal && captureBadge && captureDetails) {
+    const s = state.lastCapturedSignal;
+    captureBadge.textContent = `${s.len} Pulses (${s.buttonId || 'Cloned'})`;
+    captureBadge.style.background = '#bfdbfe';
+    captureDetails.innerHTML = `
+      <strong>Button:</strong> ${s.buttonId || 'Unknown'} (${s.timestamp})<br>
+      <strong>Total Pulses:</strong> ${s.len} (${s.count} values)<br>
+      <strong>Header:</strong> ${s.first8[0]}μs (Mark), ${s.first8[1]}μs (Space)<br>
+      <strong>First 6:</strong> [${s.first8.slice(0, 6).join(', ')}]<br>
+      <strong>Last 4:</strong> [${s.last6.slice(-4).join(', ')}]
+    `;
+  }
+
+  if (state.lastTransmittedSignal && transmitBadge && transmitDetails) {
+    const t = state.lastTransmittedSignal;
+    transmitBadge.textContent = `${t.len} Pulses (${t.buttonId})`;
+    transmitBadge.style.background = '#fecaca';
+    transmitDetails.innerHTML = `
+      <strong>Target:</strong> ${t.buttonId} (${t.timestamp})<br>
+      <strong>Pulses Sent:</strong> ${t.len} (${t.count} values)<br>
+      <strong>Header:</strong> ${t.first8[0]}μs (Mark), ${t.first8[1]}μs (Space)<br>
+      <strong>First 6:</strong> [${t.first8.slice(0, 6).join(', ')}]<br>
+      <strong>Last 4:</strong> [${t.last6.slice(-4).join(', ')}]
+    `;
+  }
+
+  if (matchBadge && echoDetails && state.lastTelemetry) {
+    const tel = state.lastTelemetry;
+    const isMatch = tel.received === tel.expected;
+    matchBadge.textContent = isMatch ? `✅ 100% MATCH (${tel.received}/${tel.expected})` : `⚠️ MISMATCH (${tel.received}/${tel.expected})`;
+    matchBadge.style.background = isMatch ? '#bbf7d0' : '#fecaca';
+    matchBadge.style.color = isMatch ? '#14532d' : '#991b1b';
+    echoDetails.innerHTML = `
+      <strong>Expected by Uno:</strong> ${tel.expected} pulses<br>
+      <strong>Actually Received:</strong> ${tel.received} pulses<br>
+      <strong>First 4 echoed:</strong> [${tel.first4}]<br>
+      <strong>Last 4 echoed:</strong> [${tel.last4}]<br>
+      <strong>Status:</strong> ${isMatch ? '<span style="color:#15803d; font-weight:bold;">All pulses received in Uno buffer!</span>' : '<span style="color:#b91c1c; font-weight:bold;">Pulses were dropped during Serial download!</span>'}
+    `;
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}

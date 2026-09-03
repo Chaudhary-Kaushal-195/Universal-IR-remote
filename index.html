@@ -50,10 +50,11 @@
           </div>
 
           <!-- Settings Sub-Tabs -->
-          <div class="modal-tabs" id="config-tabs" style="display: flex; gap: 6px; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 10px;">
-            <button type="button" class="modal-tab active" data-tab="hardware" style="flex: 1; padding: 6px 4px; border: none; border-radius: 8px; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Hardware</button>
-            <button type="button" class="modal-tab" data-tab="account" style="flex: 1; padding: 6px 4px; border: none; border-radius: 8px; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Cloud & Sync</button>
-            <button type="button" class="modal-tab" data-tab="database" style="flex: 1; padding: 6px 4px; border: none; border-radius: 8px; font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Database</button>
+          <div class="modal-tabs" id="config-tabs" style="display: flex; gap: 4px; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 10px;">
+            <button type="button" class="modal-tab active" data-tab="hardware" style="flex: 1; padding: 6px 3px; border: none; border-radius: 8px; font-size: 0.74rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Hardware</button>
+            <button type="button" class="modal-tab" data-tab="debugger" style="flex: 1; padding: 6px 3px; border: none; border-radius: 8px; font-size: 0.74rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Signal Logs</button>
+            <button type="button" class="modal-tab" data-tab="account" style="flex: 1; padding: 6px 3px; border: none; border-radius: 8px; font-size: 0.74rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Cloud</button>
+            <button type="button" class="modal-tab" data-tab="database" style="flex: 1; padding: 6px 3px; border: none; border-radius: 8px; font-size: 0.74rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; transition: all 0.2s;">Database</button>
           </div>
 
           <!-- Tab Pane 1: Hardware & Connection -->
@@ -151,6 +152,56 @@
               <button class="primary-btn" id="db-import-btn" style="background: var(--accent-color); font-size: 0.82rem; padding: 9px; width: 100%;">
                 <i data-lucide="download" style="width:14px; height:14px; margin-right:5px"></i> Apply Profile
               </button>
+            </div>
+          <!-- Tab Pane 4: Signal Diagnostics & Logger -->
+          <div class="modal-pane" id="pane-debugger" style="display: none; flex-direction: column; gap: 8px;">
+            <div class="settings-card" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px;">
+              <div>
+                <p style="font-size: 0.86rem; font-weight: 800; color: #0f172a; margin: 0;">🔬 IR Signal Comparator</p>
+                <p style="font-size: 0.7rem; color: #64748b; margin: 0;">Compare Physical Capture vs Transmitted Pulse Arrays</p>
+              </div>
+              <button class="primary-btn" id="btn-copy-debug-log" style="padding: 5px 9px; font-size: 0.72rem;">
+                <i data-lucide="copy" style="width: 12px; height: 12px;"></i> Copy Log
+              </button>
+            </div>
+
+            <!-- Card 1: Captured from Physical Remote -->
+            <div class="settings-card" style="display: flex; flex-direction: column; gap: 4px; background: #eff6ff !important; border-color: #1d4ed8 !important; padding: 8px 10px !important;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.78rem; font-weight: 800; color: #1e3a8a; display: flex; align-items: center; gap: 4px;">
+                  <i data-lucide="arrow-down-left" style="width: 14px; height: 14px; color: #1d4ed8;"></i> 1. Captured From Remote
+                </span>
+                <span id="debug-capture-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; background: #dbeafe; color: #1e3a8a;">NO SIGNAL YET</span>
+              </div>
+              <div id="debug-capture-details" style="font-size: 0.72rem; color: #1e3a8a; font-family: monospace; line-height: 1.4; background: #ffffff; padding: 6px 8px; border-radius: 8px; border: 1.5px solid #bfdbfe; max-height: 75px; overflow-y: auto;">
+                Point your physical remote at the Uno receiver and clone a button to view timings.
+              </div>
+            </div>
+
+            <!-- Card 2: Sent from Web App to AC -->
+            <div class="settings-card" style="display: flex; flex-direction: column; gap: 4px; background: #fef2f2 !important; border-color: #b91c1c !important; padding: 8px 10px !important;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.78rem; font-weight: 800; color: #991b1b; display: flex; align-items: center; gap: 4px;">
+                  <i data-lucide="arrow-up-right" style="width: 14px; height: 14px; color: #b91c1c;"></i> 2. Sent from Web App
+                </span>
+                <span id="debug-transmit-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; background: #fee2e2; color: #991b1b;">NO TRANSMISSION YET</span>
+              </div>
+              <div id="debug-transmit-details" style="font-size: 0.72rem; color: #991b1b; font-family: monospace; line-height: 1.4; background: #ffffff; padding: 6px 8px; border-radius: 8px; border: 1.5px solid #fecaca; max-height: 75px; overflow-y: auto;">
+                Click any button on the TV / AC remote to view the outbound pulse stream.
+              </div>
+            </div>
+
+            <!-- Card 3: Hardware Echo & Integrity Check -->
+            <div class="settings-card" style="display: flex; flex-direction: column; gap: 4px; background: #f3e8ff !important; border-color: #7c3aed !important; padding: 8px 10px !important;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.78rem; font-weight: 800; color: #581c87; display: flex; align-items: center; gap: 4px;">
+                  <i data-lucide="check-circle-2" style="width: 14px; height: 14px; color: #7c3aed;"></i> 3. Uno Hardware Echo
+                </span>
+                <span id="debug-match-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 6px; border-radius: 6px; background: #e9d5ff; color: #581c87;">WAITING</span>
+              </div>
+              <div id="debug-echo-details" style="font-size: 0.72rem; color: #581c87; font-family: monospace; line-height: 1.4; background: #ffffff; padding: 6px 8px; border-radius: 8px; border: 1.5px solid #ddd6fe;">
+                Uno reports pulse counts and checksums back to the web app in real-time.
+              </div>
             </div>
           </div>
 

@@ -11,7 +11,10 @@ export const state = {
   globalDeviceDatabase: {},
   acTemp: 24,
   isDeviceOnline: false,
-  hubWifiStatus: 'off'
+  hubWifiStatus: 'off',
+  lastCapturedSignal: null,
+  lastTransmittedSignal: null,
+  lastTelemetry: null
 };
 
 // Global Config

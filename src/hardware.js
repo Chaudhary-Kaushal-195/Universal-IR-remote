@@ -1,7 +1,7 @@
 import mqtt from 'mqtt';
 import { serial as polyfillSerial } from 'web-serial-polyfill';
 import { state, MQTT_BROKER, MQTT_TOPIC_TX, MQTT_TOPIC_RX } from './state.js';
-import { flashStatus, updateStatusIndicator, renderRemote } from './ui.js';
+import { flashStatus, updateStatusIndicator, renderRemote, renderSignalDebugger } from './ui.js';
 import { syncCloudRemotes } from './api.js';
 
 export let mqttClient = null;
@@ -291,6 +291,38 @@ export function handleStatusMessages(line) {
     } else {
       console.log(`%c📡 [SENSE] Raw IR Signal Seen (${raw.len} pulses)`, "color: #22c55e; font-weight: bold;");
     }
+  } else if (line.startsWith("TELEMETRY:")) {
+    // TELEMETRY:EXPECTED=284:RECEIVED=284:FIRST4=8950,4400,600,1650:LAST4=550,550,600,1650
+    const parts = line.split(":");
+    const expPart = parts.find(p => p.startsWith("EXPECTED="));
+    const recPart = parts.find(p => p.startsWith("RECEIVED="));
+    const f4Part = parts.find(p => p.startsWith("FIRST4="));
+    const l4Part = parts.find(p => p.startsWith("LAST4="));
+
+    const expected = expPart ? parseInt(expPart.split("=")[1]) : 0;
+    const received = recPart ? parseInt(recPart.split("=")[1]) : 0;
+    const first4 = f4Part ? f4Part.split("=")[1] : "";
+    const last4 = l4Part ? l4Part.split("=")[1] : "";
+
+    state.lastTelemetry = { expected, received, first4, last4, timestamp: new Date().toLocaleTimeString() };
+
+    console.group(`%c🔬 [ARDUINO HARDWARE TELEMETRY] Pulse Verification`, "color: #7c3aed; font-size: 13px; font-weight: bold;");
+    console.log(`Expected by Arduino: ${expected} pulses`);
+    console.log(`Actually Received by Arduino: ${received} pulses`);
+    console.log(`First 4 Timings Received: [${first4}]`);
+    console.log(`Last 4 Timings Received: [${last4}]`);
+    if (expected === received) {
+      console.log("%c✅ [100% PULSE COUNT MATCH] All pulses downloaded into Uno RAM intact!", "color: #16a34a; font-weight: bold;");
+    } else {
+      console.error(`%c❌ [CORRUPTION] Web App sent ${expected} pulses, but Uno buffer only received ${received}!`, "color: #dc2626; font-weight: bold;");
+    }
+    console.groupEnd();
+
+    renderSignalDebugger();
+  } else if (line.startsWith("CAPTURE_INFO:")) {
+    console.log(`%c📥 [UNO SENSE INFO] ${line}`, "color: #0284c7; font-weight: bold;");
+  } else if (line.startsWith("WARN:DROPPED_PULSES:")) {
+    console.warn(`%c⚠️ [HARDWARE BUFFER WARNING] ${line}`, "color: #f59e0b; font-weight: bold;");
   } else if (line === "SEND_OK") {
     console.log("%c✅ [OK] Replay Successful", "color: #6366f1;");
   } else if (line.startsWith("HUB_READY")) {
@@ -307,6 +339,7 @@ export function handleCapture(rawInput, triggerUIRefresh) {
   if (!shouldCaptureRaw(raw)) return;
 
   const buttonId = state.learningTargetId;
+  const valuesArr = raw.values.split(',').map(Number);
   
   state.learnedCodes[buttonId] = {
     type: 'raw',
@@ -314,9 +347,30 @@ export function handleCapture(rawInput, triggerUIRefresh) {
     values: raw.values
   };
 
+  state.lastCapturedSignal = {
+    buttonId,
+    len: raw.len,
+    values: raw.values,
+    count: valuesArr.length,
+    first8: valuesArr.slice(0, 8),
+    last6: valuesArr.slice(-6),
+    timestamp: new Date().toLocaleTimeString()
+  };
+
+  console.group(`%c📥 [IR SIGNAL CAPTURED FROM REMOTE] ${buttonId} (${raw.len} Pulses)`, "color: #0284c7; font-size: 13px; font-weight: 800;");
+  console.log("🎯 Target Button:", buttonId);
+  console.log("📊 Total Pulses:", raw.len);
+  console.log("⏱️ Header Mark/Space:", `${valuesArr[0]}μs / ${valuesArr[1]}μs`);
+  console.log("🔢 First 8 Timings (μs):", valuesArr.slice(0, 8));
+  console.log("🔢 Last 6 Timings (μs):", valuesArr.slice(-6));
+  console.log("📋 Full Raw Sequence:", raw.values);
+  console.groupEnd();
+
+  renderSignalDebugger();
+
   localStorage.setItem('learnedCodes', JSON.stringify(state.learnedCodes));
   syncCloudRemotes();
-  stopLearning(); // Tell ESP32 to pause receiver immediately!
+  stopLearning(); // Tell ESP32 / Uno to pause receiver immediately!
   
   if (triggerUIRefresh) triggerUIRefresh(buttonId);
   else {
@@ -407,7 +461,28 @@ export async function fireSignal(buttonId) {
   }
 
   const payload = signal.len + ":" + signal.values;
+  const valuesArr = signal.values.split(',').map(Number);
   let transmitted = false;
+
+  state.lastTransmittedSignal = {
+    buttonId,
+    len: signal.len,
+    values: signal.values,
+    count: valuesArr.length,
+    first8: valuesArr.slice(0, 8),
+    last6: valuesArr.slice(-6),
+    timestamp: new Date().toLocaleTimeString()
+  };
+
+  console.group(`%c📤 [IR SIGNAL TRANSMITTING] ${buttonId} (${signal.len} Pulses)`, "color: #dc2626; font-size: 13px; font-weight: 800;");
+  console.log("🎯 Target Button:", buttonId);
+  console.log("📊 Pulses to Transmit:", signal.len);
+  console.log("⏱️ Header Mark/Space:", `${valuesArr[0]}μs / ${valuesArr[1]}μs`);
+  console.log("🔢 First 8 Timings (μs):", valuesArr.slice(0, 8));
+  console.log("🔢 Last 6 Timings (μs):", valuesArr.slice(-6));
+  console.groupEnd();
+
+  renderSignalDebugger();
 
   // 1. Send via USB Serial if connected
   if (state.serialWriter) {
@@ -415,13 +490,14 @@ export async function fireSignal(buttonId) {
     const encoder = new TextEncoder();
     const fullPayload = "SEND_RAW:" + payload + "\n";
     
+    // Chunk in 32 bytes with 8ms delay to prevent Arduino AVR 64-byte serial buffer overflow
     for (let i = 0; i < fullPayload.length; i += 32) {
       const chunk = fullPayload.substring(i, i + 32);
       await state.serialWriter.write(encoder.encode(chunk));
-      await new Promise(res => setTimeout(res, 5));
+      await new Promise(res => setTimeout(res, 8));
     }
     transmitted = true;
-    console.log("%c🔌 [USB TX] Dispatched via Serial", "color: #10b981; font-weight: bold;");
+    console.log("%c🔌 [USB TX] Dispatched via Serial to Uno", "color: #10b981; font-weight: bold;");
   }
 
   // 2. Send via Wi-Fi MQTT if connected
