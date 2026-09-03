@@ -95,6 +95,72 @@ async function readSerial() {
   } catch (err) { console.error("Reader error", err); } finally { reader.releaseLock(); }
 }
 
+export function updateHubWifiBadge(status) {
+  state.hubWifiStatus = status;
+  const badge = document.getElementById('hub-wifi-badge');
+  if (!badge) return;
+  if (status === 'ONLINE') {
+    badge.textContent = 'ONLINE (WIFI ACTIVE)';
+    badge.style.background = 'rgba(34, 197, 94, 0.2)';
+    badge.style.color = 'var(--success)';
+  } else if (status === 'CONNECTING') {
+    badge.textContent = 'CONNECTING...';
+    badge.style.background = 'rgba(245, 158, 11, 0.2)';
+    badge.style.color = '#f59e0b';
+  } else {
+    badge.textContent = 'OFF (USB ONLY)';
+    badge.style.background = 'rgba(100, 116, 139, 0.2)';
+    badge.style.color = '#94a3b8';
+  }
+}
+
+export async function sendSerialCommand(cmd) {
+  if (state.serialWriter) {
+    try {
+      const encoder = new TextEncoder();
+      await state.serialWriter.write(encoder.encode(cmd.trim() + "\n"));
+      console.log(`%c[SERIAL TX] ${cmd.trim()}`, "color: #a855f7; font-weight: bold;");
+      return true;
+    } catch (err) {
+      console.error("Failed to send serial command:", err);
+      return false;
+    }
+  }
+  return false;
+}
+
+export async function enableHubWifi() {
+  console.log("%c📡 Requesting ESP32 to turn ON WiFi & MQTT...", "color: #3b82f6; font-weight: bold;");
+  updateHubWifiBadge('CONNECTING');
+  return await sendSerialCommand("CMD:WIFI_START");
+}
+
+export async function disableHubWifi() {
+  console.log("%c🔌 Requesting ESP32 to turn OFF WiFi (Pure USB Mode)...", "color: #f59e0b; font-weight: bold;");
+  updateHubWifiBadge('OFF');
+  return await sendSerialCommand("CMD:WIFI_STOP");
+}
+
+export async function toggleAutoWifiBoot(enable) {
+  return await sendSerialCommand(enable ? "CMD:AUTO_WIFI_ON" : "CMD:AUTO_WIFI_OFF");
+}
+
+export async function startLearning() {
+  if (state.connectionType === 'serial') {
+    await sendSerialCommand("CMD:LEARN_START");
+  } else if (state.connectionType === 'wifi' && mqttClient && mqttClient.connected) {
+    mqttClient.publish(MQTT_TOPIC_TX, JSON.stringify({ cmd: "LEARN_START" }));
+  }
+}
+
+export async function stopLearning() {
+  if (state.connectionType === 'serial') {
+    await sendSerialCommand("CMD:LEARN_STOP");
+  } else if (state.connectionType === 'wifi' && mqttClient && mqttClient.connected) {
+    mqttClient.publish(MQTT_TOPIC_TX, JSON.stringify({ cmd: "LEARN_STOP" }));
+  }
+}
+
 export function handleStatusMessages(line) {
   if (line.startsWith("STATUS:REPLAYING_RAW_SIGNAL")) {
     console.log("%c🔥 [EMIT] Replaying Physical Timing Pattern...", "color: #ef4444; font-weight: bold;");
@@ -105,11 +171,36 @@ export function handleStatusMessages(line) {
   } else if (line === "STATUS:ONLINE") {
     console.log("%c🟢 [HUB] ESP32 is Online!", "color: #22c55e; font-weight: bold;");
     state.isDeviceOnline = true;
+    updateHubWifiBadge('ONLINE');
     updateStatusIndicator();
   } else if (line === "STATUS:OFFLINE") {
     console.log("%c🔴 [HUB] ESP32 has gone Offline!", "color: #ef4444; font-weight: bold;");
     state.isDeviceOnline = false;
+    updateHubWifiBadge('OFF');
     updateStatusIndicator();
+  } else if (line.startsWith("STATUS:WIFI_ENABLED")) {
+    console.log("%c🌐 [HUB] WiFi Radio Activated on ESP32", "color: #3b82f6; font-weight: bold;");
+    updateHubWifiBadge('CONNECTING');
+  } else if (line.startsWith("STATUS:WIFI_DISABLED")) {
+    console.log("%c🔌 [HUB] WiFi Turned OFF on ESP32 (Clean USB Mode)", "color: #10b981; font-weight: bold;");
+    updateHubWifiBadge('OFF');
+  } else if (line.startsWith("STATUS:WIFI_CONNECTING")) {
+    console.log("%c⏳ [HUB] ESP32 Connecting to WiFi...", "color: #f59e0b;");
+    updateHubWifiBadge('CONNECTING');
+  } else if (line.startsWith("STATUS:WIFI_TIMEOUT_RETRYING")) {
+    console.log("%c⚠️ [HUB] WiFi Connect timed out, retrying...", "color: #ef4444;");
+    updateHubWifiBadge('CONNECTING');
+  } else if (line.startsWith("STATUS:WIFI_CONNECTED")) {
+    console.log(`%c🟢 [HUB] ESP32 Connected to WiFi! (${line})`, "color: #22c55e; font-weight: bold;");
+    updateHubWifiBadge('ONLINE');
+  } else if (line.startsWith("STATUS:LEARNING_ACTIVE")) {
+    console.log("%c🎯 [HUB] IR Receiver Active (Point remote at Hub)", "color: #22c55e; font-weight: bold;");
+  } else if (line.startsWith("STATUS:LEARNING_IDLE") || line.startsWith("STATUS:LEARNING_COMPLETE")) {
+    console.log("%c💤 [HUB] IR Receiver Idle (Noise Filter Active)", "color: #64748b;");
+  } else if (line.startsWith("STATUS:AUTO_WIFI_ENABLED")) {
+    console.log("%c💾 [HUB] Auto-WiFi on Boot Enabled", "color: #3b82f6; font-weight: bold;");
+  } else if (line.startsWith("STATUS:AUTO_WIFI_DISABLED")) {
+    console.log("%c💾 [HUB] Auto-WiFi on Boot Disabled", "color: #64748b; font-weight: bold;");
   } else if (line.startsWith("RAW:")) {
     const raw = parseRawLine(line);
     if (!raw) return;
@@ -123,8 +214,10 @@ export function handleStatusMessages(line) {
     }
   } else if (line === "SEND_OK") {
     console.log("%c✅ [OK] Replay Successful", "color: #6366f1;");
-  } else if (line === "HUB_READY") {
-    console.log("%c🔌 [LINK] Arduino Hub Ready for Cloning", "color: #00e676; font-weight: bold;");
+  } else if (line.startsWith("HUB_READY")) {
+    console.log(`%c🔌 [LINK] ${line}`, "color: #00e676; font-weight: bold;");
+  } else if (line.startsWith("HUB_ALIVE")) {
+    // Keep console tidy for regular heartbeats
   } else {
     console.log("Incoming Serial:", line);
   }
@@ -144,6 +237,7 @@ export function handleCapture(rawInput, triggerUIRefresh) {
 
   localStorage.setItem('learnedCodes', JSON.stringify(state.learnedCodes));
   syncCloudRemotes();
+  stopLearning(); // Tell ESP32 to pause receiver immediately!
   
   if (triggerUIRefresh) triggerUIRefresh(buttonId);
   else {

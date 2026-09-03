@@ -12,16 +12,22 @@
 #include <IRutils.h>
 #include <ArduinoJson.h>
 #include <PubSubClient.h>
+#include <Preferences.h>
+
+Preferences preferences;
+bool wifiEnabled = false; // Default: WiFi is OFF in USB mode unless software requests it
+bool isLearningMode = false; // Only listen for IR when user is cloning a remote
+unsigned long wifiConnectStartTime = 0;
 
 // --- CONFIGURATION ---
-const char* ssid = "Galaxy M17 5G 7A52";
-const char* password = "12121212";
+const char* ssid = "Galaxy M35 5G A733";
+const char* password = "TestKaushal";
 const char* mqtt_server = "broker.hivemq.com";
 const char* mqtt_topic_rx = "universalo-hub/kaushal-ir-hub-97/rx"; // ESP32 Listens here
 const char* mqtt_topic_tx = "universalo-hub/kaushal-ir-hub-97/tx"; // ESP32 Publishes status here
 
 const uint16_t kIrLedPin = 4;   // IR Emitter Pin
-const uint16_t kIrRecvPin = 27; // CHANGED PIN: GPIO 27 is quieter than Pin 15
+const uint16_t kIrRecvPin = 27; // IR Receiver Pin
 IRsend irsend(kIrLedPin);
 IRrecv irrecv(kIrRecvPin);
 decode_results results;
@@ -77,8 +83,6 @@ void sendACRaw(uint16_t* rawArray, uint16_t rawLen) {
   }
 }
 
-
-
 bool parseAndScheduleRaw(uint16_t rawLen, const String& valuesStr) {
   if (rawLen == 0 || valuesStr.length() == 0) return false;
 
@@ -119,6 +123,21 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     return;
   }
 
+  String cmdStr = doc["cmd"] | "";
+  if (cmdStr == "LEARN_START") {
+    isLearningMode = true;
+    irrecv.resume();
+    Serial.println("STATUS:LEARNING_ACTIVE");
+    client.publish(mqtt_topic_tx, "STATUS:LEARNING_ACTIVE");
+    return;
+  } else if (cmdStr == "LEARN_STOP") {
+    isLearningMode = false;
+    irrecv.pause();
+    Serial.println("STATUS:LEARNING_IDLE");
+    client.publish(mqtt_topic_tx, "STATUS:LEARNING_IDLE");
+    return;
+  }
+
   String typeStr = doc["type"] | "standard";
 
   if (typeStr == "raw") {
@@ -142,20 +161,46 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   }
 }
 
+void startWiFiConnection() {
+  if (WiFi.status() == WL_CONNECTED) return;
+  Serial.printf("STATUS:WIFI_CONNECTING to '%s'...\n", ssid);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  wifiConnectStartTime = millis();
+}
+
 void reconnectMQTT() {
-  static unsigned long lastAttempt = 0;
-  if (millis() - lastAttempt < 6000) return;
-  lastAttempt = millis();
+  if (!wifiEnabled) return;
 
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("Connecting to WiFi in background...");
-    WiFi.disconnect();
-    WiFi.begin(ssid, password);
+    if (wifiConnectStartTime == 0) {
+      startWiFiConnection();
+    } else if (millis() - wifiConnectStartTime > 20000) {
+      int st = WiFi.status();
+      if (st == WL_NO_SSID_AVAIL) {
+        Serial.printf("STATUS:HOTSPOT_NOT_FOUND: '%s' not visible. Ensure 2.4GHz is enabled on phone!\n", ssid);
+      } else if (st == WL_CONNECT_FAILED) {
+        Serial.println("STATUS:WIFI_AUTH_FAILED: Password rejected.");
+      } else {
+        Serial.printf("STATUS:WIFI_TIMEOUT (code %d), retrying...\n", st);
+      }
+      WiFi.disconnect();
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(ssid, password);
+      wifiConnectStartTime = millis();
+    }
     return;
   }
 
+  // WiFi is connected! Reset connect timer
+  wifiConnectStartTime = 0;
+
+  static unsigned long lastMqttAttempt = 0;
   if (!client.connected()) {
-    Serial.print("Connecting to MQTT Broker...");
+    if (millis() - lastMqttAttempt < 5000) return;
+    lastMqttAttempt = millis();
+
+    Serial.print("Connecting to MQTT Broker (broker.hivemq.com)...");
     String clientId = "ESP32Hub-" + String(random(0xffff), HEX);
     
     // Use Last Will and Testament to tell the frontend if the device drops offline
@@ -163,8 +208,9 @@ void reconnectMQTT() {
       Serial.println(" SUCCESS!");
       client.publish(mqtt_topic_tx, "STATUS:ONLINE", true);
       client.subscribe(mqtt_topic_rx);
+      Serial.printf("STATUS:WIFI_CONNECTED:IP:%s\n", WiFi.localIP().toString().c_str());
     } else {
-      Serial.printf(" FAILED (rc=%d), will retry.\n", client.state());
+      Serial.printf(" FAILED (rc=%d), will retry in 5s.\n", client.state());
     }
   }
 }
@@ -176,28 +222,39 @@ void setup() {
   // Start the IR receiver with internal pull-up enabled to reduce noise
   pinMode(kIrRecvPin, INPUT_PULLUP); 
   irrecv.enableIRIn(); 
+  irrecv.pause(); // Start paused by default to completely eliminate WiFi RF noise!
   
-  pinMode(kIrLedPin, OUTPUT); // Ensure pin is ready for custom AC transmitter
-  digitalWrite(kIrLedPin, LOW);
+  // Indicator LED (Built-in Blue LED on GPIO 2) for visible visual feedback
+  pinMode(2, OUTPUT);
+  digitalWrite(2, HIGH); // Flash once on boot to visually confirm firmware started!
+  delay(150);
+  digitalWrite(2, LOW);
+
+  // Start with WiFi enabled so it connects to MQTT right away!
+  wifiEnabled = true;
+  startWiFiConnection();
   
   client.setServer(mqtt_server, 1883);
   client.setCallback(mqttCallback);
   client.setBufferSize(8192); // Required for receiving huge AC strings
   
-  Serial.println(F("HUB_READY: USB Serial & MQTT Active (115200 baud)"));
+  Serial.println(F("HUB_READY: Dual Mode Active (115200 baud)"));
 }
 
 void loop() {
-  if (WiFi.status() == WL_CONNECTED && client.connected()) {
-    client.loop();
-  } else {
-    reconnectMQTT();
+  if (wifiEnabled) {
+    if (WiFi.status() == WL_CONNECTED && client.connected()) {
+      client.loop();
+    } else {
+      reconnectMQTT();
+    }
   }
 
-  // --- USB SERIAL STREAMING TRANSMIT (ARDUINO / ESP32 UNIFIED PROTOCOL) ---
+  // --- USB SERIAL STREAMING TRANSMIT & COMMAND HANDLING ---
   if (Serial.available() > 0) {
     String serialLine = Serial.readStringUntil('\n');
     serialLine.trim();
+
     if (serialLine.startsWith("SEND_RAW:")) {
       int firstColon = serialLine.indexOf(':');
       int secondColon = serialLine.indexOf(':', firstColon + 1);
@@ -208,11 +265,68 @@ void loop() {
           Serial.println(F("STATUS:REPLAYING_RAW_SIGNAL"));
         }
       }
+    } else if (serialLine == "CMD:WIFI_START" || serialLine == "WIFI:ON" || serialLine == "WIFI_CONNECT") {
+      wifiEnabled = true;
+      Serial.println(F("STATUS:WIFI_ENABLED"));
+      startWiFiConnection();
+    } else if (serialLine == "CMD:WIFI_STOP" || serialLine == "WIFI:OFF" || serialLine == "WIFI_DISCONNECT") {
+      wifiEnabled = false;
+      wifiConnectStartTime = 0;
+      if (client.connected()) {
+        client.publish(mqtt_topic_tx, "STATUS:OFFLINE", true);
+        client.disconnect();
+      }
+      WiFi.disconnect(true);
+      WiFi.mode(WIFI_OFF);
+      Serial.println(F("STATUS:WIFI_DISABLED"));
+    } else if (serialLine == "CMD:WIFI_STATUS") {
+      if (wifiEnabled && WiFi.status() == WL_CONNECTED) {
+        Serial.printf("STATUS:WIFI_ACTIVE:IP:%s:MQTT:%s\n", 
+          WiFi.localIP().toString().c_str(), 
+          client.connected() ? "CONNECTED" : "CONNECTING");
+      } else if (wifiEnabled) {
+        Serial.println(F("STATUS:WIFI_CONNECTING"));
+      } else {
+        Serial.println(F("STATUS:WIFI_OFF"));
+      }
+    } else if (serialLine == "CMD:LEARN_START" || serialLine == "LEARN:ON") {
+      isLearningMode = true;
+      irrecv.resume();
+      Serial.println(F("STATUS:LEARNING_ACTIVE"));
+    } else if (serialLine == "CMD:LEARN_STOP" || serialLine == "LEARN:OFF") {
+      isLearningMode = false;
+      irrecv.pause();
+      Serial.println(F("STATUS:LEARNING_IDLE"));
+    } else if (serialLine == "CMD:AUTO_WIFI_ON") {
+      preferences.begin("irhub", false);
+      preferences.putBool("auto_wifi", true);
+      preferences.end();
+      wifiEnabled = true;
+      Serial.println(F("STATUS:AUTO_WIFI_ENABLED"));
+      startWiFiConnection();
+    } else if (serialLine == "CMD:AUTO_WIFI_OFF") {
+      preferences.begin("irhub", false);
+      preferences.putBool("auto_wifi", false);
+      preferences.end();
+      wifiEnabled = false;
+      wifiConnectStartTime = 0;
+      if (client.connected()) client.disconnect();
+      WiFi.disconnect(true);
+      WiFi.mode(WIFI_OFF);
+      Serial.println(F("STATUS:AUTO_WIFI_DISABLED"));
+    } else if (serialLine == "CMD:TEST_LED" || serialLine == "TEST") {
+      Serial.println(F("TEST: Blinking Blue LED & Sending Test IR Pulse..."));
+      digitalWrite(2, HIGH);
+      irsend.sendNEC(0x00FFE01F, 32);
+      delay(300);
+      digitalWrite(2, LOW);
+      Serial.println(F("TEST_OK"));
     }
   }
 
   // --- SAFE TRANSMISSION EXECUTION ---
   if (pendingTransmission) {
+    digitalWrite(2, HIGH); // Visible visual feedback on ESP32 onboard LED!
     irrecv.pause(); // STOP receiver to prevent interrupt interference with RMT timing
     
     Serial.println("\n--- EMITTING IR SIGNAL ---");
@@ -224,12 +338,15 @@ void loop() {
     delete[] globalRawArray;
     globalRawArray = nullptr;
     pendingTransmission = false;
+    digitalWrite(2, LOW);
     
-    irrecv.resume(); // RESTART receiver
+    if (isLearningMode) {
+      irrecv.resume(); // Only resume if learning mode was active
+    }
   }
 
-  // --- IR RECEIVER LOGIC ---
-  if (irrecv.decode(&results)) {
+  // --- IR RECEIVER LOGIC (ONLY RUNS WHEN ACTIVELY LEARNING) ---
+  if (isLearningMode && irrecv.decode(&results)) {
     // FILTER: Lowered from 40 to 15 to allow shorter TV remote signals (like your 21-pulse signal)
     if (results.rawlen > 15) {
       Serial.println("\n--- IR SIGNAL CAPTURED ---");
@@ -260,19 +377,28 @@ void loop() {
       Serial.println(payload);
       
       // Also publish to MQTT if connected
-      if (client.connected()) {
+      if (wifiEnabled && client.connected()) {
         if (client.publish(mqtt_topic_tx, payload.c_str())) {
           Serial.println("Published captured RAW signal to MQTT.");
         }
       }
-    }
 
-    irrecv.resume(); // Receive the next value
+      // Auto-pause receiver immediately after successful capture
+      isLearningMode = false;
+      irrecv.pause();
+      Serial.println(F("STATUS:LEARNING_COMPLETE"));
+    } else {
+      irrecv.resume(); // Receive the next value
+    }
   }
 
   static unsigned long lastHeartbeat = 0;
   if (millis() - lastHeartbeat > 10000) {
     lastHeartbeat = millis();
-    Serial.printf("HUB_ALIVE: IP %s, RSSI %d\n", WiFi.localIP().toString().c_str(), WiFi.RSSI());
+    if (wifiEnabled && WiFi.status() == WL_CONNECTED) {
+      Serial.printf("HUB_ALIVE: IP %s, RSSI %d\n", WiFi.localIP().toString().c_str(), WiFi.RSSI());
+    } else {
+      Serial.println(F("HUB_ALIVE: USB_ACTIVE (WiFi Standby)"));
+    }
   }
 }

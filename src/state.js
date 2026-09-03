@@ -10,7 +10,8 @@ export const state = {
   learnedCodes: JSON.parse(localStorage.getItem('learnedCodes') || '{}'),
   globalDeviceDatabase: {},
   acTemp: 24,
-  isDeviceOnline: false
+  isDeviceOnline: false,
+  hubWifiStatus: 'off'
 };
 
 // Global Config

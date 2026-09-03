@@ -72,6 +72,28 @@
               <button class="primary-btn" id="save-config" style="padding: 7px; font-size: 0.8rem;">Save & Connect</button>
             </div>
 
+            <!-- On-Demand ESP32 WiFi Controller -->
+            <div id="hub-wifi-control" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                  <i data-lucide="radio" style="width: 13px; height: 13px; color: var(--accent-color);"></i>
+                  ESP32 Hub WiFi Radio
+                </span>
+                <span id="hub-wifi-badge" style="font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; background: rgba(100,116,139,0.2); color: #94a3b8; font-weight: 600;">OFF (USB ONLY)</span>
+              </div>
+              <p style="font-size: 0.68rem; color: var(--text-secondary); margin: 0; line-height: 1.2;">
+                WiFi connects only on demand. Keep OFF for silent USB mode.
+              </p>
+              <div style="display: flex; gap: 6px; margin-top: 2px;">
+                <button class="primary-btn" id="btn-enable-hub-wifi" style="flex: 1; padding: 6px; font-size: 0.72rem; background: var(--accent-color);">
+                  <i data-lucide="wifi" style="width: 12px; height: 12px; margin-right: 4px;"></i> Turn ON
+                </button>
+                <button class="primary-btn" id="btn-disable-hub-wifi" style="flex: 1; padding: 6px; font-size: 0.72rem; background: rgba(255,255,255,0.08);">
+                  <i data-lucide="wifi-off" style="width: 12px; height: 12px; margin-right: 4px;"></i> Turn OFF
+                </button>
+              </div>
+            </div>
+
             <div style="margin-top: 4px;">
               <button class="primary-btn" id="learn-btn" style="background: var(--success); width: 100%; padding: 10px; font-size: 0.85rem;">
                 <i data-lucide="mic" style="width:15px; height:15px; margin-right:6px"></i>

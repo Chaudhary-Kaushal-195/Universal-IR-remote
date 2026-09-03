@@ -40,7 +40,7 @@ export const templates = {
       <div style="grid-column: span 3; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255,255,255,0.02); border-radius: 18px; border: 1px solid var(--glass-border);">
         <button class="remote-btn" id="AC_TEMP_DOWN" style="width: 42px; height: 42px; border-radius: 50%; aspect-ratio: 1;"><i data-lucide="minus"></i></button>
         <button class="remote-btn" id="AC_TEMP_DISPLAY" style="text-align: center; border: none; background: transparent; padding: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: auto;">
-          <h1 id="ac-temp-display" style="font-size: 2.6rem; font-weight: 300; letter-spacing: -1px; margin: 0; line-height: 1;">AC</h1>
+          <h1 id="ac-temp-display" style="font-size: 2.6rem; font-weight: 500; letter-spacing: -1px; margin: 0; line-height: 1; color: #ffffff;">AC</h1>
           <span style="color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">Climate Control</span>
         </button>
         <button class="remote-btn" id="AC_TEMP_UP" style="width: 42px; height: 42px; border-radius: 50%; aspect-ratio: 1;"><i data-lucide="plus"></i></button>

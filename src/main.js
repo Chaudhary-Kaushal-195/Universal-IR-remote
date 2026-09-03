@@ -2,8 +2,7 @@ import './style.css';
 import { registerSW } from 'virtual:pwa-register';
 import { isSupabaseEnabled, supabase } from './supabaseClient.js';
 import { state } from './state.js';
-import { initAuth, fetchCloudRemotes, syncCloudRemotes, loadGlobalDatabase } from './api.js';
-import { setupMQTT, connectUSB, scanHardware, fireSignal, handleCapture } from './hardware.js';
+import { setupMQTT, connectUSB, scanHardware, fireSignal, handleCapture, enableHubWifi, disableHubWifi, startLearning, stopLearning } from './hardware.js';
 import { renderRemote, updateStatusIndicator, toggleAC, updateAuthUI } from './ui.js';
 
 // Initialize PWA Service Worker aggressively
@@ -34,6 +33,8 @@ const wifiConnectBtn = document.getElementById('wifi-connect');
 const wifiConfig = document.getElementById('wifi-config');
 const saveWifiBtn = document.getElementById('save-config');
 const ipInput = document.getElementById('esp-ip');
+const btnEnableHubWifi = document.getElementById('btn-enable-hub-wifi');
+const btnDisableHubWifi = document.getElementById('btn-disable-hub-wifi');
 
 const hardwareModal = document.getElementById('hardware-modal');
 const closeHardwareModal = document.getElementById('close-hardware-modal');
@@ -49,6 +50,7 @@ function init() {
   updateStatusIndicator();
   renderRemote();
   setupEventListeners();
+  if (window.lucide) window.lucide.createIcons();
 
   // Core Network Setup Layer
   setupMQTT();
@@ -123,10 +125,37 @@ function setupEventListeners() {
   });
 
   // Internal Hardware Assignments
-  usbConnectBtn.addEventListener('click', connectUSB);
-  wifiConnectBtn.addEventListener('click', () => {
+  usbConnectBtn.addEventListener('click', async () => {
+    await connectUSB();
+    await disableHubWifi(); // Keep WiFi radio OFF for pure, fast USB mode
+  });
+
+  wifiConnectBtn.addEventListener('click', async () => {
+    state.connectionType = 'wifi';
+    localStorage.setItem('connectionType', 'wifi');
+    updateStatusIndicator();
+    setupMQTT();
+    await enableHubWifi(); // Automatically tell ESP32 to connect to WiFi!
     wifiConfig.style.display = wifiConfig.style.display === 'none' ? 'block' : 'none';
   });
+
+  if (btnEnableHubWifi) {
+    btnEnableHubWifi.addEventListener('click', async () => {
+      const sent = await enableHubWifi();
+      if (!sent) {
+        alert("Please connect via USB first to command the ESP32 Hub.");
+      }
+    });
+  }
+
+  if (btnDisableHubWifi) {
+    btnDisableHubWifi.addEventListener('click', async () => {
+      const sent = await disableHubWifi();
+      if (!sent) {
+        alert("Please connect via USB first to command the ESP32 Hub.");
+      }
+    });
+  }
 
   saveWifiBtn.addEventListener('click', () => {
     if (ipInput.value) {
@@ -136,6 +165,7 @@ function setupEventListeners() {
       localStorage.setItem('connectionType', 'wifi');
       updateStatusIndicator();
       setupMQTT();
+      enableHubWifi(); // Request plugged-in ESP32 to turn ON WiFi radio
       wifiConfig.style.display = 'none';
       configModal.classList.remove('active');
     }
@@ -263,6 +293,7 @@ function setupEventListeners() {
       learnBtn.classList.add('learning-mode');
       learnBtn.innerHTML = `Cancel Learning`; // Removed icon to avoid flickering, clean text
       learningStatus.textContent = `Step 1: Click a button on the virtual remote behind this modal to map it.`;
+      startLearning();
     } else {
       // Cancel
       state.isLearning = false;
@@ -272,6 +303,7 @@ function setupEventListeners() {
       if (window.lucide) lucide.createIcons();
       learningStatus.textContent = "";
       document.querySelectorAll('.remote-btn').forEach(b => b.classList.remove('learning-target'));
+      stopLearning();
     }
   });
 }
