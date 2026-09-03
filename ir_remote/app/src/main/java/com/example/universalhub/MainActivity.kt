@@ -85,6 +85,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textFan: TextView
     private lateinit var switchFan: SwitchCompat
 
+    // Hardware Status Indicator UI
+    private lateinit var hardwareStatusPill: LinearLayout
+    private lateinit var hardwareStatusDot: TextView
+    private lateinit var hardwareStatusText: TextView
+    private var isEsp32MqttOnline: Boolean = false
+
     // Floating Popup HUD Elements
     private lateinit var toastBanner: View
     private lateinit var toastIcon: TextView
@@ -137,6 +143,7 @@ class MainActivity : AppCompatActivity() {
         setupMQTT()
         setupUsbSerial()
         updateCardStates()
+        updateHardwareStatusUI()
     }
 
     private fun bindViews() {
@@ -163,6 +170,10 @@ class MainActivity : AppCompatActivity() {
         textFan = findViewById(R.id.text_fan)
         switchFan = findViewById(R.id.switch_fan)
 
+        hardwareStatusPill = findViewById(R.id.hardware_status_pill)
+        hardwareStatusDot = findViewById(R.id.hardware_status_dot)
+        hardwareStatusText = findViewById(R.id.hardware_status_text)
+
         toastBanner = findViewById(R.id.toast_banner)
         toastIcon = findViewById(R.id.toast_icon)
         toastMessage = findViewById(R.id.toast_message)
@@ -173,6 +184,12 @@ class MainActivity : AppCompatActivity() {
         btnMenu.setOnClickListener {
             triggerVibration()
             showSettingsDialog()
+        }
+
+        // Hardware Status Pill -> Connection Diagnostics Dialog
+        hardwareStatusPill.setOnClickListener {
+            triggerVibration()
+            showHardwareStatusDialog()
         }
 
         // Person -> Settings
@@ -860,13 +877,23 @@ class MainActivity : AppCompatActivity() {
                     override fun connectComplete(reconnect: Boolean, serverURI: String?) {
                         Log.d("MQTT", "Connected to HiveMQ")
                         try { client.subscribe(topicRx, 0) } catch (e: Exception) {}
+                        updateHardwareStatusUI()
                     }
                     override fun connectionLost(cause: Throwable?) {
                         Log.w("MQTT", "Connection lost", cause)
+                        isEsp32MqttOnline = false
+                        updateHardwareStatusUI()
                     }
                     override fun messageArrived(topic: String?, message: MqttMessage?) {
                         val rawData = message?.toString() ?: return
                         Log.d("MQTT", "Incoming on $topic: $rawData")
+                        if (rawData == "STATUS:ONLINE") {
+                            isEsp32MqttOnline = true
+                            updateHardwareStatusUI()
+                        } else if (rawData == "STATUS:OFFLINE") {
+                            isEsp32MqttOnline = false
+                            updateHardwareStatusUI()
+                        }
                         handleIncomingSignal(rawData)
                     }
                     override fun deliveryComplete(token: IMqttDeliveryToken?) {}
@@ -1214,17 +1241,90 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateHardwareStatusUI() {
+        runOnUiThread {
+            if (!::hardwareStatusText.isInitialized) return@runOnUiThread
+            val isUsb = usbSerialManager.isConnected
+            val boardName = usbSerialManager.connectedDeviceName
+            val isWifi = isEsp32MqttOnline
+
+            when {
+                isUsb && isWifi -> {
+                    hardwareStatusDot.text = "⚡"
+                    hardwareStatusText.text = "$boardName + ESP32 (Wi-Fi)"
+                    hardwareStatusText.setTextColor(Color.parseColor("#15803d"))
+                    hardwareStatusPill.setBackgroundResource(R.drawable.bg_profile_chip_active)
+                }
+                isUsb -> {
+                    hardwareStatusDot.text = "🔌"
+                    hardwareStatusText.text = "$boardName (USB Online)"
+                    hardwareStatusText.setTextColor(Color.parseColor("#1e3a8a"))
+                    hardwareStatusPill.setBackgroundColor(Color.parseColor("#dbeafe"))
+                }
+                isWifi -> {
+                    hardwareStatusDot.text = "🌐"
+                    hardwareStatusText.text = "ESP32 (Wi-Fi Online)"
+                    hardwareStatusText.setTextColor(Color.parseColor("#15803d"))
+                    hardwareStatusPill.setBackgroundColor(Color.parseColor("#dcfce7"))
+                }
+                mqttClient?.isConnected == true -> {
+                    hardwareStatusDot.text = "⏳"
+                    hardwareStatusText.text = "ESP32 (Wi-Fi Waiting...)"
+                    hardwareStatusText.setTextColor(Color.parseColor("#b45309"))
+                    hardwareStatusPill.setBackgroundColor(Color.parseColor("#fef3c7"))
+                }
+                else -> {
+                    hardwareStatusDot.text = "🔴"
+                    hardwareStatusText.text = "Hardware Offline"
+                    hardwareStatusText.setTextColor(Color.parseColor("#b91c1c"))
+                    hardwareStatusPill.setBackgroundResource(R.drawable.bg_profile_chip_inactive)
+                }
+            }
+        }
+    }
+
+    private fun showHardwareStatusDialog() {
+        val isUsb = usbSerialManager.isConnected
+        val boardName = if (isUsb) usbSerialManager.connectedDeviceName else "Not Detected"
+        val usbStatus = if (isUsb) "✅ ONLINE ($boardName via USB OTG)" else "❌ Disconnected"
+        val wifiStatus = when {
+            isEsp32MqttOnline -> "✅ ONLINE (ESP32 IR Hub via Wi-Fi)"
+            mqttClient?.isConnected == true -> "⏳ HiveMQ Ready (Waiting for ESP32)"
+            else -> "❌ Offline"
+        }
+
+        val msg = "🔌 USB Connection:\n• Status: $usbStatus\n• Board: $boardName\n\n🌐 Wi-Fi Hub:\n• Status: $wifiStatus\n• Target: ESP32 IR Hub\n• Broker: broker.hivemq.com\n• Topic: universalo-hub/$hubId/rx\n\n📱 Internal Phone IR:\n• Status: " + if (hasInternalIr) "✅ Available (Built-in IR)" else "❌ Not Available on this Phone"
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("📡 Hardware Status & Diagnostics")
+            .setMessage(msg)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Re-Scan USB") { _, _ ->
+                usbSerialManager.connect(userInitiated = true)
+                updateHardwareStatusUI()
+            }
+            .show()
+    }
+
     private fun setupUsbSerial() {
         usbSerialManager = UsbSerialManager(
             context = this,
             onStatusChange = { status, isConnected ->
                 runOnUiThread {
+                    updateHardwareStatusUI()
                     showModernPopup(status, if (isConnected) "🔌" else "ℹ️")
                 }
             },
             onDataReceived = { line ->
                 Log.d("USB_RX", line)
                 runOnUiThread {
+                    if (line == "STATUS:ONLINE") {
+                        isEsp32MqttOnline = true
+                        updateHardwareStatusUI()
+                    } else if (line == "STATUS:OFFLINE") {
+                        isEsp32MqttOnline = false
+                        updateHardwareStatusUI()
+                    }
                     handleIncomingSignal(line)
                 }
             }

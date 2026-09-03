@@ -203,20 +203,22 @@ export function updateStatusIndicator() {
 
   indicator.className = 'status-indicator';
   
+  const board = state.connectedBoardName && state.connectedBoardName !== 'None' ? state.connectedBoardName : 'USB Node';
+
   if (state.serialWriter && state.isDeviceOnline) {
-    indicator.innerHTML = '<i data-lucide="zap" style="width:14px; height:14px;"></i> USB + Wi-Fi';
+    indicator.innerHTML = `<i data-lucide="zap" style="width:14px; height:14px;"></i> ⚡ ${board} + ESP32 Wi-Fi`;
     indicator.classList.add('status-wifi');
   } else if (state.serialWriter) {
-    indicator.innerHTML = '<i data-lucide="usb" style="width:14px; height:14px;"></i> USB Online';
+    indicator.innerHTML = `<i data-lucide="usb" style="width:14px; height:14px;"></i> 🔌 ${board} (Online)`;
     indicator.classList.add('status-serial');
   } else if (state.isDeviceOnline) {
-    indicator.innerHTML = '<i data-lucide="wifi" style="width:14px; height:14px;"></i> Hub Online';
+    indicator.innerHTML = '<i data-lucide="wifi" style="width:14px; height:14px;"></i> 🌐 ESP32 (Wi-Fi Online)';
     indicator.classList.add('status-wifi');
   } else if (state.connectionType === 'wifi') {
-    indicator.innerHTML = '<i data-lucide="wifi" style="width:14px; height:14px;"></i> Wi-Fi Ready';
+    indicator.innerHTML = '<i data-lucide="wifi-off" style="width:14px; height:14px;"></i> ⏳ ESP32 Hub (Offline)';
     indicator.classList.add('status-demo');
   } else {
-    indicator.innerHTML = '<i data-lucide="radio" style="width:14px; height:14px;"></i> Demo Mode';
+    indicator.innerHTML = '<i data-lucide="radio" style="width:14px; height:14px;"></i> 🔴 Hardware Offline';
     indicator.classList.add('status-demo');
   }
   

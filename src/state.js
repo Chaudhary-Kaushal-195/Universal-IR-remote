@@ -16,7 +16,8 @@ export const state = {
   hubWifiStatus: 'off',
   lastCapturedSignal: null,
   lastTransmittedSignal: null,
-  lastTelemetry: null
+  lastTelemetry: null,
+  connectedBoardName: 'None'
 };
 
 // Global Config

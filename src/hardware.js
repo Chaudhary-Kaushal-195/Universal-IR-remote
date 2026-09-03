@@ -122,13 +122,32 @@ export async function performUSBConnect() {
     await state.serialPort.open({ baudRate: 115200 });
     state.serialWriter = state.serialPort.writable.getWriter();
     
+    // Identify connected board by USB Vendor ID
+    try {
+      const info = port.getInfo ? port.getInfo() : {};
+      const vid = info.usbVendorId;
+      if (vid === 0x2341 || vid === 0x2A03) {
+        state.connectedBoardName = "Arduino Uno";
+      } else if (vid === 0x10c4 || vid === 0x303a) {
+        state.connectedBoardName = "ESP32";
+      } else if (vid === 0x1a86) {
+        state.connectedBoardName = "Arduino/ESP32 (CH340)";
+      } else if (vid === 0x0403) {
+        state.connectedBoardName = "Arduino/ESP32 (FTDI)";
+      } else {
+        state.connectedBoardName = "USB Serial";
+      }
+    } catch(e) {
+      state.connectedBoardName = "USB Serial";
+    }
+
     state.connectionType = 'serial';
     localStorage.setItem('connectionType', 'serial');
     updateStatusIndicator();
     
     readSerial();
-    console.log("%c🔌 USB Serial Connected!", "color: #10b981; font-weight: bold;");
-    alert("✅ ESP32 Connected via USB!");
+    console.log(`%c🔌 USB Serial Connected: ${state.connectedBoardName}!`, "color: #10b981; font-weight: bold;");
+    alert(`✅ Connected: ${state.connectedBoardName} via USB!`);
   } catch (err) {
     if (err.name === 'NotFoundError') {
       console.log("USB picker closed without selection.");
@@ -414,15 +433,20 @@ export async function scanHardware() {
   if ('serial' in navigator) {
     try {
       const ports = await navigator.serial.getPorts();
-      if (ports.length > 0 || state.serialPort) {
+      if (state.serialWriter) {
         hwCardUsb.style.borderLeft = '3px solid var(--success)';
         hwStatusUsb.style.color = 'var(--success)';
-        hwStatusUsb.textContent = 'CONNECTED';
+        hwStatusUsb.textContent = `ONLINE: ${state.connectedBoardName}`;
+        hasHardware = true;
+      } else if (ports.length > 0 || state.serialPort) {
+        hwCardUsb.style.borderLeft = '3px solid #f59e0b';
+        hwStatusUsb.style.color = '#f59e0b';
+        hwStatusUsb.textContent = 'PORT DETECTED (TAP TO CONNECT)';
         hasHardware = true;
       } else {
         hwCardUsb.style.borderLeft = '3px solid #64748b';
         hwStatusUsb.style.color = '#64748b';
-        hwStatusUsb.textContent = 'NO PERMISSIONS';
+        hwStatusUsb.textContent = 'NOT CONNECTED';
       }
     } catch(e) {
       hwCardUsb.style.borderLeft = '3px solid var(--danger)';
@@ -438,12 +462,12 @@ export async function scanHardware() {
   if (mqttClient && mqttClient.connected) {
     hwCardWifi.style.borderLeft = '3px solid var(--success)';
     hwStatusWifi.style.color = 'var(--success)';
-    hwStatusWifi.textContent = 'CONNECTED';
-    hasHardware = true;
+    hwStatusWifi.textContent = state.isDeviceOnline ? 'ESP32 ONLINE (Wi-Fi)' : 'WAITING FOR ESP32...';
+    if (state.isDeviceOnline) hasHardware = true;
   } else {
     hwCardWifi.style.borderLeft = '3px solid #64748b';
     hwStatusWifi.style.color = '#64748b';
-    hwStatusWifi.textContent = 'DISCONNECTED';
+    hwStatusWifi.textContent = 'OFFLINE';
   }
 
   if (hasHardware) {
