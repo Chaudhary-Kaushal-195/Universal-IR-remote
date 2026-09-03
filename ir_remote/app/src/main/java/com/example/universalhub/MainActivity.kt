@@ -1368,52 +1368,55 @@ class MainActivity : AppCompatActivity() {
             when {
                 isUsb && isWifi -> {
                     hardwareStatusDot.text = "⚡"
-                    hardwareStatusText.text = "$boardName + ESP32 (Wi-Fi)"
-                    hardwareStatusText.setTextColor(Color.parseColor("#15803d"))
-                    hardwareStatusPill.setBackgroundResource(R.drawable.bg_profile_chip_active)
+                    hardwareStatusText.text = "$boardName + ESP32"
+                    hardwareStatusText.setTextColor(Color.parseColor("#0369a1"))
+                    hardwareStatusPill.setBackgroundResource(R.drawable.bg_hardware_pill_dual)
                 }
                 isUsb -> {
                     hardwareStatusDot.text = "🔌"
-                    hardwareStatusText.text = "$boardName (USB Online)"
-                    hardwareStatusText.setTextColor(Color.parseColor("#1e3a8a"))
-                    hardwareStatusPill.setBackgroundColor(Color.parseColor("#dbeafe"))
+                    hardwareStatusText.text = "$boardName (USB)"
+                    hardwareStatusText.setTextColor(Color.parseColor("#0284c7"))
+                    hardwareStatusPill.setBackgroundResource(R.drawable.bg_hardware_pill_dual)
                 }
                 isWifi -> {
                     hardwareStatusDot.text = "🌐"
                     hardwareStatusText.text = "ESP32 (Wi-Fi Online)"
                     hardwareStatusText.setTextColor(Color.parseColor("#15803d"))
-                    hardwareStatusPill.setBackgroundColor(Color.parseColor("#dcfce7"))
+                    hardwareStatusPill.setBackgroundResource(R.drawable.bg_hardware_pill_online)
                 }
                 mqttClient?.isConnected == true -> {
                     hardwareStatusDot.text = "⏳"
                     hardwareStatusText.text = "ESP32 (Wi-Fi Waiting...)"
                     hardwareStatusText.setTextColor(Color.parseColor("#b45309"))
-                    hardwareStatusPill.setBackgroundColor(Color.parseColor("#fef3c7"))
+                    hardwareStatusPill.setBackgroundResource(R.drawable.bg_hardware_pill_waiting)
                 }
                 else -> {
                     hardwareStatusDot.text = "🔴"
                     hardwareStatusText.text = "Hardware Offline"
-                    hardwareStatusText.setTextColor(Color.parseColor("#b91c1c"))
-                    hardwareStatusPill.setBackgroundResource(R.drawable.bg_profile_chip_inactive)
+                    hardwareStatusText.setTextColor(Color.parseColor("#64748b"))
+                    hardwareStatusPill.setBackgroundResource(R.drawable.bg_hardware_pill_offline)
                 }
             }
         }
     }
 
     private fun showHardwareStatusDialog() {
+        triggerVibration()
         val isUsb = usbSerialManager.isConnected
-        val boardName = if (isUsb) usbSerialManager.connectedDeviceName else "Not Detected"
-        val usbStatus = if (isUsb) "✅ ONLINE ($boardName via USB OTG)" else "❌ Disconnected"
+        val boardName = usbSerialManager.connectedDeviceName
+        val isWifi = isEsp32MqttOnline
+
+        val usbStatus = if (isUsb) "🟢 Connected ($boardName)" else "🔴 Disconnected"
         val wifiStatus = when {
-            isEsp32MqttOnline -> "✅ ONLINE (ESP32 IR Hub via Wi-Fi)"
-            mqttClient?.isConnected == true -> "⏳ HiveMQ Ready (Waiting for ESP32)"
+            isWifi -> "🟢 ESP32 Hub Online"
+            mqttClient?.isConnected == true -> "⏳ Broker Connected (Waiting for ESP32)"
             else -> "❌ Offline"
         }
 
         val msg = "🔌 USB Connection:\n• Status: $usbStatus\n• Board: $boardName\n\n🌐 Wi-Fi Hub:\n• Status: $wifiStatus\n• Target: ESP32 IR Hub\n• Broker: broker.hivemq.com\n• Topic: universalo-hub/$hubId/rx\n\n📱 Internal Phone IR:\n• Status: " + if (hasInternalIr) "✅ Available (Built-in IR)" else "❌ Not Available on this Phone"
 
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("📡 Hardware Status & Diagnostics")
+            .setTitle("📡 Hardware Diagnostics")
             .setMessage(msg)
             .setPositiveButton("OK", null)
             .setNegativeButton(if (mqttClient?.isConnected == true) "Reconnect Network" else "Connect via Network") { _, _ ->
@@ -1440,37 +1443,75 @@ class MainActivity : AppCompatActivity() {
         val ownerName = sharedPref.getString("owner_username", null)
         val isLoggedIn = sharedPref.getBoolean("is_logged_in", true)
 
-        if (ownerName == null) {
-            // 1. SIGN UP (Create Owner Account)
-            val layout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(60, 30, 60, 10)
-            }
-            val userInput = EditText(this).apply {
-                hint = "Owner Username (e.g. Kaushal)"
-                setText("Kaushal")
-            }
-            val passInput = EditText(this).apply {
-                hint = "Set Account Password"
-                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-            }
-            val hubKeyInput = EditText(this).apply {
-                hint = "Set Secret Hub Password (ESP32 Key)"
-                setText(hubPassword)
-                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-            }
-            layout.addView(userInput)
-            layout.addView(passInput)
-            layout.addView(hubKeyInput)
+        if (ownerName != null && isLoggedIn) {
+            // 1. LOGGED IN OWNER PROFILE BOTTOM SHEET
+            val bottomSheet = createCleanBottomSheet()
+            val view = layoutInflater.inflate(R.layout.dialog_user_profile, null)
+            bottomSheet.setContentView(view)
+            (view.parent as? View)?.setBackgroundColor(Color.TRANSPARENT)
+            (view.parent as? View)?.background = ColorDrawable(Color.TRANSPARENT)
 
-            androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("👤 Create Owner Security Account")
-                .setMessage("Lock your device and cloned codes so unauthorized users cannot control your appliances.")
-                .setView(layout)
-                .setPositiveButton("Sign Up & Protect") { _, _ ->
-                    val user = userInput.text.toString().trim()
-                    val pass = passInput.text.toString().trim()
-                    val hubKey = hubKeyInput.text.toString().trim()
+            val textDisplayName = view.findViewById<TextView>(R.id.text_owner_display_name)
+            val textHubKey = view.findViewById<TextView>(R.id.text_hub_key_masked)
+            val btnLock = view.findViewById<Button>(R.id.btn_lock_remote)
+            val btnClose = view.findViewById<Button>(R.id.btn_close_profile)
+
+            textDisplayName?.text = ownerName
+            var isRevealed = false
+            textHubKey?.text = "••••••••••••"
+            textHubKey?.setOnClickListener {
+                isRevealed = !isRevealed
+                textHubKey.text = if (isRevealed) hubPassword else "••••••••••••"
+            }
+
+            btnLock?.setOnClickListener {
+                triggerVibration()
+                sharedPref.edit().putBoolean("is_logged_in", false).apply()
+                bottomSheet.dismiss()
+                showModernPopup("Remote Locked! Tap Account to unlock", "🔒")
+            }
+
+            btnClose?.setOnClickListener {
+                triggerVibration()
+                bottomSheet.dismiss()
+            }
+
+            bottomSheet.show()
+        } else {
+            // 2. SIGN UP OR UNLOCK BOTTOM SHEET
+            val bottomSheet = createCleanBottomSheet()
+            val view = layoutInflater.inflate(R.layout.dialog_user_auth, null)
+            bottomSheet.setContentView(view)
+            (view.parent as? View)?.setBackgroundColor(Color.TRANSPARENT)
+            (view.parent as? View)?.background = ColorDrawable(Color.TRANSPARENT)
+
+            val titleView = view.findViewById<TextView>(R.id.text_auth_title)
+            val subtitleView = view.findViewById<TextView>(R.id.text_auth_subtitle)
+            val labelUser = view.findViewById<TextView>(R.id.label_auth_username)
+            val inputUser = view.findViewById<EditText>(R.id.input_auth_username)
+            val inputPass = view.findViewById<EditText>(R.id.input_auth_password)
+            val labelHubKey = view.findViewById<TextView>(R.id.label_auth_hub_key)
+            val inputHubKey = view.findViewById<EditText>(R.id.input_auth_hub_key)
+            val btnSubmit = view.findViewById<Button>(R.id.btn_auth_submit)
+            val btnCancel = view.findViewById<Button>(R.id.btn_auth_cancel)
+
+            if (ownerName == null) {
+                // Sign Up Mode
+                titleView?.text = "Create Owner Account"
+                subtitleView?.text = "Lock your device and cloned codes so only you can control appliances."
+                labelUser?.visibility = View.VISIBLE
+                inputUser?.visibility = View.VISIBLE
+                inputUser?.setText("Kaushal")
+                labelHubKey?.visibility = View.VISIBLE
+                inputHubKey?.visibility = View.VISIBLE
+                inputHubKey?.setText(hubPassword)
+                btnSubmit?.text = "Create Account & Protect"
+
+                btnSubmit?.setOnClickListener {
+                    triggerVibration()
+                    val user = inputUser?.text?.toString()?.trim() ?: ""
+                    val pass = inputPass?.text?.toString()?.trim() ?: ""
+                    val hubKey = inputHubKey?.text?.toString()?.trim() ?: ""
                     if (user.isNotEmpty() && pass.isNotEmpty()) {
                         sharedPref.edit()
                             .putString("owner_username", user)
@@ -1479,52 +1520,42 @@ class MainActivity : AppCompatActivity() {
                             .putBoolean("is_logged_in", true)
                             .apply()
                         if (hubKey.isNotEmpty()) hubPassword = hubKey
+                        bottomSheet.dismiss()
                         showModernPopup("Owner Account Created! Protected 🔒", "✅")
                     } else {
-                        showModernPopup("Please enter both username and password", "⚠️")
+                        showModernPopup("Please enter username and password", "⚠️")
                     }
                 }
-                .setNegativeButton("Cancel", null)
-                .show()
-        } else if (!isLoggedIn) {
-            // 2. LOGIN (Unlock Remote)
-            val layout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(60, 30, 60, 10)
-            }
-            val passInput = EditText(this).apply {
-                hint = "Enter Password to Unlock"
-                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
-            }
-            layout.addView(passInput)
+            } else {
+                // Login / Unlock Mode
+                titleView?.text = "Unlock Remote: $ownerName"
+                subtitleView?.text = "Enter your security password to control appliances."
+                labelUser?.visibility = View.GONE
+                inputUser?.visibility = View.GONE
+                labelHubKey?.visibility = View.GONE
+                inputHubKey?.visibility = View.GONE
+                btnSubmit?.text = "Unlock Remote 🔓"
 
-            androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("🔒 Remote Locked: $ownerName")
-                .setMessage("Enter your password to unlock the IR remote and control appliances.")
-                .setView(layout)
-                .setPositiveButton("Log In / Unlock") { _, _ ->
-                    val enteredPass = passInput.text.toString().trim()
+                btnSubmit?.setOnClickListener {
+                    triggerVibration()
+                    val enteredPass = inputPass?.text?.toString()?.trim() ?: ""
                     val savedPass = sharedPref.getString("owner_password", "")
                     if (enteredPass == savedPass) {
                         sharedPref.edit().putBoolean("is_logged_in", true).apply()
+                        bottomSheet.dismiss()
                         showModernPopup("Welcome back, $ownerName! Unlocked 🔓", "✅")
                     } else {
                         showModernPopup("Incorrect password! Access denied ⛔", "❌")
                     }
                 }
-                .setNegativeButton("Cancel", null)
-                .show()
-        } else {
-            // 3. LOGGED IN STATUS & LOGOUT / LOCK
-            androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("👤 Owner Account: $ownerName")
-                .setMessage("🟢 Status: Logged In & Authorized\n🔑 Hub Password: Active ($hubPassword)\n📦 Cloned Codes: Secured on this Device")
-                .setPositiveButton("OK", null)
-                .setNegativeButton("Lock / Log Out") { _, _ ->
-                    sharedPref.edit().putBoolean("is_logged_in", false).apply()
-                    showModernPopup("Remote Locked! Login required to control", "🔒")
-                }
-                .show()
+            }
+
+            btnCancel?.setOnClickListener {
+                triggerVibration()
+                bottomSheet.dismiss()
+            }
+
+            bottomSheet.show()
         }
     }
 

@@ -46,11 +46,10 @@
                 <LinearLayout
                     android:id="@+id/hardware_status_pill"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_centerInParent="true"
-                    android:background="@drawable/bg_profile_chip_inactive"
+                    android:background="@drawable/bg_hardware_pill_offline"
                     android:paddingHorizontal="14dp"
-                    android:paddingVertical="7dp"
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:clickable="true"
@@ -61,17 +60,19 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="🔴"
-                        android:textSize="11sp"
-                        android:layout_marginEnd="5dp" />
+                        android:textSize="12sp"
+                        android:layout_marginEnd="6dp" />
 
                     <TextView
                         android:id="@+id/hardware_status_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Offline"
-                        android:textSize="11sp"
+                        android:text="Hardware Offline"
+                        android:textSize="11.5sp"
                         android:textStyle="bold"
-                        android:textColor="#475569" />
+                        android:textColor="#475569"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.01" />
                 </LinearLayout>
 
                 <!-- Person / Account Icon -->

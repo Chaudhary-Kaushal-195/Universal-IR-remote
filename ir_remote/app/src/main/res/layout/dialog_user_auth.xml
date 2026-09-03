@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_sheet"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="28dp">
+
+    <!-- Drag Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_drag_handle"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Header Block -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:id="@+id/text_auth_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Owner Account"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#0F172A"
+            android:fontFamily="sans-serif-medium" />
+
+        <TextView
+            android:id="@+id/text_auth_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lock your device and cloned codes so only you can control appliances."
+            android:textSize="12sp"
+            android:textColor="#64748B"
+            android:fontFamily="sans-serif"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+    <!-- Username Field (Sign-up only) -->
+    <TextView
+        android:id="@+id/label_auth_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OWNER USERNAME"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="#64748B"
+        android:letterSpacing="0.06"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/input_auth_username"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_sheet_btn"
+        android:textColor="#0F172A"
+        android:textColorHint="#94A3B8"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:hint="e.g. Kaushal"
+        android:paddingHorizontal="16dp"
+        android:singleLine="true"
+        android:layout_marginBottom="14dp" />
+
+    <!-- Password Field -->
+    <TextView
+        android:id="@+id/label_auth_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SECURITY PASSWORD"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="#64748B"
+        android:letterSpacing="0.06"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/input_auth_password"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_sheet_btn"
+        android:textColor="#0F172A"
+        android:textColorHint="#94A3B8"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:hint="Enter Account Password"
+        android:inputType="textPassword"
+        android:paddingHorizontal="16dp"
+        android:singleLine="true"
+        android:layout_marginBottom="14dp" />
+
+    <!-- Secret Hub Key Field (Sign-up only) -->
+    <TextView
+        android:id="@+id/label_auth_hub_key"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ESP32 HUB SECRET PASSWORD"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="#64748B"
+        android:letterSpacing="0.06"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/input_auth_hub_key"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_sheet_btn"
+        android:textColor="#0F172A"
+        android:textColorHint="#94A3B8"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:hint="Secret Hardware Key"
+        android:inputType="textPassword"
+        android:paddingHorizontal="16dp"
+        android:singleLine="true"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Submit Action Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_auth_submit"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="@drawable/bg_sheet_btn_active"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:text="Create Account &amp; Protect"
+        android:textAllCaps="false"
+        android:fontFamily="sans-serif-medium"
+        android:stateListAnimator="@null"
+        android:layout_marginBottom="10dp" />
+
+    <!-- Cancel Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_auth_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:background="@drawable/bg_sheet_btn"
+        android:textColor="#64748B"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:text="Cancel"
+        android:textAllCaps="false"
+        android:fontFamily="sans-serif-medium"
+        android:stateListAnimator="@null" />
+
+</LinearLayout>
