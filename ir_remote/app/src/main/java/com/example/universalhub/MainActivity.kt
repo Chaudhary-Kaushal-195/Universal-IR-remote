@@ -121,6 +121,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Force IPv4 networking to eliminate broken IPv6 route drops on cellular/Wi-Fi
+        System.setProperty("java.net.preferIPv4Stack", "true")
+        System.setProperty("java.net.preferIPv6Addresses", "false")
+
         sharedPref = getSharedPreferences("LearnedCodes", Context.MODE_PRIVATE)
         profileManager = ProfileManager(sharedPref)
 
@@ -901,6 +905,29 @@ class MainActivity : AppCompatActivity() {
     // ========================================================
     // MQTT & TRANSMISSION & CAPTURE
     // ========================================================
+    private fun resolveBrokerUrl(originalBroker: String): String {
+        return try {
+            val uri = java.net.URI(originalBroker)
+            val host = uri.host ?: return originalBroker
+            val port = if (uri.port > 0) uri.port else 1883
+            val scheme = uri.scheme ?: "tcp"
+            
+            // Force IPv4 lookup to bypass broken IPv6 mobile routes
+            val ipv4 = java.net.InetAddress.getAllByName(host)
+                .firstOrNull { it is java.net.Inet4Address }
+                ?.hostAddress
+
+            if (ipv4 != null) {
+                "$scheme://$ipv4:$port"
+            } else {
+                originalBroker
+            }
+        } catch (e: Exception) {
+            Log.w("MQTT", "Failed to resolve IPv4, using original", e)
+            originalBroker
+        }
+    }
+
     private fun setupMQTT(onComplete: ((Boolean, String?) -> Unit)? = null) {
         bgExecutor.execute {
             try {
@@ -910,9 +937,12 @@ class MainActivity : AppCompatActivity() {
                     mqttClient = null
                 }
 
+                val resolvedBroker = resolveBrokerUrl(broker)
+                Log.d("MQTT", "Connecting to resolved broker: $resolvedBroker (original: $broker)")
+
                 val currentClientId = "AndroidHub_" + System.currentTimeMillis() + "_" + (1000..9999).random()
                 val persistence = MemoryPersistence()
-                val client = MqttClient(broker, currentClientId, persistence)
+                val client = MqttClient(resolvedBroker, currentClientId, persistence)
                 mqttClient = client
 
                 val connOpts = MqttConnectOptions().apply {
