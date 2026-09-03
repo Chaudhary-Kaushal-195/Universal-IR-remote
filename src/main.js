@@ -45,6 +45,7 @@ const modalTabs = document.querySelectorAll('.modal-tab');
 const exportCodesBtn = document.getElementById('export-codes-btn');
 const importCodesBtn = document.getElementById('import-codes-btn');
 const importFileInput = document.getElementById('import-file-input');
+const pasteCodesBtn = document.getElementById('paste-codes-btn');
 
 function init() {
   updateStatusIndicator();
@@ -257,6 +258,59 @@ function setupEventListeners() {
     }
   });
 
+  // Smart Normalization for Android App and Web App JSON Backups
+  function normalizeImportedCodes(data) {
+    if (!data || typeof data !== 'object') return {};
+    const normalized = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      // Skip non-signal metadata like "active_profile_AC": "0"
+      if (!value || typeof value !== 'object' || !value.values) {
+        continue;
+      }
+
+      // Strip Android app prefix: "code_AC_0_AC_TEMP_19" -> "AC_TEMP_19"
+      let cleanKey = key;
+      const prefixMatch = key.match(/^code_[A-Za-z0-9]+_[0-9]+_(.+)$/);
+      if (prefixMatch) {
+        cleanKey = prefixMatch[1];
+      }
+
+      const payload = {
+        type: value.type || 'raw',
+        len: String(value.len || (value.values.split(',').length + 1)),
+        values: String(value.values).trim()
+      };
+
+      normalized[cleanKey] = payload;
+
+      // Smart mapping for Light: if AC_LIGHT is present, also map AC_LIGHT_ON and AC_LIGHT_OFF
+      if (cleanKey === 'AC_LIGHT') {
+        if (!normalized['AC_LIGHT_ON']) normalized['AC_LIGHT_ON'] = payload;
+        if (!normalized['AC_LIGHT_OFF']) normalized['AC_LIGHT_OFF'] = payload;
+      }
+    }
+    return normalized;
+  }
+
+  function applyImportedData(rawJson) {
+    const importedData = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
+    const normalized = normalizeImportedCodes(importedData);
+    const count = Object.keys(normalized).length;
+    
+    if (count === 0) {
+      throw new Error("No valid IR signal codes found in JSON.");
+    }
+
+    // Merge into state and localStorage
+    state.learnedCodes = { ...state.learnedCodes, ...normalized };
+    localStorage.setItem('learnedCodes', JSON.stringify(state.learnedCodes));
+    
+    syncCloudRemotes();
+    renderRemote();
+    return count;
+  }
+
   importCodesBtn.addEventListener('click', () => importFileInput.click());
 
   importFileInput.addEventListener('change', (e) => {
@@ -266,22 +320,42 @@ function setupEventListeners() {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const importedData = JSON.parse(event.target.result);
-        
-        // Safety check: merge instead of overwrite to prevent accidental loss
-        state.learnedCodes = { ...state.learnedCodes, ...importedData };
-        localStorage.setItem('learnedCodes', JSON.stringify(state.learnedCodes));
-        
-        syncCloudRemotes();
-        renderRemote();
-        alert("Import Successful! Your codes have been merged.");
+        const count = applyImportedData(event.target.result);
+        alert(`✅ Import Successful! ${count} IR button codes have been imported and mapped.`);
       } catch (err) {
-        alert("Import failed: File is not a valid JSON clone database.");
+        console.error("Import error:", err);
+        alert("Import failed: " + err.message);
       }
       importFileInput.value = ''; // Reset for next use
     };
     reader.readAsText(file);
   });
+
+  if (pasteCodesBtn) {
+    pasteCodesBtn.addEventListener('click', async () => {
+      let text = '';
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          text = await navigator.clipboard.readText();
+        }
+      } catch (clipErr) {
+        console.warn("Clipboard read not permitted, falling back to prompt.", clipErr);
+      }
+
+      if (!text || !text.includes('{')) {
+        text = prompt("Paste your JSON code database here:");
+      }
+
+      if (!text) return;
+
+      try {
+        const count = applyImportedData(text);
+        alert(`✅ Import Successful! ${count} IR button codes have been imported and mapped.`);
+      } catch (err) {
+        alert("Import failed: " + err.message);
+      }
+    });
+  }
 
   // Main UI Grid Traversal (Dispatch Loop)
   remoteContent.addEventListener('click', async (e) => {
