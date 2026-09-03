@@ -697,6 +697,8 @@ class MainActivity : AppCompatActivity() {
         bottomSheet.setContentView(view)
         (view.parent as? View)?.setBackgroundColor(Color.TRANSPARENT)
         (view.parent as? View)?.background = ColorDrawable(Color.TRANSPARENT)
+        bottomSheet.behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+        bottomSheet.behavior.skipCollapsed = true
 
         val switchLearnMode = view.findViewById<SwitchCompat>(R.id.switch_learn_mode)
         val textUsbStatus = view.findViewById<TextView>(R.id.text_usb_status)
