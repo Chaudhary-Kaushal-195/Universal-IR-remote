@@ -772,14 +772,14 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 showModernPopup("Connecting to ESP32 via Network...", "🌐")
-                setupMQTT { success ->
+                setupMQTT { success, errMsg ->
                     runOnUiThread {
                         updateNetworkUi()
                         updateHardwareStatusUI()
                         if (success) {
                             showModernPopup("Connected to Network Broker! 🌐", "✅")
                         } else {
-                            showModernPopup("Network Connection Failed", "❌")
+                            showModernPopup("Network Failed: $errMsg", "❌")
                         }
                     }
                 }
@@ -901,21 +901,24 @@ class MainActivity : AppCompatActivity() {
     // ========================================================
     // MQTT & TRANSMISSION & CAPTURE
     // ========================================================
-    private fun setupMQTT(onComplete: ((Boolean) -> Unit)? = null) {
+    private fun setupMQTT(onComplete: ((Boolean, String?) -> Unit)? = null) {
         bgExecutor.execute {
             try {
-                if (mqttClient != null && mqttClient!!.isConnected) {
-                    try { mqttClient?.disconnect() } catch (e: Exception) {}
+                if (mqttClient != null) {
+                    try { if (mqttClient!!.isConnected) mqttClient?.disconnect() } catch (e: Exception) {}
+                    try { mqttClient?.close() } catch (e: Exception) {}
+                    mqttClient = null
                 }
 
+                val currentClientId = "AndroidHub_" + System.currentTimeMillis() + "_" + (1000..9999).random()
                 val persistence = MemoryPersistence()
-                val client = MqttClient(broker, clientId, persistence)
+                val client = MqttClient(broker, currentClientId, persistence)
                 mqttClient = client
 
                 val connOpts = MqttConnectOptions().apply {
                     isCleanSession = true
-                    connectionTimeout = 10
-                    keepAliveInterval = 30
+                    connectionTimeout = 15
+                    keepAliveInterval = 60
                     isAutomaticReconnect = true
                 }
 
@@ -946,10 +949,18 @@ class MainActivity : AppCompatActivity() {
                 })
 
                 client.connect(connOpts)
-                onComplete?.invoke(true)
+                Log.d("MQTT", "Successfully connected to $broker with ID $currentClientId")
+                onComplete?.invoke(true, null)
             } catch (e: Exception) {
-                Log.e("MQTT", "Error connecting", e)
-                onComplete?.invoke(false)
+                Log.e("MQTT", "Error connecting: ${e.message}", e)
+                val errorMsg = when {
+                    e.message?.contains("Unable to resolve host", ignoreCase = true) == true -> "No Internet (Cannot resolve broker)"
+                    e.message?.contains("timed out", ignoreCase = true) == true -> "Connection Timed Out"
+                    e.message?.contains("refused", ignoreCase = true) == true -> "Connection Refused"
+                    e.message?.contains("32100") == true -> "Client was already active"
+                    else -> e.localizedMessage ?: e.message ?: "Network Error"
+                }
+                onComplete?.invoke(false, errorMsg)
             }
         }
     }
@@ -1349,13 +1360,13 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton("OK", null)
             .setNegativeButton(if (mqttClient?.isConnected == true) "Reconnect Network" else "Connect via Network") { _, _ ->
                 showModernPopup("Connecting to ESP32 via Network...", "🌐")
-                setupMQTT { success ->
+                setupMQTT { success, errMsg ->
                     runOnUiThread {
                         updateHardwareStatusUI()
                         if (success) {
                             showModernPopup("Connected to Network Broker! 🌐", "✅")
                         } else {
-                            showModernPopup("Network Connection Failed", "❌")
+                            showModernPopup("Network Failed: $errMsg", "❌")
                         }
                     }
                 }
