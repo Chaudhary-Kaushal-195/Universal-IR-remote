@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_sheet"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="28dp">
+
+    <!-- Drag Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_drag_handle"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Header Block -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="18dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📡 Hardware Diagnostics"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#0F172A"
+            android:fontFamily="sans-serif-medium" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Real-time transmitter bridge status &amp; connection control"
+            android:textSize="12sp"
+            android:textColor="#64748B"
+            android:fontFamily="sans-serif"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+    <!-- 1. Wi-Fi MQTT Hub Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_sheet_btn"
+        android:padding="16dp"
+        android:layout_marginBottom="12dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_alignParentStart="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🌐"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ESP32 Wi-Fi Hub"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/badge_diag_wifi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="🟢 Online"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#16A34A"
+                android:background="@drawable/bg_sheet_btn_green"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="3dp" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/text_diag_wifi_broker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Broker: broker.hivemq.com (IPv4 Verified)"
+            android:textSize="11.5sp"
+            android:textColor="#64748B"
+            android:fontFamily="sans-serif"
+            android:layout_marginBottom="3dp" />
+
+        <TextView
+            android:id="@+id/text_diag_wifi_topic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Topic: universalo-hub/kaushal-ir-hub-97/rx"
+            android:textSize="11.5sp"
+            android:textColor="#64748B"
+            android:fontFamily="sans-serif"
+            android:layout_marginBottom="12dp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_diag_network_action"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_sheet_btn_active"
+            android:textColor="#FFFFFF"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            android:text="Reconnect Network"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-medium"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+    <!-- 2. USB Serial Emitter Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_sheet_btn"
+        android:padding="16dp"
+        android:layout_marginBottom="12dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_alignParentStart="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔌"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="USB OTG Serial"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/badge_diag_usb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="🔴 Disconnected"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#64748B"
+                android:background="@drawable/bg_sheet_btn"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="3dp" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/text_diag_usb_board"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Board: None Detected"
+            android:textSize="11.5sp"
+            android:textColor="#64748B"
+            android:fontFamily="sans-serif"
+            android:layout_marginBottom="3dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Speed: 115200 Baud (Hardware-Timed Chunking)"
+            android:textSize="11.5sp"
+            android:textColor="#64748B"
+            android:fontFamily="sans-serif"
+            android:layout_marginBottom="12dp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_diag_usb_rescan"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_sheet_btn"
+            android:textColor="#0F172A"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            android:text="🔄 Re-Scan USB Port"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-medium"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+    <!-- 3. Internal Phone IR Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_sheet_btn"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📱"
+            android:textSize="18sp"
+            android:layout_marginEnd="10dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Internal Phone IR Blaster"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#0F172A"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/text_diag_internal_ir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Not Available on this Phone"
+                android:textSize="11.5sp"
+                android:textColor="#64748B"
+                android:fontFamily="sans-serif" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/badge_diag_internal_ir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="❌ N/A"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#64748B"
+            android:background="@drawable/bg_sheet_btn"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp" />
+    </LinearLayout>
+
+    <!-- Close / Done Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_diag_done"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="@drawable/bg_sheet_btn_active"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:text="Done"
+        android:textAllCaps="false"
+        android:fontFamily="sans-serif-medium"
+        android:stateListAnimator="@null" />
+
+</LinearLayout>

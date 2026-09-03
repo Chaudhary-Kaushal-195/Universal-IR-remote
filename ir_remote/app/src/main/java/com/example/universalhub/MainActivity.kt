@@ -1402,41 +1402,113 @@ class MainActivity : AppCompatActivity() {
 
     private fun showHardwareStatusDialog() {
         triggerVibration()
-        val isUsb = usbSerialManager.isConnected
-        val boardName = usbSerialManager.connectedDeviceName
-        val isWifi = isEsp32MqttOnline
+        val bottomSheet = createCleanBottomSheet()
+        val view = layoutInflater.inflate(R.layout.dialog_hardware_diagnostics, null)
+        bottomSheet.setContentView(view)
+        (view.parent as? View)?.setBackgroundColor(Color.TRANSPARENT)
+        (view.parent as? View)?.background = ColorDrawable(Color.TRANSPARENT)
 
-        val usbStatus = if (isUsb) "🟢 Connected ($boardName)" else "🔴 Disconnected"
-        val wifiStatus = when {
-            isWifi -> "🟢 ESP32 Hub Online"
-            mqttClient?.isConnected == true -> "⏳ Broker Connected (Waiting for ESP32)"
-            else -> "❌ Offline"
+        val badgeWifi = view.findViewById<TextView>(R.id.badge_diag_wifi)
+        val textWifiTopic = view.findViewById<TextView>(R.id.text_diag_wifi_topic)
+        val btnNetworkAction = view.findViewById<Button>(R.id.btn_diag_network_action)
+
+        val badgeUsb = view.findViewById<TextView>(R.id.badge_diag_usb)
+        val textUsbBoard = view.findViewById<TextView>(R.id.text_diag_usb_board)
+        val btnUsbRescan = view.findViewById<Button>(R.id.btn_diag_usb_rescan)
+
+        val badgeInternalIr = view.findViewById<TextView>(R.id.badge_diag_internal_ir)
+        val textInternalIr = view.findViewById<TextView>(R.id.text_diag_internal_ir)
+        val btnDone = view.findViewById<Button>(R.id.btn_diag_done)
+
+        // 1. Wi-Fi Status
+        textWifiTopic?.text = "Topic: universalo-hub/$hubId/rx"
+        val isWifi = isEsp32MqttOnline
+        when {
+            isWifi -> {
+                badgeWifi?.text = "🟢 Online"
+                badgeWifi?.setTextColor(Color.parseColor("#16A34A"))
+                badgeWifi?.setBackgroundResource(R.drawable.bg_sheet_btn_green)
+                btnNetworkAction?.text = "Reconnect Network"
+            }
+            mqttClient?.isConnected == true -> {
+                badgeWifi?.text = "⏳ Waiting for ESP32"
+                badgeWifi?.setTextColor(Color.parseColor("#D97706"))
+                badgeWifi?.setBackgroundResource(R.drawable.bg_hardware_pill_waiting)
+                btnNetworkAction?.text = "Reconnect Network"
+            }
+            else -> {
+                badgeWifi?.text = "🔴 Offline"
+                badgeWifi?.setTextColor(Color.parseColor("#DC2626"))
+                badgeWifi?.setBackgroundResource(R.drawable.bg_sheet_btn_red)
+                btnNetworkAction?.text = "Connect via Network"
+            }
         }
 
-        val msg = "🔌 USB Connection:\n• Status: $usbStatus\n• Board: $boardName\n\n🌐 Wi-Fi Hub:\n• Status: $wifiStatus\n• Target: ESP32 IR Hub\n• Broker: broker.hivemq.com\n• Topic: universalo-hub/$hubId/rx\n\n📱 Internal Phone IR:\n• Status: " + if (hasInternalIr) "✅ Available (Built-in IR)" else "❌ Not Available on this Phone"
-
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("📡 Hardware Diagnostics")
-            .setMessage(msg)
-            .setPositiveButton("OK", null)
-            .setNegativeButton(if (mqttClient?.isConnected == true) "Reconnect Network" else "Connect via Network") { _, _ ->
-                showModernPopup("Connecting to ESP32 via Network...", "🌐")
-                setupMQTT { success, errMsg ->
-                    runOnUiThread {
-                        updateHardwareStatusUI()
-                        if (success) {
-                            showModernPopup("Connected to Network Broker! 🌐", "✅")
-                        } else {
-                            showModernPopup("Network Failed: $errMsg", "❌")
-                        }
+        btnNetworkAction?.setOnClickListener {
+            triggerVibration()
+            showModernPopup("Connecting to ESP32 via Network...", "🌐")
+            setupMQTT { success, errMsg ->
+                runOnUiThread {
+                    updateHardwareStatusUI()
+                    if (success) {
+                        showModernPopup("Connected to Network Broker! 🌐", "✅")
+                        badgeWifi?.text = "🟢 Online"
+                        badgeWifi?.setTextColor(Color.parseColor("#16A34A"))
+                        badgeWifi?.setBackgroundResource(R.drawable.bg_sheet_btn_green)
+                    } else {
+                        showModernPopup("Network Failed: $errMsg", "❌")
                     }
                 }
             }
-            .setNeutralButton("Re-Scan USB") { _, _ ->
-                usbSerialManager.connect(userInitiated = true)
-                updateHardwareStatusUI()
+        }
+
+        // 2. USB Status
+        val isUsb = usbSerialManager.isConnected
+        val boardName = usbSerialManager.connectedDeviceName
+        if (isUsb) {
+            badgeUsb?.text = "🟢 Connected"
+            badgeUsb?.setTextColor(Color.parseColor("#16A34A"))
+            badgeUsb?.setBackgroundResource(R.drawable.bg_sheet_btn_green)
+            textUsbBoard?.text = "Board: $boardName (Active)"
+        } else {
+            badgeUsb?.text = "🔴 Disconnected"
+            badgeUsb?.setTextColor(Color.parseColor("#64748B"))
+            badgeUsb?.setBackgroundResource(R.drawable.bg_sheet_btn)
+            textUsbBoard?.text = "Board: None Detected"
+        }
+
+        btnUsbRescan?.setOnClickListener {
+            triggerVibration()
+            usbSerialManager.connect(userInitiated = true)
+            updateHardwareStatusUI()
+            val reconnected = usbSerialManager.isConnected
+            if (reconnected) {
+                badgeUsb?.text = "🟢 Connected"
+                badgeUsb?.setTextColor(Color.parseColor("#16A34A"))
+                badgeUsb?.setBackgroundResource(R.drawable.bg_sheet_btn_green)
+                textUsbBoard?.text = "Board: ${usbSerialManager.connectedDeviceName} (Active)"
             }
-            .show()
+        }
+
+        // 3. Internal Phone IR
+        if (hasInternalIr) {
+            badgeInternalIr?.text = "✅ Active"
+            badgeInternalIr?.setTextColor(Color.parseColor("#16A34A"))
+            badgeInternalIr?.setBackgroundResource(R.drawable.bg_sheet_btn_green)
+            textInternalIr?.text = "Consumer IR Transmitter Ready"
+        } else {
+            badgeInternalIr?.text = "❌ N/A"
+            badgeInternalIr?.setTextColor(Color.parseColor("#64748B"))
+            badgeInternalIr?.setBackgroundResource(R.drawable.bg_sheet_btn)
+            textInternalIr?.text = "Not Supported on this Device"
+        }
+
+        btnDone?.setOnClickListener {
+            triggerVibration()
+            bottomSheet.dismiss()
+        }
+
+        bottomSheet.show()
     }
 
     private fun showUserAccountSecurityDialog() {
