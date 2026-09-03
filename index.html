@@ -60,11 +60,11 @@
           <div class="modal-pane" id="pane-hardware" style="display: flex; flex-direction: column; gap: 10px;">
             <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: -2px;">Choose Connection Bridge:</p>
             <div style="display: flex; gap: 8px;">
-              <button class="primary-btn" id="wifi-connect" style="flex: 1.2; padding: 10px 8px; font-size: 0.82rem; background: var(--card-green-bg); color: var(--card-green-text); border: 2.2px solid var(--card-green-border); box-shadow: 2px 2.5px 0px var(--card-green-border);">
-                <i data-lucide="wifi" style="width: 16px; height: 16px;"></i> Wi-Fi (Phone & Wireless)
+              <button class="primary-btn" id="wifi-connect" style="flex: 1; padding: 10px 8px; font-size: 0.82rem; background: var(--card-green-bg); color: var(--card-green-text); border: 2.2px solid var(--card-green-border); box-shadow: 2px 2.5px 0px var(--card-green-border);">
+                <i data-lucide="wifi" style="width: 16px; height: 16px;"></i> Wi-Fi
               </button>
-              <button class="primary-btn" id="usb-connect" style="flex: 0.8; padding: 10px 6px; font-size: 0.78rem; background: #f1f5f9; color: #475569; border: 2px solid #64748b; box-shadow: 2px 2px 0px #64748b;">
-                <i data-lucide="usb" style="width: 14px; height: 14px;"></i> USB (PC Only)
+              <button class="primary-btn" id="usb-connect" style="flex: 1; padding: 10px 8px; font-size: 0.82rem; background: var(--card-blue-bg); color: var(--card-blue-text); border: 2.2px solid var(--card-blue-border); box-shadow: 2px 2.5px 0px var(--card-blue-border);">
+                <i data-lucide="usb" style="width: 16px; height: 16px;"></i> USB Serial
               </button>
             </div>
 
@@ -154,6 +154,28 @@
             </div>
           </div>
 
+        </div>
+      </div>
+
+      <!-- USB Connection Confirmation Request Dialog (Matches User Request) -->
+      <div class="modal" id="usb-confirm-modal" style="z-index: 1500;">
+        <div class="modal-content" style="max-width: 320px; padding: 22px 18px; text-align: center; gap: 14px; border-radius: 24px; background: #ffffff; border: 3px solid var(--card-blue-border); box-shadow: 6px 8px 0px var(--card-blue-border);">
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--card-blue-bg); border: 2.5px solid var(--card-blue-border); display: flex; align-items: center; justify-content: center; box-shadow: 2px 3px 0px var(--card-blue-border);">
+              <i data-lucide="usb" style="width: 24px; height: 24px; color: var(--card-blue-border);"></i>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 900; color: #0f172a; margin-top: 2px; letter-spacing: -0.3px;">USB connection request</h3>
+            <p style="font-size: 0.88rem; font-weight: 700; color: #334155; line-height: 1.45;">Allow IR Remote to access USB Serial?</p>
+            <p style="font-size: 0.74rem; color: #64748b; margin-top: -4px;">(Connect your ESP32 via USB cable or phone OTG adapter)</p>
+          </div>
+          <div style="display: flex; gap: 10px; width: 100%; margin-top: 4px;">
+            <button class="primary-btn" id="btn-cancel-usb" style="flex: 1; padding: 10px; font-size: 0.88rem; background: #f1f5f9; color: #475569; border: 2.2px solid #64748b; box-shadow: 2px 2.5px 0px #64748b;">
+              Cancel
+            </button>
+            <button class="primary-btn" id="btn-confirm-usb" style="flex: 1; padding: 10px; font-size: 0.88rem; background: var(--card-purple-bg); color: var(--card-purple-text); border: 2.2px solid var(--card-purple-border); box-shadow: 2px 2.5px 0px var(--card-purple-border);">
+              OK
+            </button>
+          </div>
         </div>
       </div>
 

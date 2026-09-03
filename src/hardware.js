@@ -65,14 +65,9 @@ export function setupMQTT() {
   });
 }
 
-export async function connectUSB() {
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isMobile || !('serial' in navigator)) {
-    alert("📱 Phones connect to the ESP32 wirelessly via Wi-Fi!\n\nNo cable needed. Switched to Wi-Fi mode.");
-    state.connectionType = 'wifi';
-    localStorage.setItem('connectionType', 'wifi');
-    updateStatusIndicator();
-    setupMQTT();
+export async function performUSBConnect() {
+  if (!('serial' in navigator)) {
+    alert("Web Serial is not supported in this browser. Use Chrome (on PC or Android with a USB-OTG adapter).");
     return;
   }
   
@@ -86,10 +81,26 @@ export async function connectUSB() {
     updateStatusIndicator();
     
     readSerial();
+    console.log("%c🔌 USB Serial Connected!", "color: #10b981; font-weight: bold;");
   } catch (err) {
-    alert("Serial Connection Failed: " + err.message);
+    if (err.name === 'NotFoundError') {
+      console.log("USB picker closed without selection.");
+    } else {
+      console.warn("Serial Connection notice:", err.message);
+    }
   }
 }
+
+export function promptUSBConnect() {
+  const modal = document.getElementById('usb-confirm-modal');
+  if (modal) {
+    modal.classList.add('active');
+  } else {
+    performUSBConnect();
+  }
+}
+
+export const connectUSB = promptUSBConnect;
 
 async function readSerial() {
   const reader = state.serialPort.readable.getReader();
@@ -348,37 +359,38 @@ export async function fireSignal(buttonId) {
   }
 
   const payload = signal.len + ":" + signal.values;
+  let transmitted = false;
 
-  if (state.connectionType === 'serial' && state.serialWriter) {
+  // 1. Send via USB Serial if connected
+  if (state.serialWriter) {
     flashStatus('fire');
     const encoder = new TextEncoder();
     const fullPayload = "SEND_RAW:" + payload + "\n";
     
-    // Chunk transmission to prevent Arduino 64-byte RX buffer overrun
     for (let i = 0; i < fullPayload.length; i += 32) {
       const chunk = fullPayload.substring(i, i + 32);
       await state.serialWriter.write(encoder.encode(chunk));
-      await new Promise(res => setTimeout(res, 5)); // 5ms breathing room
+      await new Promise(res => setTimeout(res, 5));
     }
-  } else if (state.connectionType === 'wifi') {
-    flashStatus('fire');
+    transmitted = true;
+    console.log("%c🔌 [USB TX] Dispatched via Serial", "color: #10b981; font-weight: bold;");
+  }
 
-    // Prepare JSON payload for ESP32
+  // 2. Send via Wi-Fi MQTT if connected
+  if (mqttClient && mqttClient.connected) {
+    flashStatus('fire');
     const wifiPayload = JSON.stringify({
       type: 'raw',
       len: parseInt(signal.len),
       values: signal.values
     });
+    mqttClient.publish(MQTT_TOPIC_TX, wifiPayload);
+    transmitted = true;
+    console.log("%c🌐 [MQTT TX] Dispatched via Wi-Fi", "color: #3b82f6; font-weight: bold;");
+  }
 
-    if (mqttClient && mqttClient.connected) {
-      mqttClient.publish(MQTT_TOPIC_TX, wifiPayload);
-      console.log("%c🌐 [MQTT TX] JSON Payload Dispatch to ESP32...", "color: #3b82f6;");
-      console.log("Payload:", wifiPayload);
-    } else {
-      alert("ESP32 is offline. Please check its power and WiFi connection.");
-      console.warn("MQTT Not Connected. Cannot emit signal over WiFi.");
-    }
-  } else if (state.connectionType === 'demo') {
+  // 3. Fallback Demo flash if neither physical bridge is connected
+  if (!transmitted) {
     flashStatus('fire');
     console.log(`[DEMO] Triggered ${buttonId}`, signal);
   }

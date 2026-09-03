@@ -198,17 +198,19 @@ export function updateStatusIndicator() {
   if (!indicator) return;
 
   indicator.className = 'status-indicator';
-  if (state.connectionType === 'serial') {
-    indicator.innerHTML = '<i data-lucide="usb" style="width:14px; height:14px;"></i> USB Connected';
+  
+  if (state.serialWriter && state.isDeviceOnline) {
+    indicator.innerHTML = '<i data-lucide="zap" style="width:14px; height:14px;"></i> USB + Wi-Fi';
+    indicator.classList.add('status-wifi');
+  } else if (state.serialWriter) {
+    indicator.innerHTML = '<i data-lucide="usb" style="width:14px; height:14px;"></i> USB Online';
     indicator.classList.add('status-serial');
+  } else if (state.isDeviceOnline) {
+    indicator.innerHTML = '<i data-lucide="wifi" style="width:14px; height:14px;"></i> Hub Online';
+    indicator.classList.add('status-wifi');
   } else if (state.connectionType === 'wifi') {
-    if (state.isDeviceOnline) {
-        indicator.innerHTML = '<i data-lucide="wifi" style="width:14px; height:14px;"></i> Hub Online';
-        indicator.classList.add('status-wifi');
-    } else {
-        indicator.innerHTML = '<i data-lucide="cloud-off" style="width:14px; height:14px;"></i> Hub Offline';
-        indicator.classList.add('status-demo'); // Grey color
-    }
+    indicator.innerHTML = '<i data-lucide="wifi" style="width:14px; height:14px;"></i> Wi-Fi Ready';
+    indicator.classList.add('status-demo');
   } else {
     indicator.innerHTML = '<i data-lucide="radio" style="width:14px; height:14px;"></i> Demo Mode';
     indicator.classList.add('status-demo');

@@ -2,7 +2,7 @@ import './style.css';
 import { registerSW } from 'virtual:pwa-register';
 import { isSupabaseEnabled, supabase } from './supabaseClient.js';
 import { state } from './state.js';
-import { setupMQTT, connectUSB, scanHardware, fireSignal, handleCapture, enableHubWifi, disableHubWifi, startLearning, stopLearning } from './hardware.js';
+import { setupMQTT, connectUSB, performUSBConnect, scanHardware, fireSignal, handleCapture, enableHubWifi, disableHubWifi, startLearning, stopLearning } from './hardware.js';
 import { renderRemote, updateStatusIndicator, toggleAC, updateAuthUI } from './ui.js';
 
 // Initialize PWA Service Worker aggressively
@@ -124,18 +124,40 @@ function setupEventListeners() {
     }
   });
 
-  // Internal Hardware Assignments
-  usbConnectBtn.addEventListener('click', async () => {
-    await connectUSB();
-    await disableHubWifi(); // Keep WiFi radio OFF for pure, fast USB mode
-  });
+  // USB Connection Confirmation Dialog Elements (Matches User Request)
+  const usbConfirmModal = document.getElementById('usb-confirm-modal');
+  const btnCancelUsb = document.getElementById('btn-cancel-usb');
+  const btnConfirmUsb = document.getElementById('btn-confirm-usb');
+
+  if (usbConnectBtn) {
+    usbConnectBtn.addEventListener('click', () => {
+      if (usbConfirmModal) {
+        usbConfirmModal.classList.add('active');
+        if (window.lucide) window.lucide.createIcons();
+      } else {
+        performUSBConnect();
+      }
+    });
+  }
+
+  if (btnCancelUsb) {
+    btnCancelUsb.addEventListener('click', () => {
+      if (usbConfirmModal) usbConfirmModal.classList.remove('active');
+    });
+  }
+
+  if (btnConfirmUsb) {
+    btnConfirmUsb.addEventListener('click', async () => {
+      if (usbConfirmModal) usbConfirmModal.classList.remove('active');
+      await performUSBConnect();
+    });
+  }
 
   wifiConnectBtn.addEventListener('click', async () => {
     state.connectionType = 'wifi';
     localStorage.setItem('connectionType', 'wifi');
     updateStatusIndicator();
     setupMQTT();
-    await enableHubWifi(); // Automatically tell ESP32 to connect to WiFi!
     wifiConfig.style.display = wifiConfig.style.display === 'none' ? 'block' : 'none';
   });
 
