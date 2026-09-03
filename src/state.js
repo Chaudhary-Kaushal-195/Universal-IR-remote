@@ -1,6 +1,6 @@
 export const state = {
   activeLayout: 'tv',
-  connectionType: localStorage.getItem('connectionType') || 'demo',
+  connectionType: localStorage.getItem('connectionType') || 'wifi',
   espIp: localStorage.getItem('espIp') || '',
   isLearning: false,
   learningTargetId: null,

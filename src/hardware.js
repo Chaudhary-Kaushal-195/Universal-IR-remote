@@ -28,16 +28,26 @@ function shouldCaptureRaw(raw) {
 
 export function setupMQTT() {
   if (mqttClient) {
-    mqttClient.end();
+    try { mqttClient.end(true); } catch (e) {}
   }
   if (state.connectionType !== 'wifi') return;
 
-  mqttClient = mqtt.connect(MQTT_BROKER);
+  console.log("%c🌐 Connecting to MQTT Cloud Broker (HiveMQ)...", "color: #3b82f6; font-weight: bold;");
+  
+  mqttClient = mqtt.connect(MQTT_BROKER, {
+    keepalive: 30,
+    clientId: 'WebRemote-' + Math.random().toString(16).substring(2, 10),
+    reconnectPeriod: 3000
+  });
 
   mqttClient.on('connect', () => {
-    console.log("%c🌐 Global MQTT Connected!", "color: #3b82f6; font-weight: bold;");
+    console.log("%c🟢 MQTT Connected to Cloud Broker! Listening for ESP32...", "color: #22c55e; font-weight: bold;");
     mqttClient.subscribe(MQTT_TOPIC_RX);
     updateStatusIndicator();
+    // Ask ESP32 for status
+    try {
+      mqttClient.publish(MQTT_TOPIC_TX, JSON.stringify({ cmd: "WIFI_STATUS" }));
+    } catch (e) {}
   });
 
   mqttClient.on('message', (topic, message) => {
@@ -49,11 +59,21 @@ export function setupMQTT() {
       handleCapture(raw);
     }
   });
+
+  mqttClient.on('error', (err) => {
+    console.warn("MQTT connection error:", err);
+  });
 }
 
 export async function connectUSB() {
-  if (!('serial' in navigator)) {
-    return alert("Web Serial API not supported in this browser. Use Chrome.");
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile || !('serial' in navigator)) {
+    alert("📱 Phones connect to the ESP32 wirelessly via Wi-Fi!\n\nNo cable needed. Switched to Wi-Fi mode.");
+    state.connectionType = 'wifi';
+    localStorage.setItem('connectionType', 'wifi');
+    updateStatusIndicator();
+    setupMQTT();
+    return;
   }
   
   try {
