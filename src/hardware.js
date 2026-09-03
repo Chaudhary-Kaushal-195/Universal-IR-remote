@@ -1,4 +1,5 @@
 import mqtt from 'mqtt';
+import { serial as polyfillSerial } from 'web-serial-polyfill';
 import { state, MQTT_BROKER, MQTT_TOPIC_TX, MQTT_TOPIC_RX } from './state.js';
 import { flashStatus, updateStatusIndicator, renderRemote } from './ui.js';
 import { syncCloudRemotes } from './api.js';
@@ -66,33 +67,58 @@ export function setupMQTT() {
 }
 
 export async function performUSBConnect() {
-  if (!('serial' in navigator)) {
-    alert("Web Serial is not supported in this browser. Use Chrome (on PC or Android with a USB-OTG adapter).");
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const hasNativeSerial = 'serial' in navigator;
+  const hasWebUsb = 'usb' in navigator;
+
+  if (!hasNativeSerial && !hasWebUsb) {
+    alert("Neither Web Serial nor WebUSB is supported in this browser. Please use Google Chrome.");
     return;
   }
   
   try {
-    // Explicitly declare common ESP32 USB-to-UART bridge chips so Android Chrome exposes them
-    const filters = [
-      { usbVendorId: 0x10c4 }, // Silicon Labs CP2102 / CP2104 / CP210x (ESP32 DevKit)
-      { usbVendorId: 0x1a86 }, // WCH CH340 / CH341 (NodeMCU / ESP32)
-      { usbVendorId: 0x303a }, // Espressif Systems Native USB (ESP32-S2 / S3 / C3)
-      { usbVendorId: 0x0403 }, // FTDI FT232R
-      { usbVendorId: 0x067b }, // Prolific PL2303
-      { usbVendorId: 0x2341 }  // Arduino
-    ];
+    let port = null;
 
-    try {
-      state.serialPort = await navigator.serial.requestPort({ filters });
-    } catch (filterErr) {
-      if (filterErr.name === 'NotFoundError') {
-        // Fallback without filters in case board uses an unlisted vendor
-        state.serialPort = await navigator.serial.requestPort();
-      } else {
-        throw filterErr;
+    // On Android, native Web Serial only exposes Bluetooth, which causes "No compatible devices found"
+    // for wired USB OTG. The polyfill uses WebUSB (navigator.usb) which directly supports CP2102/CH340!
+    if (isAndroid && hasWebUsb) {
+      console.log("Connecting via WebUSB Serial Polyfill for Android OTG...");
+      try {
+        port = await polyfillSerial.requestPort();
+      } catch (polyErr) {
+        if (polyErr.name === 'NotFoundError') {
+          console.log("WebUSB closed without selection.");
+          return;
+        }
+        console.warn("Polyfill failed, falling back to native serial...", polyErr);
+        if (hasNativeSerial) {
+          port = await navigator.serial.requestPort();
+        } else {
+          throw polyErr;
+        }
       }
+    } else if (hasNativeSerial) {
+      try {
+        port = await navigator.serial.requestPort();
+      } catch (nativeErr) {
+        if (nativeErr.name === 'NotFoundError') {
+          console.log("Native serial closed without selection.");
+          return;
+        }
+        if (hasWebUsb) {
+          console.log("Native serial failed, trying WebUSB polyfill...", nativeErr);
+          port = await polyfillSerial.requestPort();
+        } else {
+          throw nativeErr;
+        }
+      }
+    } else if (hasWebUsb) {
+      port = await polyfillSerial.requestPort();
     }
 
+    if (!port) return;
+
+    state.serialPort = port;
     await state.serialPort.open({ baudRate: 115200 });
     state.serialWriter = state.serialPort.writable.getWriter();
     
@@ -102,6 +128,7 @@ export async function performUSBConnect() {
     
     readSerial();
     console.log("%c🔌 USB Serial Connected!", "color: #10b981; font-weight: bold;");
+    alert("✅ ESP32 Connected via USB!");
   } catch (err) {
     if (err.name === 'NotFoundError') {
       console.log("USB picker closed without selection.");
