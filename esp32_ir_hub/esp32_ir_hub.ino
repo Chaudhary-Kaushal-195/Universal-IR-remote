@@ -124,7 +124,11 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   }
 
   String cmdStr = doc["cmd"] | "";
-  if (cmdStr == "LEARN_START") {
+  if (cmdStr == "PING") {
+    Serial.println("STATUS:PING_RECEIVED -> Replying ONLINE");
+    client.publish(mqtt_topic_tx, "STATUS:ONLINE", true);
+    return;
+  } else if (cmdStr == "LEARN_START") {
     isLearningMode = true;
     irrecv.resume();
     Serial.println("STATUS:LEARNING_ACTIVE");
@@ -245,6 +249,13 @@ void loop() {
   if (wifiEnabled) {
     if (WiFi.status() == WL_CONNECTED && client.connected()) {
       client.loop();
+
+      // Periodic heartbeat every 20 seconds so mobile apps immediately know hub is active
+      static unsigned long lastHeartbeat = 0;
+      if (millis() - lastHeartbeat > 20000) {
+        lastHeartbeat = millis();
+        client.publish(mqtt_topic_tx, "STATUS:ONLINE", true);
+      }
     } else {
       reconnectMQTT();
     }

@@ -955,7 +955,14 @@ class MainActivity : AppCompatActivity() {
                 client.setCallback(object : MqttCallbackExtended {
                     override fun connectComplete(reconnect: Boolean, serverURI: String?) {
                         Log.d("MQTT", "Connected to HiveMQ")
-                        try { client.subscribe(topicRx, 0) } catch (e: Exception) {}
+                        try {
+                            client.subscribe(topicRx, 0)
+                            // Send a heartbeat ping to ask the ESP32 to announce itself
+                            val pingMsg = MqttMessage("{\"cmd\":\"PING\"}".toByteArray())
+                            client.publish(topicTx, pingMsg)
+                        } catch (e: Exception) {
+                            Log.w("MQTT", "Subscribe/Ping error", e)
+                        }
                         updateHardwareStatusUI()
                     }
                     override fun connectionLost(cause: Throwable?) {
