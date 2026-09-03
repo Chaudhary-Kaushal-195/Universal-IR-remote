@@ -16,12 +16,17 @@
   <body>
     <div id="app">
       <header>
-        <div class="logo" style="display: flex; align-items: center; gap: 9px;">
-          <img src="/logo-192.png" alt="Logo" style="width: 28px; height: 28px; object-fit: contain;" />
+        <div class="logo" style="display: flex; align-items: center; gap: 7px;">
+          <img src="/logo-192.png" alt="Logo" style="width: 24px; height: 24px; object-fit: contain;" />
           <span>UNIVERSAL HUB</span>
         </div>
-        <div id="connection-status" class="status-indicator status-demo" style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-          <i data-lucide="radio" style="width: 14px; height: 14px;"></i> Demo Mode
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div id="connection-status" class="status-indicator status-demo" style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            <i data-lucide="radio" style="width: 13px; height: 13px;"></i> Demo Mode
+          </div>
+          <div class="config-trigger" id="config-btn" title="Settings">
+            <i data-lucide="settings" style="width: 17px; height: 17px;"></i>
+          </div>
         </div>
       </header>
 
@@ -33,10 +38,6 @@
       <main id="remote-content" class="glass remote-container">
         <!-- Remote UI will be injected here -->
       </main>
-
-      <div class="config-trigger" id="config-btn">
-        <i data-lucide="settings"></i>
-      </div>
 
       <!-- Settings Modal -->
       <div class="modal" id="config-modal">

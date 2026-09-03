@@ -36,8 +36,8 @@
   --text-muted: #64748b;
 
   --outline-dark: #1e3a8a;
-  --btn-radius: 16px;
-  --card-radius: 28px;
+  --btn-radius: 14px;
+  --card-radius: 24px;
 
   --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -49,8 +49,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body {
+html, body {
   height: 100%;
   height: 100dvh;
   margin: 0;
@@ -75,7 +74,7 @@ body {
   height: 100dvh;
   max-height: 100dvh;
   margin: 0 auto;
-  padding: 8px 14px;
+  padding: clamp(4px, 1vh, 8px) clamp(8px, 2.5vw, 12px);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -84,7 +83,7 @@ body {
 
 /* Header */
 header {
-  margin-bottom: 6px;
+  margin-bottom: clamp(3px, 0.7vh, 6px);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -92,16 +91,16 @@ header {
 }
 
 .logo {
-  font-size: 1.22rem;
+  font-size: 1.15rem;
   font-weight: 900;
   color: #0f172a;
   letter-spacing: -0.5px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   background: #ffffff;
-  padding: 4px 12px;
-  border-radius: 14px;
+  padding: 3px 10px;
+  border-radius: 12px;
   border: 2px solid var(--outline-dark);
   box-shadow: 2px 2px 0px var(--outline-dark);
 }
@@ -114,15 +113,15 @@ header {
 
 /* Status Indicator Pill */
 .status-indicator {
-  padding: 5px 12px;
-  border-radius: 16px;
-  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: #ffffff;
   border: 2px solid var(--outline-dark);
   box-shadow: 2px 2px 0px var(--outline-dark);
@@ -151,25 +150,51 @@ header {
   box-shadow: 2px 2px 0px #15803d;
 }
 
+/* Header Settings Trigger */
+.config-trigger {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-purple-bg);
+  border: 2px solid var(--card-purple-border);
+  box-shadow: 2px 2px 0px var(--card-purple-border);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.config-trigger:hover {
+  transform: scale(1.08) rotate(12deg);
+  background: #f5d0fe;
+}
+
+.config-trigger svg {
+  color: var(--card-purple-border);
+  stroke-width: 2.5px;
+}
+
 /* Device Selector Tabs */
 .device-tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  padding: 4px;
+  gap: 6px;
+  margin-bottom: clamp(4px, 1vh, 7px);
+  padding: 3px;
   background: #ffffff;
-  border: 2.5px solid var(--outline-dark);
-  border-radius: 18px;
-  box-shadow: 3px 3px 0px var(--outline-dark);
+  border: 2.2px solid var(--outline-dark);
+  border-radius: 16px;
+  box-shadow: 2px 2px 0px var(--outline-dark);
   flex-shrink: 0;
 }
 
 .tab {
   flex: 1;
   text-align: center;
-  padding: 7px 14px;
+  padding: clamp(5px, 0.8vh, 7px) 10px;
   border-radius: 12px;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   font-weight: 700;
   background: transparent;
   border: 2px solid transparent;
@@ -192,26 +217,26 @@ header {
   box-shadow: 2px 2px 0px var(--card-purple-border);
 }
 
-/* Main Remote Shell Container */
+/* Main Remote Shell Container (Never overflows, no scrollbars) */
 .remote-container {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 12px 14px;
+  padding: clamp(8px, 1.3vh, 12px) clamp(8px, 2vw, 12px);
   background: #ffffff;
   border: 3px solid var(--card-blue-border);
   border-radius: var(--card-radius);
-  box-shadow: 5px 6px 0px var(--card-blue-border), 0 20px 40px rgba(29, 78, 216, 0.08);
+  box-shadow: 4px 5px 0px var(--card-blue-border), 0 16px 32px rgba(29, 78, 216, 0.08);
   overflow: hidden;
 }
 
-/* Global Remote Button Animation */
+/* Base Remote Button */
 .remote-btn {
   border: 2.2px solid var(--outline-dark);
   border-radius: var(--btn-radius);
   background: #f8fafc;
-  box-shadow: 2px 3px 0px var(--outline-dark);
+  box-shadow: 2px 2.5px 0px var(--outline-dark);
   cursor: pointer;
   transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
@@ -222,13 +247,13 @@ header {
 }
 
 .remote-btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1.5px);
   filter: brightness(0.97);
-  box-shadow: 3px 4px 0px var(--outline-dark);
+  box-shadow: 2.5px 3.5px 0px var(--outline-dark);
 }
 
 .remote-btn:active {
-  transform: translate(2px, 3px) !important;
+  transform: translate(1.5px, 2px) !important;
   box-shadow: 0px 0px 0px var(--outline-dark) !important;
 }
 
@@ -239,7 +264,7 @@ header {
 }
 
 /* ========================================================
-   SCREEN 2: APPLE SMART BOX / COMPACT TV REMOTE LAYOUT
+   TV REMOTE: COMPACT HANDHELD CHASSIS (NO EMPTY GAPS)
 ======================================================== */
 .tv-handheld-wrapper {
   flex: 1;
@@ -253,28 +278,28 @@ header {
 
 .tv-handheld-chassis {
   width: 100%;
-  max-width: 310px;
+  max-width: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  padding: 4px 6px;
+  gap: clamp(10px, 1.8vh, 16px);
+  padding: 2px;
 }
 
-/* Mi Top Row: 3 Circular Buttons (Power, Home, Menu/Input) */
+/* Top Row: 3 Circular Buttons */
 .mi-top-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0 6px;
-  height: 52px;
+  padding: 0 4px;
+  height: clamp(42px, 6vh, 48px);
 }
 
 .mi-circle-btn {
-  width: 52px !important;
-  height: 52px !important;
+  width: clamp(42px, 6vh, 48px) !important;
+  height: clamp(42px, 6vh, 48px) !important;
   border-radius: 50% !important;
   aspect-ratio: 1 !important;
   display: flex;
@@ -283,47 +308,41 @@ header {
 }
 
 .mi-circle-btn svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 .mi-circle-btn.power-btn {
   background: var(--card-red-bg) !important;
   border-color: var(--card-red-border) !important;
-  box-shadow: 2px 3px 0px var(--card-red-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-red-border) !important;
   color: var(--card-red-text) !important;
 }
-.mi-circle-btn.power-btn svg {
-  color: var(--card-red-border);
-}
+.mi-circle-btn.power-btn svg { color: var(--card-red-border); }
 
 .mi-circle-btn.home-btn {
   background: var(--card-green-bg) !important;
   border-color: var(--card-green-border) !important;
-  box-shadow: 2px 3px 0px var(--card-green-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-green-border) !important;
   color: var(--card-green-text) !important;
 }
-.mi-circle-btn.home-btn svg {
-  color: var(--card-green-border);
-}
+.mi-circle-btn.home-btn svg { color: var(--card-green-border); }
 
 .mi-circle-btn.input-btn {
   background: var(--card-teal-bg) !important;
   border-color: var(--card-teal-border) !important;
-  box-shadow: 2px 3px 0px var(--card-teal-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-teal-border) !important;
   color: var(--card-teal-text) !important;
 }
-.mi-circle-btn.input-btn svg {
-  color: var(--card-teal-border);
-}
+.mi-circle-btn.input-btn svg { color: var(--card-teal-border); }
 
 /* Center: 100% Radially Symmetric Navigation Wheel */
 .mi-dpad-wheel {
-  width: 216px;
-  height: 216px;
+  width: clamp(180px, 26vh, 206px);
+  height: clamp(180px, 26vh, 206px);
   border-radius: 50%;
   background: var(--card-blue-bg);
-  border: 3.5px solid var(--card-blue-border);
+  border: 3px solid var(--card-blue-border);
   box-shadow: 0 4px 14px rgba(29, 78, 216, 0.2);
   position: relative;
   display: flex;
@@ -333,15 +352,15 @@ header {
 }
 
 .mi-wheel-ok {
-  width: 84px !important;
-  height: 84px !important;
+  width: clamp(70px, 10vh, 80px) !important;
+  height: clamp(70px, 10vh, 80px) !important;
   border-radius: 50% !important;
   background: var(--card-purple-bg) !important;
-  border: 3px solid var(--card-purple-border) !important;
+  border: 2.5px solid var(--card-purple-border) !important;
   box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25) !important;
   color: var(--card-purple-text) !important;
   font-weight: 900 !important;
-  font-size: 1.35rem !important;
+  font-size: clamp(1.15rem, 2.5vh, 1.3rem) !important;
   z-index: 2;
   aspect-ratio: 1 !important;
   margin: auto !important;
@@ -350,15 +369,13 @@ header {
 .mi-wheel-ok:hover {
   background: #f5d0fe !important;
   transform: scale(1.04) !important;
-  box-shadow: 0 3px 12px rgba(124, 58, 237, 0.35) !important;
 }
 
 .mi-wheel-ok:active {
   transform: scale(0.96) !important;
-  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.2) !important;
 }
 
-/* 100% Symmetrical Directional Touch Sectors (Zero Asymmetric Borders/Shadows) */
+/* Symmetrical Directional Touch Sectors */
 button.remote-btn.mi-wheel-dir,
 .mi-wheel-dir {
   position: absolute !important;
@@ -391,64 +408,63 @@ button.remote-btn.mi-wheel-dir:focus,
   outline: none !important;
 }
 
-/* Symmetrically Placed Directional Sectors */
 .mi-wheel-dir.up {
   top: 0;
   left: 50%;
   transform: translateX(-50%) !important;
-  width: 80px;
-  height: 60px;
+  width: 76px;
+  height: 54px;
 }
 
 .mi-wheel-dir.down {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%) !important;
-  width: 80px;
-  height: 60px;
+  width: 76px;
+  height: 54px;
 }
 
 .mi-wheel-dir.left {
   left: 0;
   top: 50%;
   transform: translateY(-50%) !important;
-  width: 60px;
-  height: 80px;
+  width: 54px;
+  height: 76px;
 }
 
 .mi-wheel-dir.right {
   right: 0;
   top: 50%;
   transform: translateY(-50%) !important;
-  width: 60px;
-  height: 80px;
+  width: 54px;
+  height: 76px;
 }
 
 .mi-wheel-dir svg {
-  width: 32px !important;
-  height: 32px !important;
+  width: 28px !important;
+  height: 28px !important;
   color: var(--card-blue-border) !important;
   stroke-width: 3.4px !important;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mi-wheel-dir.up:hover svg {
-  transform: translateY(-3px) scale(1.15);
+  transform: translateY(-2px) scale(1.15);
   filter: drop-shadow(0 0 6px rgba(29, 78, 216, 0.5));
 }
 
 .mi-wheel-dir.down:hover svg {
-  transform: translateY(3px) scale(1.15);
+  transform: translateY(2px) scale(1.15);
   filter: drop-shadow(0 0 6px rgba(29, 78, 216, 0.5));
 }
 
 .mi-wheel-dir.left:hover svg {
-  transform: translateX(-3px) scale(1.15);
+  transform: translateX(-2px) scale(1.15);
   filter: drop-shadow(0 0 6px rgba(29, 78, 216, 0.5));
 }
 
 .mi-wheel-dir.right:hover svg {
-  transform: translateX(3px) scale(1.15);
+  transform: translateX(2px) scale(1.15);
   filter: drop-shadow(0 0 6px rgba(29, 78, 216, 0.5));
 }
 
@@ -456,17 +472,17 @@ button.remote-btn.mi-wheel-dir:focus,
   transform: scale(0.92) !important;
 }
 
-/* Bottom Capsule Bar 1: Volume (Screen 2) */
+/* Bottom Capsule Bar 1: Volume */
 .mi-capsule-bar.vol-bar {
   width: 100%;
   display: flex;
   align-items: center;
   background: #eff6ff;
-  border: 2.5px solid var(--card-blue-border);
-  border-radius: 24px;
-  box-shadow: 3px 4px 0px var(--card-blue-border);
+  border: 2.2px solid var(--card-blue-border);
+  border-radius: 20px;
+  box-shadow: 2px 3px 0px var(--card-blue-border);
   overflow: hidden;
-  height: 50px;
+  height: clamp(40px, 5.8vh, 46px);
 }
 
 .mi-capsule-btn {
@@ -488,17 +504,15 @@ button.remote-btn.mi-wheel-dir:focus,
 
 .mi-capsule-btn:hover {
   background: #dbeafe !important;
-  transform: none !important;
 }
 
 .mi-capsule-btn:active {
   background: #bfdbfe !important;
-  transform: none !important;
 }
 
 .mi-capsule-btn svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   color: var(--card-blue-border);
   stroke-width: 2.6px;
 }
@@ -507,14 +521,14 @@ button.remote-btn.mi-wheel-dir:focus,
   color: var(--card-amber-border);
 }
 
-/* Bottom Capsule Bar 2: Large Wide Return/Back (Screen 2) */
+/* Bottom Capsule Bar 2: Large Wide Return/Back */
 .mi-wide-back-btn {
   width: 100%;
-  height: 50px;
+  height: clamp(40px, 5.8vh, 46px);
   background: var(--card-purple-bg) !important;
-  border: 2.5px solid var(--card-purple-border) !important;
-  border-radius: 24px !important;
-  box-shadow: 3px 4px 0px var(--card-purple-border) !important;
+  border: 2.2px solid var(--card-purple-border) !important;
+  border-radius: 20px !important;
+  box-shadow: 2px 3px 0px var(--card-purple-border) !important;
   color: var(--card-purple-text) !important;
   display: flex;
   align-items: center;
@@ -522,8 +536,8 @@ button.remote-btn.mi-wheel-dir:focus,
 }
 
 .mi-wide-back-btn svg {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   color: var(--card-purple-border);
   stroke-width: 2.8px;
 }
@@ -534,48 +548,48 @@ button.remote-btn.mi-wheel-dir:focus,
 
 
 /* ========================================================
-   SCREEN 3: 3M SMART AC REMOTE LAYOUT
+   AC REMOTE: COMPACT AUTO-FIT LAYOUT (NEVER OVERFLOWS)
 ======================================================== */
 .ac-layout.mi-layout {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-  gap: 8px;
+  gap: clamp(4px, 1vh, 8px);
 }
 
-/* Screen 3 Top Hero Card (Ambient info, 26°C, Cooling) */
+/* Top Ambient Info & Temp Card */
 .mi-ac-display-card {
   background: var(--card-blue-bg);
-  border: 2.8px solid var(--card-blue-border);
-  border-radius: 22px;
-  box-shadow: 4px 5px 0px var(--card-blue-border);
-  padding: 10px 14px;
+  border: 2.5px solid var(--card-blue-border);
+  border-radius: 20px;
+  box-shadow: 3px 4px 0px var(--card-blue-border);
+  padding: clamp(6px, 1vh, 10px) 12px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   flex: 1;
-  min-height: 155px;
-  max-height: 185px;
+  min-height: 110px;
+  max-height: 145px;
 }
 
 .mi-ac-meta-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
   color: var(--card-blue-text);
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   border-bottom: 1.5px solid rgba(29, 78, 216, 0.18);
-  padding-bottom: 4px;
+  padding-bottom: 2px;
 }
 
 .mi-ac-hero-temp {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 12px;
-  margin: 4px 0;
+  gap: 10px;
+  margin: 2px 0;
 }
 
 .mi-ac-big-digits {
@@ -584,32 +598,32 @@ button.remote-btn.mi-wheel-dir:focus,
 }
 
 #ac-temp-display {
-  font-size: 4.2rem;
+  font-size: clamp(2.5rem, 6.5vh, 3.4rem);
   font-weight: 900;
-  letter-spacing: -2px;
-  line-height: 0.95;
+  letter-spacing: -1.5px;
+  line-height: 0.92;
   color: #0f172a !important;
-  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.08);
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.08);
   -webkit-text-fill-color: #0f172a !important;
 }
 
 .mi-ac-deg {
-  font-size: 1.6rem;
+  font-size: 1.25rem;
   font-weight: 900;
   color: var(--card-blue-border);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .mi-ac-mode-badge {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   background: #ffffff;
   border: 1.5px solid var(--card-blue-border);
-  padding: 4px 10px;
-  border-radius: 12px;
-  box-shadow: 1px 2px 0px var(--card-blue-border);
-  font-size: 0.78rem;
+  padding: 3px 8px;
+  border-radius: 10px;
+  box-shadow: 1px 1.5px 0px var(--card-blue-border);
+  font-size: 0.72rem;
   font-weight: 800;
   color: var(--card-blue-text);
 }
@@ -621,24 +635,24 @@ button.remote-btn.mi-wheel-dir:focus,
 .mi-ac-sub-status {
   display: flex;
   justify-content: space-between;
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 800;
   color: var(--card-blue-text);
   border-top: 1.5px solid rgba(29, 78, 216, 0.18);
-  padding-top: 4px;
+  padding-top: 2px;
 }
 
 .mi-ac-sub-status span {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 /* Row 1: Power ON / OFF & Mode */
 .mi-ac-power-mode-row {
   display: flex;
-  gap: 8px;
-  height: 48px;
+  gap: 6px;
+  height: clamp(38px, 5.5vh, 44px);
   flex-shrink: 0;
 }
 
@@ -647,40 +661,34 @@ button.remote-btn.mi-wheel-dir:focus,
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   font-weight: 900;
-  font-size: 0.82rem;
-  border-radius: 14px;
+  font-size: 0.8rem;
+  border-radius: 12px;
 }
 
 .mi-ac-power-btn.power-btn-on {
   background: var(--card-green-bg) !important;
   border-color: var(--card-green-border) !important;
-  box-shadow: 2px 3px 0px var(--card-green-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-green-border) !important;
   color: var(--card-green-text) !important;
 }
-
-.mi-ac-power-btn.power-btn-on svg {
-  color: var(--card-green-border);
-}
+.mi-ac-power-btn.power-btn-on svg { color: var(--card-green-border); }
 
 .mi-ac-power-btn.power-btn-off {
   background: var(--card-red-bg) !important;
   border-color: var(--card-red-border) !important;
-  box-shadow: 2px 3px 0px var(--card-red-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-red-border) !important;
   color: var(--card-red-text) !important;
 }
+.mi-ac-power-btn.power-btn-off svg { color: var(--card-red-border); }
 
-.mi-ac-power-btn.power-btn-off svg {
-  color: var(--card-red-border);
-}
-
-/* Row 2 & Row 4: 3-Column Tile Rows (Speed, Direction, Swing, etc.) */
+/* Row 2 & Row 4: 3-Column Tile Rows */
 .mi-ac-three-col-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  height: 48px;
+  gap: 6px;
+  height: clamp(38px, 5.5vh, 44px);
   flex-shrink: 0;
 }
 
@@ -688,109 +696,88 @@ button.remote-btn.mi-wheel-dir:focus,
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-size: 0.78rem;
+  gap: 5px;
+  font-size: 0.74rem;
   font-weight: 800;
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .mi-ac-tile-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 .mi-ac-tile-btn.mode-btn {
   flex: 1;
   background: var(--card-purple-bg) !important;
   border-color: var(--card-purple-border) !important;
-  box-shadow: 2px 3px 0px var(--card-purple-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-purple-border) !important;
   color: var(--card-purple-text) !important;
 }
-
-.mi-ac-tile-btn.mode-btn svg {
-  color: var(--card-purple-border);
-}
+.mi-ac-tile-btn.mode-btn svg { color: var(--card-purple-border); }
 
 .mi-ac-tile-btn.fan-btn {
   background: var(--card-blue-bg) !important;
   border-color: var(--card-blue-border) !important;
-  box-shadow: 2px 3px 0px var(--card-blue-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-blue-border) !important;
   color: var(--card-blue-text) !important;
 }
-
-.mi-ac-tile-btn.fan-btn svg {
-  color: var(--card-blue-border);
-}
+.mi-ac-tile-btn.fan-btn svg { color: var(--card-blue-border); }
 
 .mi-ac-tile-btn.swing-btn {
   background: var(--card-teal-bg) !important;
   border-color: var(--card-teal-border) !important;
-  box-shadow: 2px 3px 0px var(--card-teal-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-teal-border) !important;
   color: var(--card-teal-text) !important;
 }
-
-.mi-ac-tile-btn.swing-btn svg {
-  color: var(--card-teal-border);
-}
+.mi-ac-tile-btn.swing-btn svg { color: var(--card-teal-border); }
 
 .mi-ac-tile-btn.light-btn {
   background: var(--card-amber-bg) !important;
   border-color: var(--card-amber-border) !important;
-  box-shadow: 2px 3px 0px var(--card-amber-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-amber-border) !important;
   color: var(--card-amber-text) !important;
 }
-
-.mi-ac-tile-btn.light-btn svg {
-  color: var(--card-amber-border);
-}
+.mi-ac-tile-btn.light-btn svg { color: var(--card-amber-border); }
 
 .mi-ac-tile-btn.timer-btn {
   background: var(--card-amber-bg) !important;
   border-color: var(--card-amber-border) !important;
-  box-shadow: 2px 3px 0px var(--card-amber-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-amber-border) !important;
   color: var(--card-amber-text) !important;
 }
-
-.mi-ac-tile-btn.timer-btn svg {
-  color: var(--card-amber-border);
-}
+.mi-ac-tile-btn.timer-btn svg { color: var(--card-amber-border); }
 
 .mi-ac-tile-btn.sleep-btn {
   background: #ede9fe !important;
   border-color: #6d28d9 !important;
-  box-shadow: 2px 3px 0px #6d28d9 !important;
+  box-shadow: 2px 2.5px 0px #6d28d9 !important;
   color: #4c1d95 !important;
 }
-
-.mi-ac-tile-btn.sleep-btn svg {
-  color: #6d28d9;
-}
+.mi-ac-tile-btn.sleep-btn svg { color: #6d28d9; }
 
 .mi-ac-tile-btn.eco-btn {
   background: var(--card-green-bg) !important;
   border-color: var(--card-green-border) !important;
-  box-shadow: 2px 3px 0px var(--card-green-border) !important;
+  box-shadow: 2px 2.5px 0px var(--card-green-border) !important;
   color: var(--card-green-text) !important;
 }
+.mi-ac-tile-btn.eco-btn svg { color: var(--card-green-border); }
 
-.mi-ac-tile-btn.eco-btn svg {
-  color: var(--card-green-border);
-}
-
-/* Row 3: Horizontal Temperature Slider Bar (Screen 3: [ - ]  Temp  [ + ]) */
+/* Row 3: Horizontal Temperature Slider Bar */
 .mi-ac-temp-bar {
   display: flex;
   background: #ffffff;
-  border: 2.5px solid var(--card-blue-border);
-  border-radius: 20px;
-  box-shadow: 3px 4px 0px var(--card-blue-border);
-  height: 52px;
+  border: 2.2px solid var(--card-blue-border);
+  border-radius: 18px;
+  box-shadow: 2px 3px 0px var(--card-blue-border);
+  height: clamp(40px, 6vh, 46px);
   overflow: hidden;
   flex-shrink: 0;
 }
 
 .mi-temp-pill-btn {
-  width: 64px;
+  width: 56px;
   border: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
@@ -801,26 +788,24 @@ button.remote-btn.mi-wheel-dir:focus,
 
 .mi-temp-pill-btn.minus {
   background: var(--card-amber-bg) !important;
-  border-right: 2px solid var(--card-blue-border) !important;
+  border-right: 1.8px solid var(--card-blue-border) !important;
 }
-
 .mi-temp-pill-btn.minus svg {
   color: var(--card-amber-border);
   stroke-width: 3.2px;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .mi-temp-pill-btn.plus {
   background: var(--card-teal-bg) !important;
-  border-left: 2px solid var(--card-blue-border) !important;
+  border-left: 1.8px solid var(--card-blue-border) !important;
 }
-
 .mi-temp-pill-btn.plus svg {
   color: var(--card-teal-border);
   stroke-width: 3.2px;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .mi-temp-center-btn {
@@ -835,41 +820,10 @@ button.remote-btn.mi-wheel-dir:focus,
 }
 
 .temp-bar-label {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 900;
   color: #0f172a;
   letter-spacing: 0.5px;
-}
-
-/* Floating Settings Button */
-.config-trigger {
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--card-purple-bg);
-  border: 2.5px solid var(--card-purple-border);
-  box-shadow: 3px 3px 0px var(--card-purple-border);
-  cursor: pointer;
-  z-index: 100;
-  transition: all 0.15s;
-}
-
-.config-trigger:hover {
-  transform: scale(1.08) rotate(12deg);
-  background: #f5d0fe;
-}
-
-.config-trigger svg {
-  width: 22px;
-  height: 22px;
-  color: var(--card-purple-border);
-  stroke-width: 2.5px;
 }
 
 /* Settings Modal */
