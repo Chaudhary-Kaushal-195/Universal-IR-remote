@@ -72,7 +72,27 @@ export async function performUSBConnect() {
   }
   
   try {
-    state.serialPort = await navigator.serial.requestPort();
+    // Explicitly declare common ESP32 USB-to-UART bridge chips so Android Chrome exposes them
+    const filters = [
+      { usbVendorId: 0x10c4 }, // Silicon Labs CP2102 / CP2104 / CP210x (ESP32 DevKit)
+      { usbVendorId: 0x1a86 }, // WCH CH340 / CH341 (NodeMCU / ESP32)
+      { usbVendorId: 0x303a }, // Espressif Systems Native USB (ESP32-S2 / S3 / C3)
+      { usbVendorId: 0x0403 }, // FTDI FT232R
+      { usbVendorId: 0x067b }, // Prolific PL2303
+      { usbVendorId: 0x2341 }  // Arduino
+    ];
+
+    try {
+      state.serialPort = await navigator.serial.requestPort({ filters });
+    } catch (filterErr) {
+      if (filterErr.name === 'NotFoundError') {
+        // Fallback without filters in case board uses an unlisted vendor
+        state.serialPort = await navigator.serial.requestPort();
+      } else {
+        throw filterErr;
+      }
+    }
+
     await state.serialPort.open({ baudRate: 115200 });
     state.serialWriter = state.serialPort.writable.getWriter();
     
@@ -87,6 +107,7 @@ export async function performUSBConnect() {
       console.log("USB picker closed without selection.");
     } else {
       console.warn("Serial Connection notice:", err.message);
+      alert("USB Notice: " + err.message);
     }
   }
 }

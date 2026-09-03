@@ -166,7 +166,13 @@
             </div>
             <h3 style="font-size: 1.15rem; font-weight: 900; color: #0f172a; margin-top: 2px; letter-spacing: -0.3px;">USB connection request</h3>
             <p style="font-size: 0.88rem; font-weight: 700; color: #334155; line-height: 1.45;">Allow IR Remote to access USB Serial?</p>
-            <p style="font-size: 0.74rem; color: #64748b; margin-top: -4px;">(Connect your ESP32 via USB cable or phone OTG adapter)</p>
+            <div style="background: var(--card-blue-bg); border: 1.8px solid var(--card-blue-border); border-radius: 12px; padding: 8px 10px; margin-top: 2px; text-align: left;">
+              <p style="font-size: 0.74rem; color: var(--card-blue-text); font-weight: 600; line-height: 1.4; margin: 0;">
+                🔌 <strong>On Android Phones:</strong><br>
+                1. Plug ESP32 into phone with OTG adapter.<br>
+                2. If not detected, go to <strong>Phone Settings → OTG</strong> and toggle <strong>OTG Connection ON</strong>.
+              </p>
+            </div>
           </div>
           <div style="display: flex; gap: 10px; width: 100%; margin-top: 4px;">
             <button class="primary-btn" id="btn-cancel-usb" style="flex: 1; padding: 10px; font-size: 0.88rem; background: #f1f5f9; color: #475569; border: 2.2px solid #64748b; box-shadow: 2px 2.5px 0px #64748b;">
