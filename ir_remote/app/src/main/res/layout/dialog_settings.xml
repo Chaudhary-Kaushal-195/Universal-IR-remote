@@ -6,10 +6,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/bg_bottom_sheet"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
     android:paddingTop="14dp"
-    android:paddingBottom="28dp">
+    android:paddingBottom="24dp">
 
     <!-- Top Drag Handle -->
     <View
@@ -23,7 +21,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp">
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:layout_marginBottom="16dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -66,17 +66,19 @@
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
         android:scrollbarThumbVertical="@drawable/bg_scrollbar_thumb"
-        android:scrollbarSize="4dp"
+        android:scrollbarSize="3.5dp"
+        android:scrollbarStyle="outsideOverlay"
         android:fadeScrollbars="false"
         android:fillViewport="true"
-        android:clipToPadding="false"
-        android:paddingEnd="2dp">
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="12dp">
+            android:paddingStart="24dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="16dp">
 
     <!-- IR Programming Mode Toggle Card -->
     <LinearLayout
