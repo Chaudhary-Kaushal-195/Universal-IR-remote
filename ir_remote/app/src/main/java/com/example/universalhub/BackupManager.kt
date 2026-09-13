@@ -10,7 +10,8 @@ enum class BackupType {
     FULL_BACKUP,
     DEVICE_PROFILE,
     CUSTOM_BUTTONS,
-    LEGACY
+    LEGACY,
+    INCOMPATIBLE
 }
 
 data class InspectionResult(
@@ -202,17 +203,32 @@ object BackupManager {
 
     fun inspectBackupJson(rawJson: String): InspectionResult {
         val trimmed = rawJson.trim()
+        if (trimmed.isEmpty()) {
+            return InspectionResult(type = BackupType.INCOMPATIBLE, rawJson = trimmed)
+        }
+
         // Check if raw text is a JSON Array (e.g. custom buttons array)
         if (trimmed.startsWith("[")) {
             return try {
                 val arr = JSONArray(trimmed)
-                InspectionResult(
-                    type = BackupType.CUSTOM_BUTTONS,
-                    customButtonCount = arr.length(),
-                    rawJson = trimmed
-                )
+                var validBtnCount = 0
+                for (i in 0 until arr.length()) {
+                    val item = arr.optJSONObject(i)
+                    if (item != null && (item.has("name") || item.has("codeJson") || item.has("icon") || item.has("id"))) {
+                        validBtnCount++
+                    }
+                }
+                if (validBtnCount == 0) {
+                    InspectionResult(type = BackupType.INCOMPATIBLE, rawJson = trimmed)
+                } else {
+                    InspectionResult(
+                        type = BackupType.CUSTOM_BUTTONS,
+                        customButtonCount = validBtnCount,
+                        rawJson = trimmed
+                    )
+                }
             } catch (e: Exception) {
-                InspectionResult(type = BackupType.LEGACY, rawJson = trimmed)
+                InspectionResult(type = BackupType.INCOMPATIBLE, rawJson = trimmed)
             }
         }
 
@@ -225,7 +241,7 @@ object BackupManager {
                     val catStr = obj.optString("category", "AC")
                     val category = DeviceCategory.values().firstOrNull { it.id.equals(catStr, ignoreCase = true) }
                         ?: DeviceCategory.AC
-                    val pIndex = obj.optInt("profile_index", 0)
+                    val pIndex = obj.optInt("profile_index", 0).coerceIn(0, ProfileManager.MAX_PROFILES - 1)
                     val pName = obj.optString("profile_name", "${category.defaultPrefix} ${pIndex + 1}")
                     val codesObj = obj.optJSONObject("codes") ?: obj
                     var count = 0
@@ -235,52 +251,9 @@ object BackupManager {
                         if (!isMetadataKey(k)) count++
                     }
 
-                    InspectionResult(
-                        type = BackupType.DEVICE_PROFILE,
-                        category = category,
-                        profileIndex = pIndex,
-                        profileName = pName,
-                        codeCount = count,
-                        rawJson = trimmed
-                    )
-                }
-                BackupType.CUSTOM_BUTTONS.name -> {
-                    val arr = obj.optJSONArray("buttons") ?: obj.optJSONArray("custom_buttons")
-                    val count = arr?.length() ?: obj.optInt("button_count", 0)
-                    InspectionResult(
-                        type = BackupType.CUSTOM_BUTTONS,
-                        customButtonCount = count,
-                        rawJson = trimmed
-                    )
-                }
-                BackupType.FULL_BACKUP.name -> {
-                    InspectionResult(
-                        type = BackupType.FULL_BACKUP,
-                        rawJson = trimmed
-                    )
-                }
-                else -> {
-                    // Check for custom buttons container
-                    val customArr = obj.optJSONArray("buttons") ?: obj.optJSONArray("custom_buttons")
-                    if (customArr != null) {
-                        InspectionResult(
-                            type = BackupType.CUSTOM_BUTTONS,
-                            customButtonCount = customArr.length(),
-                            rawJson = trimmed
-                        )
-                    } else if (obj.has("category") && (obj.has("codes") || obj.length() > 2)) {
-                        val catStr = obj.optString("category", "AC")
-                        val category = DeviceCategory.values().firstOrNull { it.id.equals(catStr, ignoreCase = true) }
-                            ?: DeviceCategory.AC
-                        val pIndex = obj.optInt("profile_index", 0)
-                        val pName = obj.optString("profile_name", "${category.defaultPrefix} ${pIndex + 1}")
-                        val codesObj = obj.optJSONObject("codes") ?: obj
-                        var count = 0
-                        val keys = codesObj.keys()
-                        while (keys.hasNext()) {
-                            val k = keys.next()
-                            if (!isMetadataKey(k)) count++
-                        }
+                    if (count == 0) {
+                        InspectionResult(type = BackupType.INCOMPATIBLE, rawJson = trimmed)
+                    } else {
                         InspectionResult(
                             type = BackupType.DEVICE_PROFILE,
                             category = category,
@@ -289,12 +262,88 @@ object BackupManager {
                             codeCount = count,
                             rawJson = trimmed
                         )
-                    } else if (obj.has("devices")) {
-                        // Full backup structure without backup_type
+                    }
+                }
+
+                BackupType.CUSTOM_BUTTONS.name -> {
+                    val arr = obj.optJSONArray("buttons") ?: obj.optJSONArray("custom_buttons")
+                    val count = arr?.length() ?: obj.optInt("button_count", 0)
+                    if (count == 0) {
+                        InspectionResult(type = BackupType.INCOMPATIBLE, rawJson = trimmed)
+                    } else {
+                        InspectionResult(
+                            type = BackupType.CUSTOM_BUTTONS,
+                            customButtonCount = count,
+                            rawJson = trimmed
+                        )
+                    }
+                }
+
+                BackupType.FULL_BACKUP.name -> {
+                    val available = parseAvailableProfiles(trimmed)
+                    if (available.isEmpty()) {
+                        InspectionResult(type = BackupType.INCOMPATIBLE, rawJson = trimmed)
+                    } else {
                         InspectionResult(
                             type = BackupType.FULL_BACKUP,
                             rawJson = trimmed
                         )
+                    }
+                }
+
+                else -> {
+                    // Check for custom buttons container
+                    val customArr = obj.optJSONArray("buttons") ?: obj.optJSONArray("custom_buttons")
+                    var validCustomCount = 0
+                    if (customArr != null) {
+                        for (i in 0 until customArr.length()) {
+                            val item = customArr.optJSONObject(i)
+                            if (item != null && (item.has("name") || item.has("codeJson") || item.has("icon") || item.has("id"))) {
+                                validCustomCount++
+                            }
+                        }
+                    }
+                    if (validCustomCount > 0) {
+                        InspectionResult(
+                            type = BackupType.CUSTOM_BUTTONS,
+                            customButtonCount = validCustomCount,
+                            rawJson = trimmed
+                        )
+                    } else if (obj.has("category") && (obj.has("codes") || obj.length() > 2)) {
+                        val catStr = obj.optString("category", "AC")
+                        val category = DeviceCategory.values().firstOrNull { it.id.equals(catStr, ignoreCase = true) }
+                            ?: DeviceCategory.AC
+                        val pIndex = obj.optInt("profile_index", 0).coerceIn(0, ProfileManager.MAX_PROFILES - 1)
+                        val pName = obj.optString("profile_name", "${category.defaultPrefix} ${pIndex + 1}")
+                        val codesObj = obj.optJSONObject("codes") ?: obj
+                        var count = 0
+                        val keys = codesObj.keys()
+                        while (keys.hasNext()) {
+                            val k = keys.next()
+                            if (!isMetadataKey(k)) count++
+                        }
+                        if (count == 0) {
+                            InspectionResult(type = BackupType.INCOMPATIBLE, rawJson = trimmed)
+                        } else {
+                            InspectionResult(
+                                type = BackupType.DEVICE_PROFILE,
+                                category = category,
+                                profileIndex = pIndex,
+                                profileName = pName,
+                                codeCount = count,
+                                rawJson = trimmed
+                            )
+                        }
+                    } else if (obj.has("devices")) {
+                        val available = parseAvailableProfiles(trimmed)
+                        if (available.isEmpty()) {
+                            InspectionResult(type = BackupType.INCOMPATIBLE, rawJson = trimmed)
+                        } else {
+                            InspectionResult(
+                                type = BackupType.FULL_BACKUP,
+                                rawJson = trimmed
+                            )
+                        }
                     } else {
                         // Direct flat dictionary from Web App or legacy export
                         var acCount = 0
@@ -353,10 +402,16 @@ object BackupManager {
                                 codeCount = fanCount,
                                 rawJson = trimmed
                             )
-                        } else {
+                        } else if (acCount > 0 || tvCount > 0 || lightCount > 0 || fanCount > 0) {
                             // Mixed categories or full database
                             InspectionResult(
                                 type = BackupType.FULL_BACKUP,
+                                rawJson = trimmed
+                            )
+                        } else {
+                            // Not a compatible IR remote JSON
+                            InspectionResult(
+                                type = BackupType.INCOMPATIBLE,
                                 rawJson = trimmed
                             )
                         }
@@ -364,20 +419,29 @@ object BackupManager {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error inspecting backup JSON", e)
+            try {
+                Log.e(TAG, "Error inspecting backup JSON", e)
+            } catch (_: Exception) {}
             InspectionResult(
-                type = BackupType.LEGACY,
+                type = BackupType.INCOMPATIBLE,
                 rawJson = trimmed
             )
         }
     }
 
-    private fun isMetadataKey(key: String): Boolean {
-        return key == "backup_type" || key == "version" || key == "timestamp" ||
-                key == "hubId" || key == "category" || key == "profile_name" ||
-                key == "profile_index" || key == "code_count" || key == "button_count" ||
-                key == "devices" || key == "custom_buttons" || key == "raw_entries" ||
-                key == "buttons" || key == "codes"
+    fun isMetadataKey(key: String): Boolean {
+        val lower = key.trim().lowercase(java.util.Locale.ROOT)
+        return lower == "backup_type" || lower == "version" || lower == "timestamp" ||
+                lower == "hubid" || lower == "category" || lower == "profile_name" ||
+                lower == "profile_index" || lower == "code_count" || lower == "button_count" ||
+                lower == "devices" || lower == "custom_buttons" || lower == "raw_entries" ||
+                lower == "buttons" || lower == "codes" ||
+                lower.startsWith("active_profile") ||
+                lower.startsWith("profile_name_") ||
+                lower.startsWith("state_") ||
+                lower == "actemp" || lower == "esp32ip" || lower == "hub_password" ||
+                lower == "owner_username" || lower == "owner_password" ||
+                lower == "is_logged_in"
     }
 
     // ====================================================================
@@ -459,7 +523,8 @@ object BackupManager {
             if (trimmed.startsWith("[")) {
                 val arr = JSONArray(trimmed)
                 for (i in 0 until arr.length()) {
-                    incomingList.add(CustomIrButton.fromJson(arr.getJSONObject(i)))
+                    val item = arr.optJSONObject(i) ?: continue
+                    incomingList.add(CustomIrButton.fromJson(item))
                 }
             } else {
                 val obj = JSONObject(trimmed)
@@ -467,7 +532,8 @@ object BackupManager {
                     ?: obj.optJSONArray("custom_buttons")
                     ?: JSONArray()
                 for (i in 0 until arr.length()) {
-                    incomingList.add(CustomIrButton.fromJson(arr.getJSONObject(i)))
+                    val item = arr.optJSONObject(i) ?: continue
+                    incomingList.add(CustomIrButton.fromJson(item))
                 }
             }
 
@@ -513,7 +579,7 @@ object BackupManager {
 
                     val profilesArr = catObj.optJSONArray("profiles") ?: continue
                     for (i in 0 until profilesArr.length()) {
-                        val pObj = profilesArr.getJSONObject(i)
+                        val pObj = profilesArr.optJSONObject(i) ?: continue
                         val pIdx = pObj.optInt("index", i)
                         val pName = pObj.optString("name", "")
                         if (pName.isNotBlank()) {
@@ -541,7 +607,8 @@ object BackupManager {
                 ?: root.optJSONArray("buttons")
             if (customBtnsArr != null) {
                 for (i in 0 until customBtnsArr.length()) {
-                    val btn = CustomIrButton.fromJson(customBtnsArr.getJSONObject(i))
+                    val item = customBtnsArr.optJSONObject(i) ?: continue
+                    val btn = CustomIrButton.fromJson(item)
                     customIrManager.saveButton(btn)
                 }
             }
@@ -576,7 +643,11 @@ object BackupManager {
     fun parseAvailableProfiles(rawJson: String): List<BackupProfileItem> {
         val result = mutableListOf<BackupProfileItem>()
         val trimmed = rawJson.trim()
-        val obj = try { JSONObject(trimmed) } catch (e: Exception) { return result }
+        val obj = try {
+            JSONObject(trimmed)
+        } catch (e: Exception) {
+            return result
+        }
 
         // 1. Devices object
         val devicesObj = obj.optJSONObject("devices")
@@ -660,16 +731,56 @@ object BackupManager {
             }
 
             if (acCodes.length() > 0) {
-                result.add(BackupProfileItem("AC_0", DeviceCategory.AC, 0, "AC 1: Main AC", acCodes.length(), "❄️", codesObj = acCodes))
+                result.add(
+                    BackupProfileItem(
+                        "AC_0",
+                        DeviceCategory.AC,
+                        0,
+                        "AC 1: Main AC",
+                        acCodes.length(),
+                        "❄️",
+                        codesObj = acCodes
+                    )
+                )
             }
             if (tvCodes.length() > 0) {
-                result.add(BackupProfileItem("TV_0", DeviceCategory.TV, 0, "TV 1: Main TV", tvCodes.length(), "📺", codesObj = tvCodes))
+                result.add(
+                    BackupProfileItem(
+                        "TV_0",
+                        DeviceCategory.TV,
+                        0,
+                        "TV 1: Main TV",
+                        tvCodes.length(),
+                        "📺",
+                        codesObj = tvCodes
+                    )
+                )
             }
             if (lightCodes.length() > 0) {
-                result.add(BackupProfileItem("LIGHT_0", DeviceCategory.LIGHT, 0, "Light 1: Main Light", lightCodes.length(), "💡", codesObj = lightCodes))
+                result.add(
+                    BackupProfileItem(
+                        "LIGHT_0",
+                        DeviceCategory.LIGHT,
+                        0,
+                        "Light 1: Main Light",
+                        lightCodes.length(),
+                        "💡",
+                        codesObj = lightCodes
+                    )
+                )
             }
             if (fanCodes.length() > 0) {
-                result.add(BackupProfileItem("FAN_0", DeviceCategory.FAN, 0, "Fan 1: Main Fan", fanCodes.length(), "🌀", codesObj = fanCodes))
+                result.add(
+                    BackupProfileItem(
+                        "FAN_0",
+                        DeviceCategory.FAN,
+                        0,
+                        "Fan 1: Main Fan",
+                        fanCodes.length(),
+                        "🌀",
+                        codesObj = fanCodes
+                    )
+                )
             }
         }
 

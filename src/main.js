@@ -308,7 +308,7 @@ function setupEventListeners() {
       const dataStr = createStandardBackupJson();
       const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = url;
       link.download = `ir_hub_backup_${new Date().toISOString().split('T')[0]}.json`;
@@ -446,7 +446,7 @@ function setupEventListeners() {
     const importedData = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
     const normalized = normalizeImportedCodes(importedData);
     const count = Object.keys(normalized).length;
-    
+
     if (count === 0) {
       throw new Error("No valid IR signal codes found in JSON.");
     }
@@ -454,7 +454,7 @@ function setupEventListeners() {
     // Merge into state and localStorage
     state.learnedCodes = { ...state.learnedCodes, ...normalized };
     localStorage.setItem('learnedCodes', JSON.stringify(state.learnedCodes));
-    
+
     syncCloudRemotes();
     renderRemote();
     return count;

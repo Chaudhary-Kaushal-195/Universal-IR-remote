@@ -41,7 +41,10 @@ data class CustomIrButton(
             val daysArray = json.optJSONArray("days")
             if (daysArray != null) {
                 for (i in 0 until daysArray.length()) {
-                    daysList.add(daysArray.getInt(i))
+                    val day = daysArray.optInt(i, -1)
+                    if (day in 0..6) {
+                        daysList.add(day)
+                    }
                 }
             }
             val rawCode = json.optString("codeJson", "")

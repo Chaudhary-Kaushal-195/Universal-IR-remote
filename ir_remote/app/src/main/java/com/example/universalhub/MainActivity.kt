@@ -143,7 +143,11 @@ class MainActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.data?.let { uri ->
-                    val dataToSave = pendingExportJson ?: BackupManager.createFullBackupJson(sharedPref, profileManager, customIrManager)
+                    val dataToSave = pendingExportJson ?: BackupManager.createFullBackupJson(
+                        sharedPref,
+                        profileManager,
+                        customIrManager
+                    )
                     try {
                         contentResolver.openOutputStream(uri)?.use { outputStream ->
                             outputStream.write(dataToSave.toByteArray())
@@ -172,7 +176,7 @@ class MainActivity : AppCompatActivity() {
                         processImportedJson(rawJson)
                     } catch (e: Exception) {
                         Log.e("Backup", "Import read error", e)
-                        showModernPopup("Failed to read file", "❌")
+                        showModernPopup("Backup format is not compatible", "⚠️")
                     }
                 }
             }
@@ -192,19 +196,19 @@ class MainActivity : AppCompatActivity() {
         consumerIrManager = getSystemService(Context.CONSUMER_IR_SERVICE) as? ConsumerIrManager
         hasInternalIr = consumerIrManager?.hasIrEmitter() == true
 
-        // Load configuration and states
-        hubId = sharedPref.getString("hubId", "kaushal-ir-hub-97") ?: "kaushal-ir-hub-97"
-        hubPassword = sharedPref.getString("hub_password", "TestKaushalSecure2026") ?: "TestKaushalSecure2026"
-        isLightOn = sharedPref.getBoolean("state_light", true)
-        isAcOn = sharedPref.getBoolean("state_ac", false)
-        isTvOn = sharedPref.getBoolean("state_tv", false)
-        isFanOn = sharedPref.getBoolean("state_fan", false)
-        acTemp = sharedPref.getInt("acTemp", 24).coerceIn(16, 32)
-        isAcDisplayOn = sharedPref.getBoolean("state_ac_display", true)
-        acModeIndex = sharedPref.getInt("state_ac_mode", 0)
-        acFanSpeedIndex = sharedPref.getInt("state_ac_fan", 0)
-        isAcSwingOn = sharedPref.getBoolean("state_ac_swing", false)
-        isAcSleepOn = sharedPref.getBoolean("state_ac_sleep", false)
+        // Load configuration and states safely
+        hubId = sharedPref.getSafeString("hubId", "kaushal-ir-hub-97") ?: "kaushal-ir-hub-97"
+        hubPassword = sharedPref.getSafeString("hub_password", "TestKaushalSecure2026") ?: "TestKaushalSecure2026"
+        isLightOn = sharedPref.getSafeBoolean("state_light", true)
+        isAcOn = sharedPref.getSafeBoolean("state_ac", false)
+        isTvOn = sharedPref.getSafeBoolean("state_tv", false)
+        isFanOn = sharedPref.getSafeBoolean("state_fan", false)
+        acTemp = sharedPref.getSafeInt("acTemp", 24).coerceIn(16, 32)
+        isAcDisplayOn = sharedPref.getSafeBoolean("state_ac_display", true)
+        acModeIndex = sharedPref.getSafeInt("state_ac_mode", 0)
+        acFanSpeedIndex = sharedPref.getSafeInt("state_ac_fan", 0)
+        isAcSwingOn = sharedPref.getSafeBoolean("state_ac_swing", false)
+        isAcSleepOn = sharedPref.getSafeBoolean("state_ac_sleep", false)
 
         instance = this
         acTimerManager = AcTimerManager(this)
@@ -2279,15 +2283,28 @@ class MainActivity : AppCompatActivity() {
         try {
             val inspection = BackupManager.inspectBackupJson(trimmed)
             when (inspection.type) {
+                BackupType.INCOMPATIBLE -> {
+                    showModernPopup("Backup format is not compatible", "⚠️")
+                }
                 BackupType.DEVICE_PROFILE -> {
-                    showImportSlotPickerSheet(inspection)
+                    if (inspection.codeCount <= 0) {
+                        showModernPopup("Backup format is not compatible", "⚠️")
+                    } else {
+                        showImportSlotPickerSheet(inspection)
+                    }
                 }
                 BackupType.CUSTOM_BUTTONS -> {
-                    showImportCustomButtonsSheet(inspection)
+                    if (inspection.customButtonCount <= 0) {
+                        showModernPopup("Backup format is not compatible", "⚠️")
+                    } else {
+                        showImportCustomButtonsSheet(inspection)
+                    }
                 }
                 BackupType.FULL_BACKUP, BackupType.LEGACY -> {
                     val available = BackupManager.parseAvailableProfiles(trimmed)
-                    if (available.size > 1) {
+                    if (available.isEmpty()) {
+                        showModernPopup("Backup format is not compatible", "⚠️")
+                    } else if (available.size > 1) {
                         showSelectiveImportSheet(trimmed, available)
                     } else {
                         showConfirmFullRestoreDialog(trimmed)
@@ -2296,7 +2313,7 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.e("Backup", "Error processing imported JSON", e)
-            showModernPopup("Invalid or Corrupted JSON format", "❌")
+            showModernPopup("Backup format is not compatible", "⚠️")
         }
     }
 
@@ -2338,7 +2355,8 @@ class MainActivity : AppCompatActivity() {
 
                 iconView.text = item.icon
                 titleView.text = item.profileName
-                subView.text = if (item.isCustomButtons) "${item.customButtonCount} Custom Buttons" else "${item.codeCount} Learned Codes"
+                subView.text =
+                    if (item.isCustomButtons) "${item.customButtonCount} Custom Buttons" else "${item.codeCount} Learned Codes"
                 checkBox.isChecked = item.isSelected
 
                 row.setOnClickListener {
@@ -2365,11 +2383,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnRestoreSelected.setOnClickListener {
-            triggerVibration()
-            val restored = BackupManager.restoreSelectedProfiles(items, sharedPref, profileManager, customIrManager)
-            bottomSheet.dismiss()
-            updateCardStates()
-            showModernPopup("$restored Devices Restored & Replaced! 📥", "✅")
+            try {
+                triggerVibration()
+                val restored = BackupManager.restoreSelectedProfiles(items, sharedPref, profileManager, customIrManager)
+                bottomSheet.dismiss()
+                updateCardStates()
+                if (restored > 0) {
+                    showModernPopup("$restored Devices Restored & Replaced! 📥", "✅")
+                } else {
+                    showModernPopup("Backup format is not compatible", "⚠️")
+                }
+            } catch (e: Exception) {
+                Log.e("Backup", "Selective restore error", e)
+                bottomSheet.dismiss()
+                showModernPopup("Backup format is not compatible", "⚠️")
+            }
         }
 
         btnRestoreAll.setOnClickListener {
@@ -2515,7 +2543,8 @@ class MainActivity : AppCompatActivity() {
                 fun doExport() {
                     triggerVibration()
                     val safeName = name.lowercase().replace("[^a-z0-9]".toRegex(), "_").trim('_')
-                    pendingExportJson = BackupManager.createDeviceProfileJson(category, pIndex, sharedPref, profileManager)
+                    pendingExportJson =
+                        BackupManager.createDeviceProfileJson(category, pIndex, sharedPref, profileManager)
                     pendingExportFileName = "${safeName}_${fileSuffix}_backup.json"
                     bottomSheet.dismiss()
                     launchExportFilePicker(pendingExportFileName)
@@ -2524,7 +2553,11 @@ class MainActivity : AppCompatActivity() {
                 fun doCopy() {
                     triggerVibration()
                     val json = BackupManager.createDeviceProfileJson(category, pIndex, sharedPref, profileManager)
-                    copyTextToClipboard("${category.defaultPrefix} Profile", json, "${category.defaultPrefix} ${pIndex + 1} Copied! 📋")
+                    copyTextToClipboard(
+                        "${category.defaultPrefix} Profile",
+                        json,
+                        "${category.defaultPrefix} ${pIndex + 1} Copied! 📋"
+                    )
                 }
 
                 btnRowCopy?.setOnClickListener { doCopy() }
@@ -2581,19 +2614,26 @@ class MainActivity : AppCompatActivity() {
             val slotRow = layoutInflater.inflate(R.layout.item_import_slot_row, containerSlots, false)
             slotRow.findViewById<TextView>(R.id.text_slot_number).text = (i + 1).toString()
             slotRow.findViewById<TextView>(R.id.text_slot_title).text = "${category.defaultPrefix} ${i + 1}"
-            val statusText = if (currentCodes > 0) "Current: $currentName • $currentCodes Codes • Tap to Replace" else "Slot Empty • Tap to Install"
+            val statusText =
+                if (currentCodes > 0) "Current: $currentName • $currentCodes Codes • Tap to Replace" else "Slot Empty • Tap to Install"
             slotRow.findViewById<TextView>(R.id.text_slot_status).text = statusText
 
             slotRow.setOnClickListener {
-                triggerVibration()
-                val success = BackupManager.restoreDeviceProfile(inspection.rawJson, i, sharedPref, profileManager)
-                bottomSheet.dismiss()
-                if (success) {
-                    updateCardStates()
-                    val targetName = profileManager.getProfileName(category, i)
-                    showModernPopup("${category.defaultPrefix} ${i + 1} ($targetName) Replaced & Updated! 📥", "✅")
-                } else {
-                    showModernPopup("Failed to import profile", "❌")
+                try {
+                    triggerVibration()
+                    val success = BackupManager.restoreDeviceProfile(inspection.rawJson, i, sharedPref, profileManager)
+                    bottomSheet.dismiss()
+                    if (success) {
+                        updateCardStates()
+                        val targetName = profileManager.getProfileName(category, i)
+                        showModernPopup("${category.defaultPrefix} ${i + 1} ($targetName) Replaced & Updated! 📥", "✅")
+                    } else {
+                        showModernPopup("Backup format is not compatible", "⚠️")
+                    }
+                } catch (e: Exception) {
+                    Log.e("Backup", "Profile slot restore error", e)
+                    bottomSheet.dismiss()
+                    showModernPopup("Backup format is not compatible", "⚠️")
                 }
             }
             containerSlots.addView(slotRow)
@@ -2627,19 +2667,39 @@ class MainActivity : AppCompatActivity() {
         textCount.text = "${inspection.customButtonCount} Custom Buttons in Backup File"
 
         btnMerge.setOnClickListener {
-            triggerVibration()
-            val count = BackupManager.restoreCustomButtons(inspection.rawJson, customIrManager, replaceAll = false)
-            bottomSheet.dismiss()
-            updateCardStates()
-            showModernPopup("$count Custom Buttons Merged! 📥", "✨")
+            try {
+                triggerVibration()
+                val count = BackupManager.restoreCustomButtons(inspection.rawJson, customIrManager, replaceAll = false)
+                bottomSheet.dismiss()
+                updateCardStates()
+                if (count > 0) {
+                    showModernPopup("$count Custom Buttons Merged! 📥", "✨")
+                } else {
+                    showModernPopup("Backup format is not compatible", "⚠️")
+                }
+            } catch (e: Exception) {
+                Log.e("Backup", "Custom buttons merge error", e)
+                bottomSheet.dismiss()
+                showModernPopup("Backup format is not compatible", "⚠️")
+            }
         }
 
         btnReplace.setOnClickListener {
-            triggerVibration()
-            val count = BackupManager.restoreCustomButtons(inspection.rawJson, customIrManager, replaceAll = true)
-            bottomSheet.dismiss()
-            updateCardStates()
-            showModernPopup("$count Custom Buttons Restored! 📥", "✨")
+            try {
+                triggerVibration()
+                val count = BackupManager.restoreCustomButtons(inspection.rawJson, customIrManager, replaceAll = true)
+                bottomSheet.dismiss()
+                updateCardStates()
+                if (count > 0) {
+                    showModernPopup("$count Custom Buttons Restored! 📥", "✨")
+                } else {
+                    showModernPopup("Backup format is not compatible", "⚠️")
+                }
+            } catch (e: Exception) {
+                Log.e("Backup", "Custom buttons replace error", e)
+                bottomSheet.dismiss()
+                showModernPopup("Backup format is not compatible", "⚠️")
+            }
         }
 
         btnCancel.setOnClickListener {
@@ -2655,21 +2715,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showConfirmFullRestoreDialog(rawJson: String) {
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("📥 Restore Full Hub Backup")
-            .setMessage("This will restore all device profiles (AC, TV, Light, Fan), learned IR codes, custom buttons, and settings from this backup.\n\nDo you want to proceed?")
-            .setPositiveButton("Restore All") { _, _ ->
-                triggerVibration()
-                val success = BackupManager.restoreFullBackup(rawJson, sharedPref, profileManager, customIrManager)
-                updateCardStates()
-                if (success) {
-                    showModernPopup("Full Hub Backup Restored! 📥", "✅")
-                } else {
-                    showModernPopup("Restore Failed", "❌")
+        if (isFinishing || isDestroyed) return
+        try {
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("📥 Restore Full Hub Backup")
+                .setMessage("This will restore all device profiles (AC, TV, Light, Fan), learned IR codes, custom buttons, and settings from this backup.\n\nDo you want to proceed?")
+                .setPositiveButton("Restore All") { _, _ ->
+                    try {
+                        triggerVibration()
+                        val success = BackupManager.restoreFullBackup(rawJson, sharedPref, profileManager, customIrManager)
+                        updateCardStates()
+                        if (success) {
+                            showModernPopup("Full Hub Backup Restored! 📥", "✅")
+                        } else {
+                            showModernPopup("Backup format is not compatible", "⚠️")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Backup", "Restore error", e)
+                        showModernPopup("Backup format is not compatible", "⚠️")
+                    }
                 }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+                .setNegativeButton("Cancel", null)
+                .show()
+        } catch (e: Exception) {
+            Log.e("Backup", "Dialog display error", e)
+            showModernPopup("Backup format is not compatible", "⚠️")
+        }
     }
 
     // ========================================================
@@ -2843,8 +2914,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleRemoteClick(buttonId: String) {
-        val isLoggedIn = sharedPref.getBoolean("is_logged_in", true)
-        val hasOwner = sharedPref.getString("owner_username", null) != null
+        val isLoggedIn = sharedPref.getSafeBoolean("is_logged_in", true)
+        val hasOwner = sharedPref.getSafeString("owner_username", null) != null
         if (hasOwner && !isLoggedIn) {
             triggerVibration()
             showModernPopup("🔒 Remote is Locked! Tap Account icon to log in", "⛔")
@@ -3329,8 +3400,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showUserAccountSecurityDialog() {
-        val ownerName = sharedPref.getString("owner_username", null)
-        val isLoggedIn = sharedPref.getBoolean("is_logged_in", true)
+        val ownerName = sharedPref.getSafeString("owner_username", null)
+        val isLoggedIn = sharedPref.getSafeBoolean("is_logged_in", true)
 
         if (ownerName != null && isLoggedIn) {
             // 1. LOGGED IN OWNER PROFILE BOTTOM SHEET
@@ -3428,7 +3499,7 @@ class MainActivity : AppCompatActivity() {
                 btnSubmit?.setOnClickListener {
                     triggerVibration()
                     val enteredPass = inputPass?.text?.toString()?.trim() ?: ""
-                    val savedPass = sharedPref.getString("owner_password", "")
+                    val savedPass = sharedPref.getSafeString("owner_password", "") ?: ""
                     if (enteredPass == savedPass) {
                         sharedPref.edit().putBoolean("is_logged_in", true).apply()
                         bottomSheet.dismiss()
