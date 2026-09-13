@@ -18,10 +18,10 @@ export const state = {
   lastTransmittedSignal: null,
   lastTelemetry: null,
   connectedBoardName: 'None',
-  hubPassword: localStorage.getItem('hubPassword') || 'TestKaushalSecure2026'
+  hubPassword: localStorage.getItem('hubPassword') || 'HubSecureKey2026'
 };
 
 // Global Config
 export const MQTT_BROKER = 'wss://broker.hivemq.com:8884/mqtt';
-export const MQTT_TOPIC_TX = 'universalo-hub/kaushal-ir-hub-97/rx';
-export const MQTT_TOPIC_RX = 'universalo-hub/kaushal-ir-hub-97/tx';
+export const MQTT_TOPIC_TX = 'universalo-hub/universal-ir-hub-01/rx';
+export const MQTT_TOPIC_RX = 'universalo-hub/universal-ir-hub-01/tx';

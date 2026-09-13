@@ -28,13 +28,13 @@ class ProfileManager(private val prefs: SharedPreferences) {
                     is String -> rawVal.trim().toIntOrNull()?.coerceIn(0, MAX_PROFILES - 1) ?: 0
                     else -> 0
                 }
-            } catch (_: Exception) {
+            } catch (ignored: Exception) {
                 0
             }
             try {
                 // Remove corrupted String/other type and store cleanly as Integer
                 prefs.edit().remove(key).putInt(key, fallback).apply()
-            } catch (_: Exception) {}
+            } catch (ignored: Exception) {}
             fallback
         }
     }
@@ -53,7 +53,7 @@ class ProfileManager(private val prefs: SharedPreferences) {
         } catch (e: Exception) {
             try {
                 prefs.all[key]?.toString()?.ifBlank { defaultName } ?: defaultName
-            } catch (_: Exception) {
+            } catch (ignored: Exception) {
                 defaultName
             }
         }
@@ -73,7 +73,7 @@ class ProfileManager(private val prefs: SharedPreferences) {
         val key = getButtonStorageKey(category, activeIndex, buttonId)
         val code = try {
             prefs.getString(key, null)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             prefs.all[key]?.toString()
         }
         if (code != null) return code
@@ -82,7 +82,7 @@ class ProfileManager(private val prefs: SharedPreferences) {
         if (activeIndex == 0) {
             return try {
                 prefs.getString(buttonId, null)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 prefs.all[buttonId]?.toString()
             }
         }
@@ -118,7 +118,7 @@ class ProfileManager(private val prefs: SharedPreferences) {
 fun SharedPreferences.getSafeInt(key: String, defValue: Int): Int {
     return try {
         this.getInt(key, defValue)
-    } catch (_: Exception) {
+    } catch (e: Exception) {
         val raw = this.all[key]
         when (raw) {
             is Number -> raw.toInt()
@@ -132,7 +132,7 @@ fun SharedPreferences.getSafeInt(key: String, defValue: Int): Int {
 fun SharedPreferences.getSafeBoolean(key: String, defValue: Boolean): Boolean {
     return try {
         this.getBoolean(key, defValue)
-    } catch (_: Exception) {
+    } catch (e: Exception) {
         val raw = this.all[key]
         when (raw) {
             is Boolean -> raw
@@ -148,10 +148,18 @@ fun SharedPreferences.getSafeBoolean(key: String, defValue: Boolean): Boolean {
     }
 }
 
-fun SharedPreferences.getSafeString(key: String, defValue: String? = null): String? {
+fun SharedPreferences.getSafeString(key: String, defValue: String): String {
     return try {
         this.getString(key, defValue) ?: defValue
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        this.all[key]?.toString() ?: defValue
+    }
+}
+
+fun SharedPreferences.getSafeNullableString(key: String, defValue: String? = null): String? {
+    return try {
+        this.getString(key, defValue) ?: defValue
+    } catch (e: Exception) {
         this.all[key]?.toString() ?: defValue
     }
 }

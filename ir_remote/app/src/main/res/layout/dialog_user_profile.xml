@@ -46,7 +46,7 @@
             android:id="@+id/text_owner_display_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Kaushal"
+            android:text="Owner"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="#0F172A"

@@ -22,9 +22,9 @@ android {
             val keystoreFile = file("release-key.jks")
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
-                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "UniversalHubKey2026!"
+                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "ReleaseKeyPlaceholder2026!"
                 keyAlias = System.getenv("KEY_ALIAS") ?: "universalhub"
-                keyPassword = System.getenv("KEY_PASSWORD") ?: "UniversalHubKey2026!"
+                keyPassword = System.getenv("KEY_PASSWORD") ?: "ReleaseKeyPlaceholder2026!"
             } else {
                 initWith(getByName("debug"))
             }

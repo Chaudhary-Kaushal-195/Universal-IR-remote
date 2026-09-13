@@ -59,7 +59,7 @@ object BackupManager {
         root.put("backup_type", BackupType.FULL_BACKUP.name)
         root.put("version", 2)
         root.put("timestamp", System.currentTimeMillis())
-        root.put("hubId", sharedPref.getString("hubId", "kaushal-ir-hub-97"))
+        root.put("hubId", sharedPref.getSafeString("hubId", "universal-ir-hub-01"))
 
         // Devices container
         val devicesObj = JSONObject()
@@ -421,7 +421,7 @@ object BackupManager {
         } catch (e: Exception) {
             try {
                 Log.e(TAG, "Error inspecting backup JSON", e)
-            } catch (_: Exception) {}
+            } catch (ignored: Exception) {}
             InspectionResult(
                 type = BackupType.INCOMPATIBLE,
                 rawJson = trimmed

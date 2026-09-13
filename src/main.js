@@ -219,7 +219,7 @@ function setupEventListeners() {
   const inputHubPassword = document.getElementById('input-hub-password');
   const btnSaveHubPassword = document.getElementById('btn-save-hub-password');
   if (inputHubPassword) {
-    inputHubPassword.value = state.hubPassword || localStorage.getItem('hubPassword') || 'TestKaushalSecure2026';
+    inputHubPassword.value = state.hubPassword || localStorage.getItem('hubPassword') || 'HubSecureKey2026';
   }
   if (btnSaveHubPassword) {
     btnSaveHubPassword.addEventListener('click', () => {
@@ -278,7 +278,7 @@ function setupEventListeners() {
       backup_type: "FULL_BACKUP",
       version: 2,
       timestamp: Date.now(),
-      hubId: state.hubId || "kaushal-ir-hub-97",
+      hubId: state.hubId || "universal-ir-hub-01",
       devices: {
         AC: {
           active_profile: 0,

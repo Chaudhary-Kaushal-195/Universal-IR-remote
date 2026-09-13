@@ -24,7 +24,7 @@ class BackupCompatibilityTest {
     fun testNonIrJsonObjectReturnsIncompatible() {
         val nonIrJson = """
             {
-                "user": "kaushal",
+                "user": "sample_user",
                 "app": "some other app",
                 "settings": { "theme": "dark" }
             }
@@ -102,7 +102,7 @@ class BackupCompatibilityTest {
               "backup_type": "FULL_BACKUP",
               "version": 2,
               "timestamp": 1789302375371,
-              "hubId": "kaushal-ir-hub-97",
+              "hubId": "generic-ir-hub-01",
               "devices": {
                 "AC": {
                   "active_profile": 0,

@@ -295,7 +295,7 @@
         android:textColorHint="#94A3B8"
         android:textSize="14sp"
         android:fontFamily="sans-serif"
-        android:hint="e.g. kaushal-ir-hub-97"
+        android:hint="e.g. universal-ir-hub-01"
         android:paddingHorizontal="16dp"
         android:singleLine="true"
         android:layout_marginBottom="16dp" />

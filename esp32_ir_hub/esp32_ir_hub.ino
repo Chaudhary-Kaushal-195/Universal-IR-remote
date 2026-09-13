@@ -19,13 +19,13 @@ bool wifiEnabled = false; // Default: WiFi is OFF in USB mode unless software re
 bool isLearningMode = false; // Only listen for IR when user is cloning a remote
 unsigned long wifiConnectStartTime = 0;
 
-// --- CONFIGURATION ---
-const char* ssid = "Galaxy M35 5G A733";
-const char* password = "TestKaushal";
+// --- CONFIGURATION (Set your WiFi & Hub credentials) ---
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
 const char* mqtt_server = "broker.hivemq.com";
-const char* hub_password = "TestKaushalSecure2026"; // Secret Hub Security Key
-const char* mqtt_topic_rx = "universalo-hub/kaushal-ir-hub-97/rx"; // ESP32 Listens here
-const char* mqtt_topic_tx = "universalo-hub/kaushal-ir-hub-97/tx"; // ESP32 Publishes status here
+const char* hub_password = "YOUR_HUB_PASSWORD"; // Secret Hub Security Key
+const char* mqtt_topic_rx = "universalo-hub/YOUR_HUB_ID/rx"; // ESP32 Listens here
+const char* mqtt_topic_tx = "universalo-hub/YOUR_HUB_ID/tx"; // ESP32 Publishes status here
 
 const uint16_t kIrLedPin = 4;   // IR Emitter Pin
 const uint16_t kIrRecvPin = 27; // IR Receiver Pin

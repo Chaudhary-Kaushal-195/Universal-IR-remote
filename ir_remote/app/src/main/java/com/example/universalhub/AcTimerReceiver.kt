@@ -110,8 +110,8 @@ class AcTimerReceiver : BroadcastReceiver() {
     private fun executeActionDirectly(context: Context, timer: AcTimer) {
         val prefs = context.getSharedPreferences("UniversalHubPrefs", Context.MODE_PRIVATE)
         val profileManager = ProfileManager(prefs)
-        val hubId = prefs.getString("hubId", "kaushal-ir-hub-97") ?: "kaushal-ir-hub-97"
-        val hubPassword = prefs.getString("hub_password", "TestKaushalSecure2026") ?: "TestKaushalSecure2026"
+        val hubId = prefs.getSafeString("hubId", "universal-ir-hub-01") ?: "universal-ir-hub-01"
+        val hubPassword = prefs.getSafeString("hub_password", "HubSecureKey2026") ?: "HubSecureKey2026"
         val topicTx = "universalo-hub/$hubId/rx"
 
         // Map timer action to target buttonId

@@ -68,8 +68,8 @@ class MainActivity : AppCompatActivity() {
 
     private var broker = "tcp://broker.hivemq.com:1883"
     private val clientId = "AndroidAppClient_" + System.currentTimeMillis()
-    private var hubId = "kaushal-ir-hub-97"
-    private var hubPassword = "TestKaushalSecure2026"
+    private var hubId = "universal-ir-hub-01"
+    private var hubPassword = "HubSecureKey2026"
     private var topicTx = "universalo-hub/$hubId/rx"
     private var topicRx = "universalo-hub/$hubId/tx"
 
@@ -197,8 +197,8 @@ class MainActivity : AppCompatActivity() {
         hasInternalIr = consumerIrManager?.hasIrEmitter() == true
 
         // Load configuration and states safely
-        hubId = sharedPref.getSafeString("hubId", "kaushal-ir-hub-97") ?: "kaushal-ir-hub-97"
-        hubPassword = sharedPref.getSafeString("hub_password", "TestKaushalSecure2026") ?: "TestKaushalSecure2026"
+        hubId = sharedPref.getSafeString("hubId", "universal-ir-hub-01") ?: "universal-ir-hub-01"
+        hubPassword = sharedPref.getSafeString("hub_password", "HubSecureKey2026") ?: "HubSecureKey2026"
         isLightOn = sharedPref.getSafeBoolean("state_light", true)
         isAcOn = sharedPref.getSafeBoolean("state_ac", false)
         isTvOn = sharedPref.getSafeBoolean("state_tv", false)
@@ -2915,7 +2915,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleRemoteClick(buttonId: String) {
         val isLoggedIn = sharedPref.getSafeBoolean("is_logged_in", true)
-        val hasOwner = sharedPref.getSafeString("owner_username", null) != null
+        val hasOwner = sharedPref.getSafeNullableString("owner_username", null) != null
         if (hasOwner && !isLoggedIn) {
             triggerVibration()
             showModernPopup("🔒 Remote is Locked! Tap Account icon to log in", "⛔")
@@ -3400,7 +3400,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showUserAccountSecurityDialog() {
-        val ownerName = sharedPref.getSafeString("owner_username", null)
+        val ownerName = sharedPref.getSafeNullableString("owner_username", null)
         val isLoggedIn = sharedPref.getSafeBoolean("is_logged_in", true)
 
         if (ownerName != null && isLoggedIn) {
@@ -3416,7 +3416,7 @@ class MainActivity : AppCompatActivity() {
             val btnLock = view.findViewById<Button>(R.id.btn_lock_remote)
             val btnClose = view.findViewById<Button>(R.id.btn_close_profile)
 
-            textDisplayName?.text = ownerName
+            textDisplayName?.text = ownerName ?: "Owner"
             var isRevealed = false
             textHubKey?.text = "••••••••••••"
             textHubKey?.setOnClickListener {
@@ -3461,7 +3461,7 @@ class MainActivity : AppCompatActivity() {
                 subtitleView?.text = "Lock your device and cloned codes so only you can control appliances."
                 labelUser?.visibility = View.VISIBLE
                 inputUser?.visibility = View.VISIBLE
-                inputUser?.setText("Kaushal")
+                inputUser?.setText("Owner")
                 labelHubKey?.visibility = View.VISIBLE
                 inputHubKey?.visibility = View.VISIBLE
                 inputHubKey?.setText(hubPassword)

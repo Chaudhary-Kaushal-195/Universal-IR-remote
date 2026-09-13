@@ -543,7 +543,7 @@ export async function fireSignal(buttonId) {
   if (mqttClient && mqttClient.connected) {
     flashStatus('fire');
     const wifiPayload = JSON.stringify({
-      auth: state.hubPassword || localStorage.getItem('hubPassword') || 'TestKaushalSecure2026',
+      auth: state.hubPassword || localStorage.getItem('hubPassword') || 'HubSecureKey2026',
       type: 'raw',
       len: parseInt(signal.len),
       values: signal.values

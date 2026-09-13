@@ -110,7 +110,7 @@
             android:id="@+id/text_diag_wifi_topic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Topic: universalo-hub/kaushal-ir-hub-97/rx"
+            android:text="Topic: universalo-hub/universal-ir-hub-01/rx"
             android:textSize="11.5sp"
             android:textColor="#64748B"
             android:fontFamily="sans-serif"
