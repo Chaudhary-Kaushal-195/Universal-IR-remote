@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="22dp"
+        android:paddingEnd="22dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="24dp">
+
+        <!-- Drag Handle -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_drag_handle" />
+
+        <!-- Dialog Header -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_alignParentStart="true">
+
+                <TextView
+                    android:id="@+id/tv_edit_custom_dialog_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add Custom Button"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#0F172A"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Universal IR Controller • Clone &amp; Store"
+                    android:textSize="12sp"
+                    android:textColor="#64748B"
+                    android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_edit_custom_close"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:text="✕"
+                android:textColor="#64748B"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_sheet_btn"
+                android:stateListAnimator="@null" />
+        </RelativeLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="520dp"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- 1. CUSTOM BUTTON NAME -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BUTTON NAME / TITLE"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#64748B"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="8dp" />
+
+                <EditText
+                    android:id="@+id/et_custom_btn_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_timer_card"
+                    android:paddingHorizontal="16dp"
+                    android:hint="e.g. Epson Projector, Soundbar Mute"
+                    android:textColorHint="#94A3B8"
+                    android:textColor="#0F172A"
+                    android:textSize="15sp"
+                    android:inputType="textCapWords"
+                    android:maxLines="1"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- 2. ICON SELECTOR -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SELECT ICON / DEVICE TYPE"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#64748B"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="8dp" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:layout_marginBottom="18dp">
+
+                    <LinearLayout
+                        android:id="@+id/layout_icon_chips"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- Icon chips populated programmatically or default -->
+                    </LinearLayout>
+                </HorizontalScrollView>
+
+                <!-- 3. IR CODE CAPTURE / PROGRAMMING SECTION -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IR SIGNAL CODE"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold"
+                    android:textColor="#64748B"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_timer_card"
+                    android:padding="16dp"
+                    android:layout_marginBottom="18dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:id="@+id/tv_learn_status_dot"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="⚪"
+                            android:textSize="12sp"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true" />
+
+                        <TextView
+                            android:id="@+id/tv_learn_status_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toEndOf="@id/tv_learn_status_dot"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="6dp"
+                            android:text="No code stored yet"
+                            android:textColor="#64748B"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium" />
+                    </RelativeLayout>
+
+                    <!-- Learning and Testing Buttons Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- Clone / Learn Button -->
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btn_custom_learn_code"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1.2"
+                            android:layout_marginEnd="8dp"
+                            android:text="🎯 Learn from Remote"
+                            android:textColor="#2563EB"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:background="@drawable/bg_sheet_btn"
+                            android:stateListAnimator="@null" />
+
+                        <!-- Test Signal Button -->
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btn_custom_test_code"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="0.8"
+                            android:text="⚡ Test"
+                            android:textColor="#166534"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:background="@drawable/bg_sheet_btn_green"
+                            android:stateListAnimator="@null" />
+                    </LinearLayout>
+
+                    <!-- Expandable Manual Code Entry Toggle -->
+                    <TextView
+                        android:id="@+id/tv_toggle_manual_code"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:paddingVertical="10dp"
+                        android:text="▶ Manual Code Entry (Optional)"
+                        android:textColor="#2563EB"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <EditText
+                        android:id="@+id/et_manual_code"
+                        android:layout_width="match_parent"
+                        android:layout_height="70dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_samsung_chip_unselected"
+                        android:padding="10dp"
+                        android:gravity="top|start"
+                        android:hint="Paste raw pulse values or JSON here..."
+                        android:textColorHint="#94A3B8"
+                        android:textColor="#0F172A"
+                        android:textSize="12sp"
+                        android:fontFamily="monospace"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <!-- 4. AUTOMATED TIMER / SCHEDULER SECTION -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="AUTOMATED SCHEDULE (OPTIONAL)"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold"
+                        android:textColor="#64748B"
+                        android:letterSpacing="0.05"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_custom_timer_enable"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+                </RelativeLayout>
+
+                <!-- Collapsible Timer View Container -->
+                <LinearLayout
+                    android:id="@+id/layout_custom_timer_details"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_timer_card"
+                    android:padding="14dp"
+                    android:layout_marginBottom="20dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <NumberPicker
+                            android:id="@+id/picker_custom_hour"
+                            android:layout_width="60dp"
+                            android:layout_height="100dp"
+                            android:theme="@style/Theme.SamsungPicker" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=":"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            android:textColor="#0F172A"
+                            android:layout_marginHorizontal="10dp" />
+
+                        <NumberPicker
+                            android:id="@+id/picker_custom_minute"
+                            android:layout_width="60dp"
+                            android:layout_height="100dp"
+                            android:theme="@style/Theme.SamsungPicker" />
+
+                        <NumberPicker
+                            android:id="@+id/picker_custom_ampm"
+                            android:layout_width="60dp"
+                            android:layout_height="100dp"
+                            android:layout_marginStart="14dp"
+                            android:theme="@style/Theme.SamsungPicker" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Bottom Action Buttons: Cancel and Save -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btn_custom_cancel"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Cancel"
+                        android:textColor="#64748B"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/bg_sheet_btn"
+                        android:stateListAnimator="@null" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btn_custom_save"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1.3"
+                        android:text="Save Button"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/bg_sheet_btn_blue"
+                        android:stateListAnimator="@null" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+</FrameLayout>

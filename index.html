@@ -144,7 +144,7 @@
 
             <!-- Offline Backup Section -->
             <div class="settings-card" style="display: flex; flex-direction: column; gap: 8px;">
-              <p style="font-size: 0.82rem; font-weight: 600; color: #ffffff;">Offline JSON File Backup</p>
+              <p style="font-size: 0.82rem; font-weight: 600; color: #ffffff;">JSON Backup &amp; Device Interoperability</p>
               <div style="display: flex; gap: 8px;">
                 <button class="primary-btn" id="export-codes-btn" style="flex: 1; background: rgba(51, 65, 85, 0.8); font-size: 0.8rem; padding: 8px;">
                   <i data-lucide="download" style="width:14px; height:14px;"></i> Export JSON
@@ -153,9 +153,14 @@
                   <i data-lucide="upload" style="width:14px; height:14px;"></i> Import File
                 </button>
               </div>
-              <button class="primary-btn" id="paste-codes-btn" style="background: var(--card-blue-border); color: #ffffff; font-size: 0.78rem; padding: 8px; width: 100%;">
-                <i data-lucide="clipboard-paste" style="width:14px; height:14px;"></i> Paste JSON Text / Android Codes
-              </button>
+              <div style="display: flex; gap: 8px;">
+                <button class="primary-btn" id="copy-codes-btn" style="flex: 1; background: #0284c7; color: #ffffff; font-size: 0.78rem; padding: 8px;">
+                  <i data-lucide="copy" style="width:14px; height:14px;"></i> Copy JSON
+                </button>
+                <button class="primary-btn" id="paste-codes-btn" style="flex: 1; background: var(--card-blue-border); color: #ffffff; font-size: 0.78rem; padding: 8px;">
+                  <i data-lucide="clipboard-paste" style="width:14px; height:14px;"></i> Paste JSON Text
+                </button>
+              </div>
               <input type="file" id="import-file-input" style="display: none;" accept=".json" />
             </div>
           </div>

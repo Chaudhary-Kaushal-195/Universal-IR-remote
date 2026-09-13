@@ -27,7 +27,7 @@ class ArcTemperatureWheelView @JvmOverloads constructor(
 
     // Temperature range
     var minTemp: Int = 16
-    var maxTemp: Int = 30
+    var maxTemp: Int = 32
 
     // Current continuous temperature value (e.g. 24.0)
     var currentTemp: Float = 24.0f

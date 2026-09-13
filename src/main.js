@@ -45,6 +45,7 @@ const modalTabs = document.querySelectorAll('.modal-tab');
 
 const exportCodesBtn = document.getElementById('export-codes-btn');
 const importCodesBtn = document.getElementById('import-codes-btn');
+const copyCodesBtn = document.getElementById('copy-codes-btn');
 const importFileInput = document.getElementById('import-file-input');
 const pasteCodesBtn = document.getElementById('paste-codes-btn');
 
@@ -256,10 +257,55 @@ function setupEventListeners() {
     await supabase.auth.signOut();
   });
 
-  // Backup & Storage Logic
+  // ========================================================
+  // Backup & Storage Logic (Cross-Platform JSON Format)
+  // ========================================================
+  function createStandardBackupJson() {
+    const acCodes = {};
+    const tvCodes = {};
+    const lightCodes = {};
+    const fanCodes = {};
+
+    for (const [key, val] of Object.entries(state.learnedCodes || {})) {
+      if (key.startsWith('AC_')) acCodes[key] = val;
+      else if (key.startsWith('TV_')) tvCodes[key] = val;
+      else if (key.startsWith('LIGHT_')) lightCodes[key] = val;
+      else if (key.startsWith('FAN_')) fanCodes[key] = val;
+      else acCodes[key] = val;
+    }
+
+    return JSON.stringify({
+      backup_type: "FULL_BACKUP",
+      version: 2,
+      timestamp: Date.now(),
+      hubId: state.hubId || "kaushal-ir-hub-97",
+      devices: {
+        AC: {
+          active_profile: 0,
+          profiles: [{ index: 0, name: "AC 1", codes: acCodes }]
+        },
+        TV: {
+          active_profile: 0,
+          profiles: [{ index: 0, name: "TV 1", codes: tvCodes }]
+        },
+        LIGHT: {
+          active_profile: 0,
+          profiles: [{ index: 0, name: "Light 1", codes: lightCodes }]
+        },
+        FAN: {
+          active_profile: 0,
+          profiles: [{ index: 0, name: "Fan 1", codes: fanCodes }]
+        }
+      },
+      custom_buttons: [],
+      raw_entries: state.learnedCodes
+    }, null, 2);
+  }
+
+  // 1. Export JSON File
   exportCodesBtn.addEventListener('click', () => {
     try {
-      const dataStr = JSON.stringify(state.learnedCodes, null, 2);
+      const dataStr = createStandardBackupJson();
       const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       
@@ -275,18 +321,54 @@ function setupEventListeners() {
     }
   });
 
-  // Smart Normalization for Android App and Web App JSON Backups
+  // 2. Copy JSON Text to Clipboard
+  if (copyCodesBtn) {
+    copyCodesBtn.addEventListener('click', async () => {
+      try {
+        const dataStr = createStandardBackupJson();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(dataStr);
+          alert("📋 Full Backup JSON copied to clipboard! You can paste it directly into the Android app.");
+        } else {
+          prompt("Copy this JSON backup:", dataStr);
+        }
+      } catch (err) {
+        alert("Copy failed: " + err.message);
+      }
+    });
+  }
+
+  // 3. Smart Universal Normalization for Android App & Web App JSON
   function normalizeImportedCodes(data) {
-    if (!data || typeof data !== 'object') return {};
+    if (!data) return {};
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) {
+        return {};
+      }
+    }
+    if (typeof data !== 'object') return {};
+
     const normalized = {};
 
-    for (const [key, value] of Object.entries(data)) {
-      // Skip non-signal metadata like "active_profile_AC": "0"
-      if (!value || typeof value !== 'object' || !value.values) {
-        continue;
+    function addCode(key, value) {
+      if (!value) return;
+      if (typeof value === 'string') {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          if (value.includes(',')) {
+            value = { type: 'raw', values: value };
+          } else {
+            return;
+          }
+        }
       }
 
-      // Strip Android app prefix: "code_AC_0_AC_TEMP_19" -> "AC_TEMP_19"
+      if (typeof value !== 'object' || !value.values) return;
+
+      // Strip Android prefix like "code_AC_0_AC_TEMP_19" -> "AC_TEMP_19"
       let cleanKey = key;
       const prefixMatch = key.match(/^code_[A-Za-z0-9]+_[0-9]+_(.+)$/);
       if (prefixMatch) {
@@ -295,18 +377,68 @@ function setupEventListeners() {
 
       const payload = {
         type: value.type || 'raw',
-        len: String(value.len || (value.values.split(',').length + 1)),
+        len: String(value.len || (value.values.split(',').length)),
         values: String(value.values).trim()
       };
 
       normalized[cleanKey] = payload;
 
-      // Smart mapping for Light: if AC_LIGHT is present, also map AC_LIGHT_ON and AC_LIGHT_OFF
+      // Smart mapping for Light
       if (cleanKey === 'AC_LIGHT') {
         if (!normalized['AC_LIGHT_ON']) normalized['AC_LIGHT_ON'] = payload;
         if (!normalized['AC_LIGHT_OFF']) normalized['AC_LIGHT_OFF'] = payload;
       }
     }
+
+    // A. If Single Device Profile (data.codes)
+    if (data.codes && typeof data.codes === 'object') {
+      for (const [k, v] of Object.entries(data.codes)) {
+        addCode(k, v);
+      }
+    }
+
+    // B. If Full Hub Backup (data.devices)
+    if (data.devices && typeof data.devices === 'object') {
+      for (const [_, catObj] of Object.entries(data.devices)) {
+        if (!catObj) continue;
+        const profiles = catObj.profiles || [];
+        for (const p of profiles) {
+          if (p && p.codes && typeof p.codes === 'object') {
+            for (const [k, v] of Object.entries(p.codes)) {
+              addCode(k, v);
+            }
+          }
+        }
+      }
+    }
+
+    // C. If raw_entries is present
+    if (data.raw_entries && typeof data.raw_entries === 'object') {
+      for (const [k, v] of Object.entries(data.raw_entries)) {
+        addCode(k, v);
+      }
+    }
+
+    // D. If Custom Buttons array is present
+    const customList = Array.isArray(data.buttons) ? data.buttons : (Array.isArray(data.custom_buttons) ? data.custom_buttons : (Array.isArray(data) ? data : null));
+    if (customList) {
+      for (const item of customList) {
+        const signal = item ? (item.codeJson || item.signalData || item.code || item.irCode) : null;
+        if (item && signal) {
+          const btnName = (item.name || item.id || 'CUSTOM_BTN').toUpperCase().replace(/[^A-Z0-9]/g, '_');
+          addCode(btnName, signal);
+        }
+      }
+    }
+
+    // E. Direct flat code map / legacy keys
+    for (const [k, v] of Object.entries(data)) {
+      if (['backup_type', 'version', 'timestamp', 'hubId', 'category', 'profile_name', 'profile_index', 'code_count', 'button_count', 'devices', 'custom_buttons', 'raw_entries', 'buttons'].includes(k)) {
+        continue;
+      }
+      addCode(k, v);
+    }
+
     return normalized;
   }
 
@@ -328,6 +460,7 @@ function setupEventListeners() {
     return count;
   }
 
+  // 4. Import JSON File
   importCodesBtn.addEventListener('click', () => importFileInput.click());
 
   importFileInput.addEventListener('change', (e) => {
@@ -348,6 +481,7 @@ function setupEventListeners() {
     reader.readAsText(file);
   });
 
+  // 5. Paste JSON Text from Clipboard / Prompt
   if (pasteCodesBtn) {
     pasteCodesBtn.addEventListener('click', async () => {
       let text = '';
@@ -359,8 +493,8 @@ function setupEventListeners() {
         console.warn("Clipboard read not permitted, falling back to prompt.", clipErr);
       }
 
-      if (!text || !text.includes('{')) {
-        text = prompt("Paste your JSON code database here:");
+      if (!text || (!text.includes('{') && !text.includes('['))) {
+        text = prompt("Paste your JSON code database (or Android export) here:");
       }
 
       if (!text) return;

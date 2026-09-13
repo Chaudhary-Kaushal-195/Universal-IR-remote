@@ -42,11 +42,18 @@ compile_commands.json
 .gradle/
 **/.gradle/
 local.properties
+secrets.properties
+signing.properties
+*.jks
+*.keystore
 *.apk
 *.aab
 .cxx/
 captures/
 *.hprof
+*.dump.xml
+dump.xml
+dump*.xml
 
 # IDE & Editor Files
 .vscode/*

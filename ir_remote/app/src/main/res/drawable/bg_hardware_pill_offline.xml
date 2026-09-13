@@ -2,10 +2,19 @@
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="#E2E8F0">
     <item>
-        <shape android:shape="rectangle">
-            <solid android:color="#F1F5F9" />
-            <corners android:radius="100dp" />
-            <stroke android:width="1.5dp" android:color="#CBD5E1" />
-        </shape>
+        <inset
+            android:insetLeft="1dp"
+            android:insetTop="1dp"
+            android:insetRight="1dp"
+            android:insetBottom="1dp">
+            <shape android:shape="rectangle">
+                <solid android:color="#F1F5F9" />
+                <corners android:radius="100dp" />
+                <stroke android:width="1.5dp" android:color="#CBD5E1" />
+                <padding
+                    android:left="10dp"
+                    android:right="10dp" />
+            </shape>
+        </inset>
     </item>
 </ripple>

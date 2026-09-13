@@ -228,7 +228,7 @@ export function updateStatusIndicator() {
 export function toggleAC(tempDisplay, delta) {
   state.acTemp += delta;
   if (state.acTemp < 16) state.acTemp = 16;
-  if (state.acTemp > 30) state.acTemp = 30;
+  if (state.acTemp > 32) state.acTemp = 32;
   tempDisplay.textContent = state.acTemp + "°";
 }
 

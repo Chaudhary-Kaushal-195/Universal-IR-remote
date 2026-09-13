@@ -405,6 +405,21 @@
             android:stateListAnimator="@null" />
     </LinearLayout>
 
+    <!-- Paste JSON / Clipboard Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_paste_json"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_sheet_btn"
+        android:textColor="#0284C7"
+        android:textSize="13.5sp"
+        android:textStyle="bold"
+        android:text="📋 Paste JSON / Web App Codes"
+        android:textAllCaps="false"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginTop="8dp"
+        android:stateListAnimator="@null" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

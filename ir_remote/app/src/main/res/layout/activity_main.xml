@@ -26,14 +26,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="36dp"
-                android:paddingTop="25dp"
-                android:paddingBottom="16dp">
+                android:paddingTop="18dp"
+                android:paddingBottom="16dp"
+                android:clipToPadding="false"
+                android:clipChildren="false">
 
                 <!-- Menu Icon -->
                 <ImageView
                     android:id="@+id/btn_menu"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:src="@drawable/ic_menu"
@@ -46,10 +48,12 @@
                 <LinearLayout
                     android:id="@+id/hardware_status_pill"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="28dp"
                     android:layout_centerInParent="true"
                     android:background="@drawable/bg_hardware_pill_offline"
-                    android:paddingHorizontal="14dp"
+                    android:paddingHorizontal="10dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:clickable="true"
@@ -60,26 +64,30 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="🔴"
-                        android:textSize="12sp"
-                        android:layout_marginEnd="6dp" />
+                        android:textSize="11sp"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:layout_marginEnd="4dp" />
 
                     <TextView
                         android:id="@+id/hardware_status_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hardware Offline"
-                        android:textSize="11.5sp"
+                        android:textSize="11sp"
                         android:textStyle="bold"
                         android:textColor="#475569"
                         android:fontFamily="sans-serif-medium"
-                        android:letterSpacing="0.01" />
+                        android:letterSpacing="0.01"
+                        android:includeFontPadding="false"
+                        android:gravity="center_vertical" />
                 </LinearLayout>
 
                 <!-- Person / Account Icon -->
                 <ImageView
                     android:id="@+id/btn_person"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:src="@drawable/ic_person"
@@ -97,8 +105,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="36dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="20dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp">
 
                 <TextView
                     android:id="@+id/text_welcome"
@@ -114,7 +122,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Kaushal"
-                    android:textSize="64sp"
+                    android:textSize="60sp"
                     android:textStyle="bold"
                     android:textColor="#000000"
                     android:fontFamily="sans-serif-condensed"
@@ -130,7 +138,7 @@
                 android:layout_height="1dp"
                 android:layout_marginHorizontal="36dp"
                 android:background="#CCCCCC"
-                android:layout_marginBottom="25dp" />
+                android:layout_marginBottom="18dp" />
 
             <!-- ============================================ -->
             <!-- 4. SMART DEVICES HEADER                      -->
@@ -139,12 +147,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Smart Devices"
-                android:textSize="24sp"
+                android:textSize="23sp"
                 android:textStyle="bold"
                 android:textColor="#424242"
                 android:fontFamily="sans-serif"
                 android:layout_marginHorizontal="36dp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="14dp" />
 
             <!-- ============================================ -->
             <!-- 5. 2x2 SMART DEVICES GRID                    -->
@@ -154,33 +162,33 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="22dp"
-                android:paddingBottom="30dp">
+                android:paddingBottom="20dp">
 
                 <!-- ROW 1: Smart Light & Smart AC -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="14dp">
+                    android:layout_marginBottom="12dp">
 
                     <!-- 1. SMART LIGHT -->
                     <RelativeLayout
                         android:id="@+id/card_light"
                         android:layout_width="0dp"
-                        android:layout_height="190dp"
+                        android:layout_height="174dp"
                         android:layout_weight="1"
                         android:layout_marginHorizontal="10dp"
                         android:background="@drawable/bg_device_card_on"
-                        android:paddingTop="25dp"
-                        android:paddingBottom="20dp"
+                        android:paddingTop="22dp"
+                        android:paddingBottom="16dp"
                         android:paddingHorizontal="16dp"
                         android:clickable="true"
                         android:focusable="true">
 
                         <ImageView
                             android:id="@+id/icon_light"
-                            android:layout_width="65dp"
-                            android:layout_height="65dp"
+                            android:layout_width="58dp"
+                            android:layout_height="58dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"
                             android:src="@drawable/ic_device_light"
@@ -200,7 +208,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="Smart\nLight"
-                                android:textSize="19sp"
+                                android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="#FFFFFF"
                                 android:fontFamily="sans-serif-medium"
@@ -220,20 +228,20 @@
                     <RelativeLayout
                         android:id="@+id/card_ac"
                         android:layout_width="0dp"
-                        android:layout_height="190dp"
+                        android:layout_height="174dp"
                         android:layout_weight="1"
                         android:layout_marginHorizontal="10dp"
                         android:background="@drawable/bg_device_card_off"
-                        android:paddingTop="25dp"
-                        android:paddingBottom="20dp"
+                        android:paddingTop="22dp"
+                        android:paddingBottom="16dp"
                         android:paddingHorizontal="16dp"
                         android:clickable="true"
                         android:focusable="true">
 
                         <ImageView
                             android:id="@+id/icon_ac"
-                            android:layout_width="65dp"
-                            android:layout_height="65dp"
+                            android:layout_width="58dp"
+                            android:layout_height="58dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"
                             android:src="@drawable/ic_device_ac"
@@ -253,7 +261,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="Smart\nAC"
-                                android:textSize="19sp"
+                                android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="#000000"
                                 android:fontFamily="sans-serif-medium"
@@ -280,20 +288,20 @@
                     <RelativeLayout
                         android:id="@+id/card_tv"
                         android:layout_width="0dp"
-                        android:layout_height="190dp"
+                        android:layout_height="174dp"
                         android:layout_weight="1"
                         android:layout_marginHorizontal="10dp"
                         android:background="@drawable/bg_device_card_off"
-                        android:paddingTop="25dp"
-                        android:paddingBottom="20dp"
+                        android:paddingTop="22dp"
+                        android:paddingBottom="16dp"
                         android:paddingHorizontal="16dp"
                         android:clickable="true"
                         android:focusable="true">
 
                         <ImageView
                             android:id="@+id/icon_tv"
-                            android:layout_width="65dp"
-                            android:layout_height="65dp"
+                            android:layout_width="58dp"
+                            android:layout_height="58dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"
                             android:src="@drawable/ic_device_tv"
@@ -313,7 +321,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="Smart\nTV"
-                                android:textSize="19sp"
+                                android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="#000000"
                                 android:fontFamily="sans-serif-medium"
@@ -333,20 +341,20 @@
                     <RelativeLayout
                         android:id="@+id/card_fan"
                         android:layout_width="0dp"
-                        android:layout_height="190dp"
+                        android:layout_height="174dp"
                         android:layout_weight="1"
                         android:layout_marginHorizontal="10dp"
                         android:background="@drawable/bg_device_card_off"
-                        android:paddingTop="25dp"
-                        android:paddingBottom="20dp"
+                        android:paddingTop="22dp"
+                        android:paddingBottom="16dp"
                         android:paddingHorizontal="16dp"
                         android:clickable="true"
                         android:focusable="true">
 
                         <ImageView
                             android:id="@+id/icon_fan"
-                            android:layout_width="65dp"
-                            android:layout_height="65dp"
+                            android:layout_width="58dp"
+                            android:layout_height="58dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"
                             android:src="@drawable/ic_device_fan"
@@ -366,7 +374,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="Smart\nFan"
-                                android:textSize="19sp"
+                                android:textSize="18sp"
                                 android:textStyle="bold"
                                 android:textColor="#000000"
                                 android:fontFamily="sans-serif-medium"
@@ -382,6 +390,85 @@
                         </LinearLayout>
                     </RelativeLayout>
                 </LinearLayout>
+
+                <!-- ROW 3: Custom Universal IR Controller Card / Button -->
+                <RelativeLayout
+                    android:id="@+id/card_custom_ir"
+                    android:layout_width="match_parent"
+                    android:layout_height="86dp"
+                    android:layout_marginHorizontal="10dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_device_card_off"
+                    android:paddingHorizontal="18dp"
+                    android:paddingVertical="14dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <LinearLayout
+                        android:id="@+id/layout_custom_ir_icon"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_samsung_chip_unselected"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="✨"
+                            android:textSize="24sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_toEndOf="@id/layout_custom_ir_icon"
+                        android:layout_toStartOf="@+id/btn_custom_ir_arrow"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/text_custom_ir_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Custom IR Remote"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:id="@+id/text_custom_ir_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Projector, Audio, LED &amp; Any IR Device"
+                            android:textSize="12sp"
+                            android:textColor="#616161"
+                            android:fontFamily="sans-serif"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/btn_custom_ir_arrow"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_samsung_day_selected"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="➔"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="#FFFFFF" />
+                    </LinearLayout>
+                </RelativeLayout>
             </LinearLayout>
 
         </LinearLayout>
